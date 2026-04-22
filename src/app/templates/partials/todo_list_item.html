@@ -1,0 +1,33 @@
+<div class="list-item {% if active_list and active_list.id == list.id %}active{% endif %}"
+     id="list-{{ list.id }}"
+     data-list-id="{{ list.id }}"
+     data-list-name="{{ list.name | e }}"
+     data-list-description="{{ (list.description or '') | e }}"
+     data-list-color="{{ list.color }}"
+     hx-get="/api/lists/{{ list.id }}"
+     hx-target="#main-content"
+     hx-swap="innerHTML"
+     hx-push-url="/app/lists/{{ list.id }}">
+    <input type="hidden" name="list_id" value="{{ list.id }}">
+    <sl-icon name="grip-vertical" class="drag-handle"></sl-icon>
+    <div class="list-color-indicator" style="background-color: {{ list.color }}"></div>
+    <div class="list-info">
+        <span class="list-name">{{ list.name }}</span>
+        {% if list.description %}
+        <span class="list-description">{{ list.description }}</span>
+        {% endif %}
+    </div>
+    <span class="list-count" id="list-{{ list.id }}-count">{{ list.todos | selectattr('is_completed', 'false') | list | length }}</span>
+    <div class="list-actions">
+        <sl-icon-button name="pencil"
+                        label="Edit list"
+                        class="edit-list-btn"
+                        onclick="event.stopPropagation(); openEditListDialog('{{ list.id }}', '{{ list.name | e }}', '{{ (list.description or '') | e }}', '{{ list.color }}')">
+        </sl-icon-button>
+        <sl-icon-button name="trash"
+                        label="Delete list"
+                        class="delete-list-btn danger-icon"
+                        onclick="event.stopPropagation(); confirmDeleteList('{{ list.id }}', '{{ list.name | e }}')">
+        </sl-icon-button>
+    </div>
+</div>

@@ -1,0 +1,663 @@
+/* Todo App Styles */
+
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-hover: #2563eb;
+    --color-danger: #ef4444;
+    --color-warning: #f59e0b;
+    --color-success: #10b981;
+    --color-low: #65a30d;
+    --color-bg: #f1f5f9;
+    --color-bg-card: #ffffff;
+    --color-border: #e2e8f0;
+    --color-text: #1e293b;
+    --color-text-muted: #64748b;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --radius: 8px;
+    --sidebar-width: 280px;
+    --header-height: 56px;
+}
+
+.sl-theme-dark {
+    --color-bg: #0f172a;
+    --color-bg-card: #1e293b;
+    --color-border: #334155;
+    --color-text: #f1f5f9;
+    --color-text-muted: #94a3b8;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+/* ==================== APP LAYOUT ==================== */
+.app-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-height);
+    padding: 0 20px;
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-logo {
+    font-size: 28px;
+    color: var(--color-primary);
+}
+
+.app-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-email {
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+/* Main content wrapper - THIS IS THE KEY FLEXBOX */
+.app-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ==================== SIDEBAR ==================== */
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--color-bg-card);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.sidebar-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.sidebar-lists {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+/* ==================== LIST ITEMS IN SIDEBAR ==================== */
+.list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    margin-bottom: 4px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+/* Drag handle - hidden by default, show on hover */
+.drag-handle {
+    cursor: grab;
+    color: var(--color-text-muted);
+    opacity: 0;
+    font-size: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    transition: opacity 0.15s;
+}
+
+.list-item:hover .drag-handle {
+    opacity: 0.5;
+}
+
+.drag-handle:hover {
+    opacity: 0.8;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+    opacity: 1;
+}
+
+/* Sortable drag states */
+.sortable-ghost {
+    opacity: 0.4;
+    background: var(--color-primary);
+}
+
+.sortable-chosen {
+    background: var(--color-bg);
+    box-shadow: var(--shadow-md);
+}
+
+.sortable-drag {
+    background: var(--color-bg-card);
+    box-shadow: var(--shadow-md);
+}
+
+.list-item:hover {
+    background: var(--color-bg);
+}
+
+.list-item.active {
+    background: #dbeafe;
+    color: var(--color-text);
+    border-left: 3px solid var(--color-primary);
+}
+
+.list-item.active .list-name {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.list-color-indicator {
+    width: 4px;
+    height: 36px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.list-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.list-name {
+    display: block;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-description {
+    display: block;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-item.active .list-description {
+    color: var(--color-text-muted);
+}
+
+.list-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    padding: 2px 8px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.list-item.active .list-count {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Hide count when hovering to make room for actions */
+.list-item:hover .list-count {
+    display: none;
+}
+
+/* Smaller icon buttons in list actions */
+.list-actions sl-icon-button {
+    font-size: 14px;
+}
+
+.list-actions sl-icon-button::part(base) {
+    padding: 4px;
+}
+
+.list-actions {
+    display: none;
+    gap: 2px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.list-item:hover .list-actions,
+.list-item.active:hover .list-actions {
+    display: flex;
+}
+
+/* Never show actions on active item unless hovered */
+.list-item.active .list-actions {
+    display: none;
+}
+
+.list-item.active:hover .list-actions {
+    display: flex;
+}
+
+.empty-sidebar {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+/* ==================== MAIN CONTENT ==================== */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: var(--color-bg);
+}
+
+.list-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.list-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.list-header-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.list-header-color {
+    width: 6px;
+    height: 40px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.list-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.list-header-description {
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+.list-header-actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* ==================== SEARCH & QUICK ADD ==================== */
+.search-bar {
+    margin-bottom: 16px;
+}
+
+/* Add padding to input icons */
+.search-bar sl-input::part(prefix),
+.quick-add-form sl-input::part(prefix) {
+    padding-left: 8px;
+}
+
+.auth-form sl-input::part(prefix) {
+    padding-left: 12px;
+}
+
+.quick-add-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.quick-add-form sl-input {
+    flex: 1;
+}
+
+/* Fix button icon sizing */
+sl-button sl-icon[slot="prefix"] {
+    font-size: 16px;
+}
+
+/* ==================== TODO ITEMS ==================== */
+.todos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.todo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.todo-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.todo-item.completed {
+    opacity: 0.6;
+}
+
+.todo-item.completed .todo-title {
+    text-decoration: line-through;
+}
+
+.todo-item.overdue:not(.completed) {
+    border-left: 3px solid var(--color-danger);
+}
+
+.todo-item.due-today:not(.completed) {
+    border-left: 3px solid var(--color-warning);
+}
+
+.todo-item.priority-high:not(.completed):not(.overdue):not(.due-today) {
+    border-left: 3px solid var(--color-danger);
+}
+
+.todo-item.priority-medium:not(.completed):not(.overdue):not(.due-today) {
+    border-left: 3px solid var(--color-warning);
+}
+
+.todo-item.priority-low:not(.completed):not(.overdue):not(.due-today) {
+    border-left: 3px solid var(--color-low);
+}
+
+/* Todo drag handle - hidden by default, show on hover */
+.todo-drag-handle {
+    cursor: grab;
+    color: var(--color-text-muted);
+    opacity: 0;
+    font-size: 16px;
+    flex-shrink: 0;
+    align-self: center;
+    transition: opacity 0.15s;
+}
+
+.todo-item:hover .todo-drag-handle {
+    opacity: 0.5;
+}
+
+.todo-drag-handle:hover {
+    opacity: 0.8;
+}
+
+.todo-drag-handle:active {
+    cursor: grabbing;
+    opacity: 1;
+}
+
+.todo-checkbox {
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.todo-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.todo-title {
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.todo-note {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.todo-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+.todo-due-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-text-muted);
+}
+
+.todo-due-date.overdue {
+    color: var(--color-danger);
+    font-weight: 500;
+}
+
+.todo-due-date.due-today {
+    color: var(--color-warning);
+    font-weight: 500;
+}
+
+.todo-actions {
+    display: none;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.todo-item:hover .todo-actions {
+    display: flex;
+}
+
+.empty-todos {
+    padding: 48px;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+/* ==================== EMPTY STATE ==================== */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    margin: 0 0 8px;
+    color: var(--color-text);
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+/* ==================== AUTH PAGES ==================== */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 32px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.auth-logo {
+    font-size: 48px;
+    color: var(--color-primary);
+}
+
+.auth-header h1 {
+    margin: 8px 0;
+    font-size: 24px;
+}
+
+.auth-subtitle {
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.auth-submit {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border);
+}
+
+.auth-footer a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.demo-credentials {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.demo-credentials code {
+    display: block;
+    margin-top: 4px;
+    background: var(--color-bg);
+    padding: 8px;
+    border-radius: var(--radius);
+}
+
+/* ==================== DIALOGS ==================== */
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+/* ==================== UTILITIES ==================== */
+.danger-icon::part(base) {
+    color: var(--color-danger);
+}
+
+.danger-icon:hover::part(base) {
+    color: #dc2626;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+
+    .header-right .user-email {
+        display: none;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .todo-actions,
+    .list-actions {
+        opacity: 1;
+    }
+}

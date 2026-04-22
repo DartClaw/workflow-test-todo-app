@@ -1,0 +1,4 @@
+{% include "partials/todo_item.html" %}
+
+<!-- Out-of-band update for sidebar count -->
+<span id="list-{{ list.id }}-count" hx-swap-oob="true">{{ count }}</span>

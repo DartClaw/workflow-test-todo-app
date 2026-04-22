@@ -1,0 +1,69 @@
+{% set current_list = list if list is defined else active_list %}
+<div class="list-content" id="list-content"
+     data-list-id="{{ current_list.id }}"
+     data-list-name="{{ current_list.name | e }}"
+     data-list-description="{{ (current_list.description or '') | e }}"
+     data-list-color="{{ current_list.color }}">
+    <div class="list-header">
+        <div class="list-header-info">
+            <div class="list-header-color" style="background-color: {{ current_list.color }}"></div>
+            <div>
+                <h2>{{ current_list.name }}</h2>
+                {% if current_list.description %}
+                <p class="list-header-description">{{ current_list.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="list-header-actions">
+            <sl-icon-button name="pencil"
+                            label="Edit list"
+                            class="edit-list-header-btn"
+                            onclick="openEditListDialog('{{ current_list.id }}', '{{ current_list.name | e }}', '{{ (current_list.description or '') | e }}', '{{ current_list.color }}')">
+            </sl-icon-button>
+            <sl-icon-button name="trash"
+                            label="Delete list"
+                            class="delete-list-header-btn danger-icon"
+                            onclick="confirmDeleteList('{{ current_list.id }}', '{{ current_list.name | e }}')">
+            </sl-icon-button>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+        <sl-input
+            placeholder="Search todos..."
+            clearable
+            hx-get="/api/todos/search"
+            hx-trigger="keyup changed delay:300ms, search"
+            hx-target="#todos-list"
+            hx-swap="innerHTML"
+            hx-vals='{"list_id": "{{ current_list.id }}"}'
+            name="q">
+            <sl-icon slot="prefix" name="search"></sl-icon>
+        </sl-input>
+    </div>
+
+    <!-- Quick add todo -->
+    <form class="quick-add-form"
+          hx-post="/api/todos"
+          hx-target="#todos-list"
+          hx-swap="beforeend"
+          hx-on::after-request="if(event.detail.successful) this.reset()">
+        <input type="hidden" name="list_id" value="{{ current_list.id }}">
+        <sl-input
+            name="title"
+            placeholder="Add a new todo..."
+            required
+            maxlength="200">
+            <sl-icon slot="prefix" name="plus-circle"></sl-icon>
+        </sl-input>
+        <sl-button type="submit" variant="primary">
+            Add
+        </sl-button>
+    </form>
+
+    <!-- Todos list -->
+    <div id="todos-list" class="todos-list">
+        {% include "partials/todos_list.html" %}
+    </div>
+</div>

@@ -1,0 +1,7 @@
+{% for list in lists %}
+{% include "partials/todo_list_item.html" %}
+{% else %}
+<div class="empty-sidebar">
+    <p>No lists yet. Create your first list!</p>
+</div>
+{% endfor %}

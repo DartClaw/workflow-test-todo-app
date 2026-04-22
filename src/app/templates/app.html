@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}{{ active_list.name if active_list else 'My Tasks' }} - Todo App{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <sl-icon name="check2-square" class="app-logo"></sl-icon>
+            <h1 class="app-title">Todo App</h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email">{{ user.email }}</span>
+            <sl-button variant="text" size="small" hx-post="/auth/logout">
+                <sl-icon slot="prefix" name="box-arrow-right"></sl-icon>
+                Logout
+            </sl-button>
+            <sl-button variant="text" size="small" id="theme-toggle" onclick="toggleTheme()">
+                <sl-icon name="moon"></sl-icon>
+            </sl-button>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <div class="app-content">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>My Lists</h2>
+                <sl-button size="small" variant="primary" id="add-list-btn">
+                    <sl-icon slot="prefix" name="plus"></sl-icon>
+                    New List
+                </sl-button>
+            </div>
+
+            <form id="sidebar-lists" class="sidebar-lists"
+                  hx-post="/api/lists/reorder"
+                  hx-trigger="end"
+                  hx-swap="innerHTML">
+                {% for list in lists %}
+                {% include "partials/todo_list_item.html" %}
+                {% else %}
+                <div class="empty-sidebar">
+                    <p>No lists yet. Create your first list!</p>
+                </div>
+                {% endfor %}
+            </form>
+        </aside>
+
+        <!-- Main area -->
+        <main class="main-content" id="main-content">
+            {% if active_list %}
+            {% include "partials/todo_list_content.html" with context %}
+            {% else %}
+            <div class="empty-state">
+                <sl-icon name="card-checklist" class="empty-icon"></sl-icon>
+                <h3>Select a list to get started</h3>
+                <p>Choose a list from the sidebar or create a new one.</p>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<!-- Add List Dialog -->
+<sl-dialog label="Create New List" id="add-list-dialog">
+    <form hx-post="/api/lists"
+          hx-target="#sidebar-lists"
+          hx-swap="beforeend"
+          id="add-list-form">
+        <div class="form-group">
+            <label for="list-name">Name</label>
+            <sl-input id="list-name" name="name" placeholder="My new list" required maxlength="100"></sl-input>
+        </div>
+
+        <div class="form-group">
+            <label for="list-description">Description (optional)</label>
+            <sl-textarea id="list-description" name="description" placeholder="What's this list for?" rows="2"></sl-textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="list-color">Color</label>
+            <sl-color-picker id="list-color" name="color" value="#3b82f6" format="hex" no-format-toggle></sl-color-picker>
+        </div>
+
+        <div slot="footer" class="dialog-footer">
+            <sl-button variant="default" onclick="document.getElementById('add-list-dialog').hide()">Cancel</sl-button>
+            <sl-button type="submit" variant="primary">Create List</sl-button>
+        </div>
+    </form>
+</sl-dialog>
+
+<!-- Edit List Dialog -->
+<sl-dialog label="Edit List" id="edit-list-dialog">
+    <form id="edit-list-form"
+          hx-swap="outerHTML"
+          hx-target="this">
+        <div class="form-group">
+            <label for="edit-list-name">Name</label>
+            <sl-input id="edit-list-name" name="name" required maxlength="100"></sl-input>
+        </div>
+
+        <div class="form-group">
+            <label for="edit-list-description">Description (optional)</label>
+            <sl-textarea id="edit-list-description" name="description" rows="2"></sl-textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="edit-list-color">Color</label>
+            <sl-color-picker id="edit-list-color" name="color" format="hex" no-format-toggle></sl-color-picker>
+        </div>
+
+        <div slot="footer" class="dialog-footer">
+            <sl-button variant="default" onclick="document.getElementById('edit-list-dialog').hide()">Cancel</sl-button>
+            <sl-button type="submit" variant="primary">Save Changes</sl-button>
+        </div>
+    </form>
+</sl-dialog>
+
+<!-- Edit Todo Dialog -->
+<sl-dialog label="Edit Todo" id="edit-todo-dialog">
+    <form id="edit-todo-form"
+          hx-swap="outerHTML"
+          hx-target="this">
+        <div class="form-group">
+            <label for="edit-todo-title">Title</label>
+            <sl-input id="edit-todo-title" name="title" required maxlength="200"></sl-input>
+        </div>
+
+        <div class="form-group">
+            <label for="edit-todo-note">Notes (optional)</label>
+            <sl-textarea id="edit-todo-note" name="note" rows="3" placeholder="Add notes..."></sl-textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="edit-todo-due-date">Due Date</label>
+                <sl-input id="edit-todo-due-date" name="due_date" type="date"></sl-input>
+            </div>
+
+            <div class="form-group">
+                <label for="edit-todo-priority">Priority</label>
+                <sl-select id="edit-todo-priority" name="priority" value="low">
+                    <sl-option value="low">Low</sl-option>
+                    <sl-option value="medium">Medium</sl-option>
+                    <sl-option value="high">High</sl-option>
+                </sl-select>
+            </div>
+        </div>
+
+        <div slot="footer" class="dialog-footer">
+            <sl-button variant="default" onclick="document.getElementById('edit-todo-dialog').hide()">Cancel</sl-button>
+            <sl-button type="submit" variant="primary">Save Changes</sl-button>
+        </div>
+    </form>
+</sl-dialog>
+
+<!-- Delete Confirmation Dialog -->
+<sl-dialog label="Confirm Delete" id="delete-confirm-dialog">
+    <p id="delete-confirm-message">Are you sure you want to delete this item?</p>
+    <div slot="footer" class="dialog-footer">
+        <sl-button variant="default" onclick="document.getElementById('delete-confirm-dialog').hide()">Cancel</sl-button>
+        <sl-button variant="danger" id="delete-confirm-btn">Delete</sl-button>
+    </div>
+</sl-dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add list dialog
+    document.getElementById('add-list-btn').addEventListener('click', () => {
+        document.getElementById('add-list-form').reset();
+        document.getElementById('add-list-dialog').show();
+    });
+
+    // Close dialog on successful form submission
+    document.body.addEventListener('htmx:afterRequest', (evt) => {
+        if (evt.detail.successful) {
+            const dialogs = ['add-list-dialog', 'edit-list-dialog', 'edit-todo-dialog'];
+            dialogs.forEach(id => {
+                const dialog = document.getElementById(id);
+                if (dialog && dialog.open) {
+                    dialog.hide();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+<div class="todo-item {% if todo.is_completed %}completed{% endif %} {% if is_overdue(todo) %}overdue{% endif %} {% if is_due_today(todo) %}due-today{% endif %} priority-{{ todo.priority }}"
+     id="todo-{{ todo.id }}"
+     data-todo-id="{{ todo.id }}"
+     data-todo-title="{{ todo.title | e }}"
+     data-todo-note="{{ (todo.note or '') | e }}"
+     data-todo-due-date="{{ format_date_input(todo.due_date) }}"
+     data-todo-priority="{{ todo.priority }}">
+    <sl-icon name="grip-vertical" class="todo-drag-handle"></sl-icon>
+    <div class="todo-checkbox">
+        <sl-checkbox
+            {% if todo.is_completed %}checked{% endif %}
+            hx-patch="/api/todos/{{ todo.id }}/toggle"
+            hx-target="#todo-{{ todo.id }}"
+            hx-swap="outerHTML">
+        </sl-checkbox>
+    </div>
+
+    <div class="todo-content">
+        <span class="todo-title">{{ todo.title }}</span>
+        {% if todo.note %}
+        <p class="todo-note">{{ todo.note }}</p>
+        {% endif %}
+        <div class="todo-meta">
+            {% if todo.due_date %}
+            <span class="todo-due-date {% if is_overdue(todo) %}overdue{% endif %} {% if is_due_today(todo) %}due-today{% endif %}">
+                <sl-icon name="calendar3"></sl-icon>
+                {{ format_date(todo.due_date) }}
+            </span>
+            {% endif %}
+            <sl-badge variant="{{ 'danger' if todo.priority == 'high' else 'warning' if todo.priority == 'medium' else 'success' }}" pill>
+                {{ todo.priority | capitalize }}
+            </sl-badge>
+        </div>
+    </div>
+
+    <div class="todo-actions">
+        <sl-icon-button name="pencil"
+                        label="Edit todo"
+                        class="edit-todo-btn"
+                        onclick="openEditTodoDialog('{{ todo.id }}', '{{ todo.title | e }}', '{{ (todo.note or '') | e }}', '{{ format_date_input(todo.due_date) }}', '{{ todo.priority }}')">
+        </sl-icon-button>
+        <sl-icon-button name="trash"
+                        label="Delete todo"
+                        class="delete-todo-btn danger-icon"
+                        onclick="confirmDeleteTodo('{{ todo.id }}', '{{ todo.title | e }}')">
+        </sl-icon-button>
+    </div>
+</div>

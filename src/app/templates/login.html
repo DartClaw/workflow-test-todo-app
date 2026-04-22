@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Todo App{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <sl-icon name="check2-square" class="auth-logo"></sl-icon>
+            <h1>Todo App</h1>
+            <p class="auth-subtitle">Sign in to manage your tasks</p>
+        </div>
+
+        {% if next and next != '/app' %}
+        <sl-alert variant="primary" open>
+            <sl-icon slot="icon" name="info-circle"></sl-icon>
+            Please log in to continue to your requested page.
+        </sl-alert>
+        {% endif %}
+
+        <div id="error-container"></div>
+
+        <form hx-post="/auth/login"
+              hx-target="#error-container"
+              hx-swap="innerHTML"
+              class="auth-form">
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <sl-input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value="demo@example.com"
+                    required
+                    autocomplete="email">
+                    <sl-icon slot="prefix" name="envelope"></sl-icon>
+                </sl-input>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <sl-input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value="demo123"
+                    required
+                    autocomplete="current-password"
+                    password-toggle>
+                    <sl-icon slot="prefix" name="lock"></sl-icon>
+                </sl-input>
+            </div>
+
+            <sl-button type="submit" variant="primary" class="auth-submit">
+                <sl-icon slot="prefix" name="box-arrow-in-right"></sl-icon>
+                Sign In
+            </sl-button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="/register">Sign up</a></p>
+        </div>
+
+        <div class="demo-credentials">
+            <sl-divider></sl-divider>
+            <p><strong>Demo credentials:</strong></p>
+            <code>demo@example.com / demo123</code>
+        </div>
+    </div>
+</div>
+{% endblock %}

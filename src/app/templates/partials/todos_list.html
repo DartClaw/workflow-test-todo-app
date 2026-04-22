@@ -1,0 +1,14 @@
+{% if todos %}
+{% for todo in todos %}
+{% include "partials/todo_item.html" %}
+{% endfor %}
+{% else %}
+<div class="empty-todos">
+    <sl-icon name="inbox" class="empty-icon"></sl-icon>
+    {% if search_query %}
+    <p>No todos match "{{ search_query }}"</p>
+    {% else %}
+    <p>No todos yet. Add your first task above!</p>
+    {% endif %}
+</div>
+{% endif %}
