@@ -109,7 +109,7 @@ See `docs/STATE.md` for current phase, active stories, blockers, and session con
 
 | Document Type        | Location                            | Notes                                   |
 |----------------------|-------------------------------------|-----------------------------------------|
-| Product Backlog      | `docs/PRODUCT-BACKLOG.md`           | Product backlog for future work (REQ-IDs) |
+| Product Backlog      | `docs/PRODUCT-BACKLOG.md`           | Feature REQ-IDs and known-defect BUG-IDs; reference both by ID in stories and PRs |
 | Roadmap              | `docs/ROADMAP.md`                   | Phase structure with success criteria   |
 | Specs & Plans        | `docs/specs/<version-or-feature>/`  | PRDs, implementation plans, FIS, story breakdowns &dagger; |
 | ADRs                 | `docs/adrs/`                        | Architecture Decision Records (create on first ADR) |
@@ -152,6 +152,7 @@ _Always fully read and understand this file before doing any work:_ @docs/guidel
 - **HTMX-first.** Every route that renders should return an HTML partial — see `## Architecture → The stack` above. Do not introduce JSON endpoints unless explicitly asked.
 - **Do not "fix" the intentionally simple auth.** Plain-text passwords and in-memory `sessions` dict are deliberate educational choices. See `src/app/core/deps.py` and the README.
 - **Pydantic models in `src/app/models/` are _not_ wired into routes.** Validation is ad-hoc in the handlers — do not assume models run.
+- **Defects are tracked in `docs/PRODUCT-BACKLOG.md` → Known Defects.** When asked to fix a `BUG-*` ID, read the backlog entry for scope and severity before writing a spec — do not infer a defect's scope from the prompt alone. Reference the `BUG-*` ID in the branch, commit, and PR.
 
 
 ## Visual Validation Workflow

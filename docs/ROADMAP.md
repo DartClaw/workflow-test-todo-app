@@ -16,9 +16,20 @@
 |-------------------|------------|--------|
 | Workflow scaffold | 2026-04-22 | Done   |
 
-## Phase 2: _(TBD)_
+## Phase 2: Defect triage
 
-<!-- Define when a real feature scope emerges. -->
+**Goal:** Stabilize the app by fixing the known defects tracked in `PRODUCT-BACKLOG.md` → Known Defects.
+
+**Success Criteria:**
+- [ ] All `BUG-*` entries in `PRODUCT-BACKLOG.md` resolved or explicitly deferred
+- [ ] Existing `tests/` suite remains green on `main` after each fix
+- [ ] No regressions introduced (verified by re-running reproduction steps where applicable)
+
+**Milestones:**
+
+| Milestone     | Target | Status |
+|---------------|--------|--------|
+| Defect triage | TBD    | Active |
 
 ## Future / Backlog
 
