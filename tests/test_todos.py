@@ -1,5 +1,6 @@
 """Tests for todo item routes."""
 
+import re
 from datetime import date, datetime, timezone
 
 import pytest
@@ -20,6 +21,9 @@ class TestTodos:
             },
         )
         assert response.status_code == 200
+        assert b'priority-low' in response.content
+        assert re.search(rb"<sl-badge[^>]*>\s*Low\s*</sl-badge>", response.content)
+        assert b'data-todo-priority="low"' in response.content
         assert b"New Todo" in response.content
 
         # Verify in database
@@ -28,6 +32,11 @@ class TestTodos:
         assert created.list_id == test_list.id
         assert created.priority == "low"
         assert created.is_completed is False
+
+        # Verify dialog-reopen metadata
+        detail_response = authenticated_client.get(f"/api/todos/{created.id}")
+        assert detail_response.status_code == 200
+        assert b'data-todo-priority="low"' in detail_response.content
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
