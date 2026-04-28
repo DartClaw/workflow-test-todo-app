@@ -116,6 +116,7 @@ async def create_todo(
     todo = Todo(
         list_id=list_id,
         title=title.strip(),
+        priority="low",
         position=new_pos,
     )
     db.add(todo)
