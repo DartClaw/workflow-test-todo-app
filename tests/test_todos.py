@@ -1,7 +1,7 @@
 """Tests for todo item routes."""
 
 import re
-from datetime import date, datetime, timezone
+from datetime import datetime
 
 import pytest
 
@@ -62,6 +62,8 @@ class TestTodos:
             },
         )
         assert response.status_code == 200
+        assert b"Dec 31, 2025" in response.content
+        assert b'data-todo-due-date="2025-12-31"' in response.content
 
         # Verify in database
         db_session.refresh(test_todo)
@@ -69,6 +71,49 @@ class TestTodos:
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
+
+    def test_update_todo_clears_due_date(self, authenticated_client, test_todo, db_session):
+        """Test clearing due date on todo update."""
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Still has a date",
+                "due_date": "",
+            },
+        )
+        assert response.status_code == 200
+        assert b'data-todo-due-date=""' in response.content
+        assert b"Dec 31, 2025" not in response.content
+        assert b'class="todo-due-date"' not in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
+
+    def test_update_todo_rejects_invalid_due_date(self, authenticated_client, test_todo, db_session):
+        """Test invalid due date payload keeps previous value."""
+        test_todo.due_date = datetime(2024, 11, 30, 0, 0, 0)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Still has a date",
+                "due_date": "2025/12/31",
+                "priority": "high",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Invalid due date format. Use YYYY-MM-DD." in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.title == "Test Todo"
+        assert test_todo.priority == "medium"
+        assert test_todo.due_date.year == 2024
+        assert test_todo.due_date.month == 11
+        assert test_todo.due_date.day == 30
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
