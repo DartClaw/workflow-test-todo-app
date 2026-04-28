@@ -16,11 +16,40 @@ from app.utils import format_date, format_date_input, is_due_today, is_overdue
 router = APIRouter(prefix="/api/todos", tags=["todos"])
 templates = Jinja2Templates(directory="src/app/templates")
 
+_TODO_DUE_DATE_FORMAT = "%Y-%m-%d"
+_TODO_DEFAULT_PRIORITY = "low"
+_TODO_PRIORITIES = ("low", "medium", "high")
+_INVALID_DUE_DATE_ERROR = "Invalid due date format. Use YYYY-MM-DD."
+
 # Add utility functions to template globals
 templates.env.globals["is_overdue"] = is_overdue
 templates.env.globals["is_due_today"] = is_due_today
 templates.env.globals["format_date"] = format_date
 templates.env.globals["format_date_input"] = format_date_input
+
+
+def _coerce_priority(priority: str) -> str:
+    """Return a valid priority with fallback to the default."""
+
+    return priority if priority in _TODO_PRIORITIES else _TODO_DEFAULT_PRIORITY
+
+
+def _parse_due_date(raw_due_date: str | None) -> tuple[bool, datetime | None]:
+    """Parse due date from edit form input.
+
+    Returns ``(should_update, due_date)`` where ``should_update`` indicates whether
+    the stored date should be replaced.
+    """
+
+    if raw_due_date is None:
+        return False, None
+
+    due_date = raw_due_date.strip()
+    if not due_date:
+        return True, None
+
+    parsed = datetime.strptime(due_date, _TODO_DUE_DATE_FORMAT)
+    return True, parsed
 
 
 def _verify_list_access(db: Session, list_id: str, user_id: str) -> TodoList | None:
@@ -116,7 +145,7 @@ async def create_todo(
     todo = Todo(
         list_id=list_id,
         title=title.strip(),
-        priority="low",
+        priority=_TODO_DEFAULT_PRIORITY,
         position=new_pos,
     )
     db.add(todo)
@@ -213,30 +242,24 @@ async def update_todo(
             context={"error": "Title must be 200 characters or less"},
         )
 
-    # Validate priority
-    if priority not in ("low", "medium", "high"):
-        priority = "low"
-
     # Update fields
     todo.title = title.strip()
     todo.note = note.strip() if note else None
 
     # Parse due date
-    parsed_due_date = due_date.strip() if due_date is not None else None
-    if parsed_due_date is not None:
-        if parsed_due_date:
-            try:
-                todo.due_date = datetime.strptime(parsed_due_date, "%Y-%m-%d")
-            except ValueError:
-                return templates.TemplateResponse(
-                    request=request,
-                    name="partials/error.html",
-                    context={"error": "Invalid due date format. Use YYYY-MM-DD."},
-                )
-        else:
-            todo.due_date = None
+    try:
+        update_due_date, parsed_due_date = _parse_due_date(due_date)
+    except ValueError:
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/error.html",
+            context={"error": _INVALID_DUE_DATE_ERROR},
+        )
 
-    todo.priority = priority
+    if update_due_date:
+        todo.due_date = parsed_due_date
+
+    todo.priority = _coerce_priority(priority)
     db.commit()
     db.refresh(todo)
 
