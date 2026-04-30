@@ -1,10 +1,10 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-04-30
 
 ## Current Phase
 
-Phase: AndThen workflow bootstrap
+Phase: Phase 1: Defect Repairs
 Status: On Track
 
 ## Active Stories
@@ -16,6 +16,7 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S02** (2026-04-30): Default quick-add priority implemented; todo creation default priority now persists as `low`, with dedicated regression coverage.
 
 ## Blockers
 

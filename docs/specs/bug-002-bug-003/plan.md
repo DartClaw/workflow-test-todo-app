@@ -15,7 +15,7 @@
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
 | S01 | Persist due-date edits | Defect Repairs | W1 | - | [P] | Medium | Pending | `docs/specs/bug-002-bug-003/s01-persist-due-date-edits.md` |
-| S02 | Default quick-add priority | Defect Repairs | W1 | - | [P] | Low | Pending | `docs/specs/bug-002-bug-003/s02-default-quick-add-priority.md` |
+| S02 | Default quick-add priority | Defect Repairs | W1 | - | [P] | Low | Done | `docs/specs/bug-002-bug-003/s02-default-quick-add-priority.md` |
 
 > **Invariant**: each row's `FIS` path is unique – one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
 
@@ -46,7 +46,7 @@ _Both stories are production-facing defect fixes with no functional dependency o
 **Asset refs**: `docs/specs/bug-002-bug-003/prd.md`, `src/app/templates/app.html`, `src/app/templates/partials/todo_item.html`
 
 #### [P] S02: Default quick-add priority
-**Status**: Pending
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003/s02-default-quick-add-priority.md`
 **Phase**: Phase 1: Defect Repairs
 **Wave**: W1
@@ -55,10 +55,10 @@ _Both stories are production-facing defect fixes with no functional dependency o
 **Risk**: Low
 **Scope**: Ensure quick-add Todo creation produces a stored `low` Priority even when the form submits only `list_id` and `title`, then prove the rendered row and edit dialog reflect that stored default. Include isolated regression coverage for repeated quick-add creation and later manual priority edits. Exclude any change to the available Priority values or to the edit dialog UI structure.
 **Acceptance Criteria**:
-- [ ] Creating a Todo through quick add with title only stores `low` as the effective Priority.
-- [ ] The newly rendered todo row reflects the same `low` Priority that was stored.
-- [ ] Opening the edit dialog for a quick-added Todo shows `Low` selected until the user changes it.
-- [ ] Later edits that change Priority to `medium` or `high` continue to persist normally.
+- [x] Creating a Todo through quick add with title only stores `low` as the effective Priority.
+- [x] The newly rendered todo row reflects the same `low` Priority that was stored.
+- [x] Opening the edit dialog for a quick-added Todo shows `Low` selected until the user changes it.
+- [x] Later edits that change Priority to `medium` or `high` continue to persist normally.
 **Key Scenarios**:
 - Happy: quick-add a Todo, open edit, and see `Low` selected.
 - Edge: quick-add several Todos in succession and confirm every stored Priority is `low`.
