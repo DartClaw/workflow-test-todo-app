@@ -113,12 +113,7 @@ async def create_todo(
     new_pos = (max_pos or -1) + 1
 
     # Create todo
-    todo = Todo(
-        list_id=list_id,
-        title=title.strip(),
-        priority="low",
-        position=new_pos,
-    )
+    todo = Todo(list_id=list_id, title=title.strip(), position=new_pos)
     db.add(todo)
     db.commit()
     db.refresh(todo)

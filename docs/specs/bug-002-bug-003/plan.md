@@ -14,7 +14,7 @@
 
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
-| S01 | Persist due-date edits | Defect Repairs | W1 | - | [P] | Medium | Pending | `docs/specs/bug-002-bug-003/s01-persist-due-date-edits.md` |
+| S01 | Persist due-date edits | Defect Repairs | W1 | - | [P] | Medium | Done | `docs/specs/bug-002-bug-003/s01-persist-due-date-edits.md` |
 | S02 | Default quick-add priority | Defect Repairs | W1 | - | [P] | Low | Done | `docs/specs/bug-002-bug-003/s02-default-quick-add-priority.md` |
 
 > **Invariant**: each row's `FIS` path is unique – one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
@@ -26,7 +26,7 @@
 _Both stories are production-facing defect fixes with no functional dependency on each other. They can execute in parallel because the merge-safe plan keeps primary file ownership separate._
 
 #### [P] S01: Persist due-date edits
-**Status**: Pending
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003/s01-persist-due-date-edits.md`
 **Phase**: Phase 1: Defect Repairs
 **Wave**: W1
@@ -35,10 +35,10 @@ _Both stories are production-facing defect fixes with no functional dependency o
 **Risk**: Medium – the current update path silently ignores mismatched input, so the fix must preserve intentional clearing while preventing silent metadata loss.
 **Scope**: Correct the todo edit-save-reopen flow so date-only values emitted by the current dialog persist in storage and round-trip back into the dialog. Include regression coverage for valid save, intentional clear, and invalid-input protection. Exclude overdue styling semantics, broader datetime normalization, and any UI redesign.
 **Acceptance Criteria**:
-- [ ] Saving a todo from the edit dialog with a valid `YYYY-MM-DD` due date persists that value on the Todo record.
-- [ ] Reopening the same todo after a successful save shows the saved due date populated in the edit dialog and row metadata.
-- [ ] Submitting an intentionally blank due-date value clears an existing due date.
-- [ ] Submitting an invalid or unsupported due-date value does not silently overwrite an existing saved due date.
+- [x] Saving a todo from the edit dialog with a valid `YYYY-MM-DD` due date persists that value on the Todo record.
+- [x] Reopening the same todo after a successful save shows the saved due date populated in the edit dialog and row metadata.
+- [x] Submitting an intentionally blank due-date value clears an existing due date.
+- [x] Submitting an invalid or unsupported due-date value does not silently overwrite an existing saved due date.
 **Key Scenarios**:
 - Happy: edit an existing Todo, save `2025-12-31`, reopen it, and see `2025-12-31` still populated.
 - Edge: clear a previously saved Due Date and confirm reopen shows the field blank.
