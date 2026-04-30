@@ -12,11 +12,12 @@ Status: On Track
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
 | S01 | Pending | `docs/specs/bug-002-bug-003/s01-persist-due-date-edits.md` | BUG-002 due-date persistence fix planned as isolated route-focused story |
-| S02 | Pending | `docs/specs/bug-002-bug-003/s02-default-quick-add-priority.md` | BUG-003 quick-add priority default fix planned as isolated model-focused story |
+| S02 | Done | `docs/specs/bug-002-bug-003/s02-default-quick-add-priority.md` | BUG-003 quick-add priority default shipped with dedicated regression coverage |
 
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S02** (2026-04-30): Default quick-add priority implemented; todo creation default priority now persists as `low`, with dedicated regression coverage.
 - **Planning bundle created** (2026-04-30): Added `docs/specs/bug-002-bug-003/plan.md`, `.technical-research.md`, and story FIS files for BUG-002 and BUG-003
 
 ## Blockers

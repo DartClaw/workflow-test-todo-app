@@ -53,15 +53,15 @@ Ensure Todos created through quick add always start with the documented `low` Pr
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] Creating a Todo through `POST /api/todos` with only `list_id` and `title` persists `priority="low"` on the Todo record.
-- [ ] The quick-add response fragment renders the same `low` Priority in both the CSS class / badge state and the reopen payload `data-todo-priority="low"`.
-- [ ] Opening the edit dialog for a quick-added Todo selects `Low` because the persisted Priority is already `low`.
-- [ ] Later edit saves that change Priority to `medium` or `high` still persist and round-trip normally.
+- [x] Creating a Todo through `POST /api/todos` with only `list_id` and `title` persists `priority="low"` on the Todo record.
+- [x] The quick-add response fragment renders the same `low` Priority in both the CSS class / badge state and the reopened payload `data-todo-priority="low"`.
+- [x] Opening the edit dialog for a quick-added Todo selects `Low` because the persisted Priority is already `low`.
+- [x] Later edit saves that change Priority to `medium` or `high` still persist and round-trip normally.
 
 ### Health Metrics (Must NOT Regress)
-- [ ] Existing quick-add title validation remains unchanged.
-- [ ] The quick-add flow still returns the OOB fragment response and updates the incomplete-count badge.
-- [ ] Existing todo update behavior for explicit Priority changes remains unchanged.
+- [x] Existing quick-add title validation remains unchanged.
+- [x] The quick-add flow still returns the OOB fragment response and updates the incomplete-count badge.
+- [x] Existing todo update behavior for explicit Priority changes remains unchanged.
 
 
 ## Scenarios
@@ -141,15 +141,15 @@ file   | tests/conftest.py:1-93                    | Authenticated client and fi
 
 ### Implementation Tasks
 
-- [ ] **TI01** Quick-add Todo creation persists `low` as the default Priority without requiring a form field
+- [x] **TI01** Quick-add Todo creation persists `low` as the default Priority without requiring a form field
   - Own `src/app/database.py:72-83`; choose the model-level default so quick add and any future omitted-Priority create path share the same baseline.
   - **Verify**: `POST /api/todos` with only `list_id` and `title` creates a Todo whose stored `priority` is exactly `"low"`
 
-- [ ] **TI02** Quick-add response fragments and edit-dialog reopen payload reflect the stored default Priority
+- [x] **TI02** Quick-add response fragments and edit-dialog reopen payload reflect the stored default Priority
   - Depends on TI01; treat `src/app/templates/partials/todo_item.html:1-40` and `src/app/templates/app.html:143-148` as the behavioral contract to prove, not redesign.
   - **Verify**: the quick-add response contains `data-todo-priority="low"` and reopening that Todo shows `Low` selected
 
-- [ ] **TI03** Default-Priority behavior is covered in an isolated regression module without breaking later edits
+- [x] **TI03** Default-Priority behavior is covered in an isolated regression module without breaking later edits
   - Add a focused test file rather than editing the shared todo CRUD test file; include repeated quick-add creation and a follow-up edit that saves `priority=high`.
   - **Verify**: a regression test quick-adds a Todo, then updates it with `priority=high`, and asserts the stored value becomes `"high"`
 
@@ -172,7 +172,7 @@ file   | tests/conftest.py:1-93                    | Authenticated client and fi
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements (if applicable)
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements (if applicable)
