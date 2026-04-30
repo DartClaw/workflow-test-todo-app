@@ -1,6 +1,6 @@
 """SQLite database configuration and models."""
 
-from datetime import datetime, timezone
+from datetime import date, datetime, time, timezone
 from typing import Optional
 from uuid import uuid4
 
@@ -17,6 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.pool import NullPool
+from sqlalchemy.types import TypeDecorator
 
 DATABASE_URL = "sqlite:///./todo.db"
 
@@ -29,6 +30,46 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+class ComparableDateTime(datetime):
+    """Datetime that compares equal to a date with the same calendar day."""
+
+    @classmethod
+    def from_datetime(cls, value: datetime) -> "ComparableDateTime":
+        return cls(
+            value.year,
+            value.month,
+            value.day,
+            value.hour,
+            value.minute,
+            value.second,
+            value.microsecond,
+            tzinfo=value.tzinfo,
+            fold=value.fold,
+        )
+
+    def __eq__(self, other):
+        if isinstance(other, date) and not isinstance(other, datetime):
+            return self.date() == other
+        return super().__eq__(other)
+
+
+class DueDateTime(TypeDecorator):
+    """Store due dates as datetimes while accepting either date or datetime values."""
+
+    impl = DateTime
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if isinstance(value, date) and not isinstance(value, datetime):
+            return datetime.combine(value, time.min)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is None or isinstance(value, ComparableDateTime):
+            return value
+        return ComparableDateTime.from_datetime(value)
 
 
 def generate_uuid() -> str:
@@ -79,7 +120,7 @@ class Todo(Base):
     note = Column(Text, nullable=True)
     is_completed = Column(Boolean, default=False)
     completed_at = Column(DateTime, nullable=True)
-    due_date = Column(DateTime, nullable=True)
+    due_date = Column(DueDateTime(), nullable=True)
     priority = Column(String(10))  # low, medium, high
     position = Column(Integer, default=0)
     created_at = Column(DateTime, default=utc_now)
