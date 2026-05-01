@@ -41,10 +41,10 @@ Restore the documented default Priority for quick-add so title-only Todo creatio
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] Quick-add creation persists new Todos with `priority="low"` when only `list_id` and `title` are submitted.
-- [ ] The Todo partial rendered immediately after quick-add is consistent with `priority="low"`, including the server-rendered priority badge and dialog data attribute.
-- [ ] Reopening the edit dialog for a quick-added Todo shows `Low` selected without requiring any new user input during creation.
-- [ ] Existing Todo edit/update behavior for valid `low`, `medium`, and `high` priorities remains unchanged.
+- [x] Quick-add creation persists new Todos with `priority="low"` when only `list_id` and `title` are submitted.
+- [x] The Todo partial rendered immediately after quick-add is consistent with `priority="low"`, including the server-rendered priority badge and dialog data attribute.
+- [x] Reopening the edit dialog for a quick-added Todo shows `Low` selected without requiring any new user input during creation.
+- [x] Existing Todo edit/update behavior for valid `low`, `medium`, and `high` priorities remains unchanged.
 
 ### Health Metrics (Must NOT Regress)
 - [ ] Existing quick-add validation for blank or oversized titles continues to behave the same.
@@ -128,15 +128,15 @@ file   | tests/test_todos.py:12-33              | Existing quick-add regression 
 
 ### Implementation Tasks
 
-- [ ] **TI01** Quick-add persists new Todos with explicit Priority `low`
+- [x] **TI01** Quick-add persists new Todos with explicit Priority `low`
   - Update `create_todo()` in `src/app/routes/todos.py:89-102`; keep the current title validation, ordering logic, and OOB response contract unchanged.
   - **Verify**: `Test: POST /api/todos with list_id and title only creates a Todo whose stored priority is exactly 'low'`
 
-- [ ] **TI02** The immediate Todo partial and reopened edit dialog both surface the stored low-priority value
+- [x] **TI02** The immediate Todo partial and reopened edit dialog both surface the stored low-priority value
   - Reuse the existing render/hydration path in `src/app/templates/partials/todo_item.html:1-33` and `src/app/static/js/app.js:111-120`; this task depends on TI01 storing the correct value.
   - **Verify**: `Test: the quick-add response and reopened dialog path expose priority 'low' so the edit select shows Low selected`
 
-- [ ] **TI03** Quick-add keeps its current minimal-entry and validation behavior
+- [x] **TI03** Quick-add keeps its current minimal-entry and validation behavior
   - Preserve the current validation branches in `src/app/routes/todos.py:79-95`; do not add new required form inputs or alternate error contracts.
   - **Verify**: `Test: blank-title quick-add still returns the existing HTML error partial and creates no Todo record`
 
@@ -159,9 +159,9 @@ file   | tests/test_todos.py:12-33              | Existing quick-add regression 
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
 - [ ] **UI verified** to match requirements (if applicable)
 
 

@@ -29,6 +29,11 @@ class TestTodos:
         assert created.priority == "low"
         assert created.is_completed is False
 
+        # Verify immediate render and edit dialog payload carry low priority
+        assert b'data-todo-priority="low"' in response.content
+        assert b'priority-low' in response.content
+        assert b'openEditTodoDialog' in response.content
+
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
         response = authenticated_client.post(

@@ -29,7 +29,7 @@
 _Single phase because both fixes are Must/P0 defects in the same authenticated Todo flow. Waves are separated to reduce merge pressure in shared route and test files._
 
 #### S01: Persist edited Due Date
-**Status**: Pending
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003/s01-bug-002-persist-due-date.md`
 **Phase**: Phase 1: Todo metadata defect fixes
 **Wave**: W1
@@ -49,7 +49,7 @@ _Single phase because both fixes are Must/P0 defects in the same authenticated T
 **Asset refs**: `docs/specs/bug-002-bug-003/prd.md#fr1-persist-edited-due-dates`, `docs/PRODUCT-BACKLOG.md#known-defects`
 
 #### S02: Apply default Priority on quick-add
-**Status**: Pending
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003/s02-bug-003-default-quick-add-priority.md`
 **Phase**: Phase 1: Todo metadata defect fixes
 **Wave**: W2
