@@ -36,14 +36,14 @@ Deleting a `Todo` from an active `TodoList` must update the sidebar incomplete-c
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] Deleting an incomplete `Todo` returns an HTMX-compatible HTML response that includes an OOB update for the matching sidebar incomplete-count element, so the count decrements without a full page reload.
-- [ ] Deleting a completed `Todo` still removes the row, but the sidebar incomplete-count value does not change because only incomplete todos are counted.
-- [ ] Missing-todo and unauthorized delete behavior remains unchanged: the fix does not broaden the bug into auth or error-handling changes.
+- [x] Deleting an incomplete `Todo` returns an HTMX-compatible HTML response that includes an OOB update for the matching sidebar incomplete-count element, so the count decrements without a full page reload.
+- [x] Deleting a completed `Todo` still removes the row, but the sidebar incomplete-count value does not change because only incomplete todos are counted.
+- [x] Missing-todo and unauthorized delete behavior remains unchanged: the fix does not broaden the bug into auth or error-handling changes.
 
 ### Health Metrics (Must NOT Regress)
-- [ ] Existing todo route tests continue to pass.
-- [ ] The delete flow keeps the existing route shape and does not introduce JSON endpoints or client-side count recalculation.
-- [ ] Existing toggle-based OOB count behavior remains unchanged.
+- [x] Existing todo route tests continue to pass.
+- [x] The delete flow keeps the existing route shape and does not introduce JSON endpoints or client-side count recalculation.
+- [x] Existing toggle-based OOB count behavior remains unchanged.
 
 
 ## Scenarios
@@ -128,11 +128,11 @@ file   | tests/test_integration.py:179-194       | Existing OOB integration asse
 
 ### Implementation Tasks
 
-- [ ] **TI01** Delete responses update the sidebar incomplete-count through the existing OOB partial contract
+- [x] **TI01** Delete responses update the sidebar incomplete-count through the existing OOB partial contract
   - Follow the mutate-commit-recount pattern at `src/app/routes/todos.py:243-283`, but adapt it to the delete flow at `src/app/routes/todos.py:286-306`; reuse `src/app/templates/partials/todo_deleted_oob.html:1-2` or an equivalent existing partial-only response.
   - **Verify**: `uv run pytest tests/test_todos.py -k "delete_todo"` proves deleting an incomplete todo returns HTTP 200, removes the row from the database, and includes both 'hx-swap-oob' and 'id="list-{list_id}-count"' with the decremented count in the response body`
 
-- [ ] **TI02** Delete coverage proves count semantics and preserved non-happy-path behavior
+- [x] **TI02** Delete coverage proves count semantics and preserved non-happy-path behavior
   - Extend existing todo-route coverage at `tests/test_todos.py:84-92` and mirror the OOB assertion style from `tests/test_integration.py:179-194`; this task depends on TI01's response contract.
   - **Verify**: `uv run pytest tests/test_todos.py -k "delete_todo or cannot_modify_other_users_todo" tests/test_integration.py -k "todo_completion_updates_count"` proves deleting a completed todo leaves the incomplete-count unchanged, unauthorized delete still returns 403 without deleting data, and existing toggle OOB behavior still passes`
 
@@ -156,10 +156,10 @@ file   | tests/test_integration.py:179-194       | Existing OOB integration asse
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements
 
 
 ## Implementation Observations
