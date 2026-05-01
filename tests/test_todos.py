@@ -1,6 +1,7 @@
 """Tests for todo item routes."""
 
 from datetime import date, datetime, timezone
+from uuid import uuid4
 
 import pytest
 
@@ -90,6 +91,50 @@ class TestTodos:
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_incomplete_todo_updates_sidebar_count(self, authenticated_client, test_todo, test_list, db_session):
+        """Deleting an incomplete todo updates the sidebar incomplete count."""
+        extra = Todo(list_id=test_list.id, title="Extra Todo", position=1)
+        db_session.add(extra)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 200
+        assert b'hx-swap-oob="true"' in response.content
+        assert f"id=\"list-{test_list.id}-count\"".encode() in response.content
+        assert b">1</span>" in response.content
+
+    def test_delete_last_incomplete_todo_sets_count_to_zero(self, authenticated_client, test_todo, test_list, db_session):
+        """Deleting the last incomplete todo updates the sidebar count to zero."""
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 200
+        assert b'hx-swap-oob="true"' in response.content
+        assert f"id=\"list-{test_list.id}-count\"".encode() in response.content
+        assert b">0</span>" in response.content
+
+    def test_delete_completed_todo_keeps_sidebar_count(self, authenticated_client, test_todo, test_list, db_session):
+        """Deleting a completed todo does not change the incomplete count."""
+        completed = Todo(
+            list_id=test_list.id,
+            title="Completed",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add(completed)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed.id}")
+        assert response.status_code == 200
+        assert b'hx-swap-oob="true"' in response.content
+        assert f"id=\"list-{test_list.id}-count\"".encode() in response.content
+        assert b">1</span>" in response.content
+
+    def test_delete_missing_todo_returns_standard_error_response(self, authenticated_client):
+        """Deleting a missing todo keeps existing non-success behavior."""
+        missing_id = str(uuid4())
+        response = authenticated_client.delete(f"/api/todos/{missing_id}")
+        assert response.status_code == 404
+        assert b"hx-swap-oob" not in response.content
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""

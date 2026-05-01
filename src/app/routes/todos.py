@@ -303,7 +303,15 @@ async def delete_todo(
     db.delete(todo)
     db.commit()
 
-    return Response(status_code=200)
+    # Get updated count for OOB swap
+    count = _get_list_todo_count(db, todo.list_id)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/todo_deleted_oob.html",
+        context={"list_id": todo.list_id, "count": count},
+        status_code=200,
+    )
 
 
 @router.post("/{todo_id}/reorder")
