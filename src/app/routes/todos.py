@@ -16,6 +16,10 @@ from app.utils import format_date, format_date_input, is_due_today, is_overdue
 router = APIRouter(prefix="/api/todos", tags=["todos"])
 templates = Jinja2Templates(directory="src/app/templates")
 
+DEFAULT_TODO_PRIORITY = "low"
+VALID_TODO_PRIORITIES = ("low", "medium", "high")
+SUPPORTED_DUE_DATE_FORMATS = ("%Y-%m-%d", "%Y-%m-%dT%H:%M")
+
 # Add utility functions to template globals
 templates.env.globals["is_overdue"] = is_overdue
 templates.env.globals["is_due_today"] = is_due_today
@@ -35,6 +39,21 @@ def _get_list_todo_count(db: Session, list_id: str) -> int:
     return db.query(func.count(Todo.id)).filter(
         Todo.list_id == list_id, Todo.is_completed == False
     ).scalar()
+
+
+def _parse_due_date(due_date: str | None) -> datetime | None:
+    """Parse supported due-date payloads from the edit form."""
+    normalized_due_date = (due_date or "").strip()
+    if not normalized_due_date:
+        return None
+
+    for due_date_format in SUPPORTED_DUE_DATE_FORMATS:
+        try:
+            return datetime.strptime(normalized_due_date, due_date_format)
+        except ValueError:
+            continue
+
+    raise ValueError("Invalid due date format")
 
 
 @router.get("/search", response_class=HTMLResponse)
@@ -117,7 +136,7 @@ async def create_todo(
         list_id=list_id,
         title=title.strip(),
         position=new_pos,
-        priority="low",
+        priority=DEFAULT_TODO_PRIORITY,
     )
     db.add(todo)
     db.commit()
@@ -214,25 +233,18 @@ async def update_todo(
         )
 
     # Validate priority
-    if priority not in ("low", "medium", "high"):
-        priority = "low"
+    if priority not in VALID_TODO_PRIORITIES:
+        priority = DEFAULT_TODO_PRIORITY
 
     # Parse due date
-    normalized_due_date = (due_date or "").strip() if due_date is not None else ""
-    if normalized_due_date:
-        try:
-            parsed_due_date = datetime.strptime(normalized_due_date, "%Y-%m-%d")
-        except ValueError:
-            try:
-                parsed_due_date = datetime.strptime(normalized_due_date, "%Y-%m-%dT%H:%M")
-            except ValueError:
-                return templates.TemplateResponse(
-                    request=request,
-                    name="partials/error.html",
-                    context={"error": "Invalid due date format"},
-                )
-    else:
-        parsed_due_date = None
+    try:
+        parsed_due_date = _parse_due_date(due_date)
+    except ValueError:
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/error.html",
+            context={"error": "Invalid due date format"},
+        )
 
     # Update fields
     todo.title = title.strip()

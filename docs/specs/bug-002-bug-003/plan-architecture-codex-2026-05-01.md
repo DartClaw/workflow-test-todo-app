@@ -58,3 +58,13 @@ No decomposition action is warranted for this scope. The single shared module (`
    - **Tooling:** `pytest` + regression test review (manual checklist) for touched routes.
    - **Findings addressed:** ARCH-001
 
+## Remediation Status (Iteration 1)
+
+### ARCH-001 Remediation Completed
+
+**Status:** Remediated
+
+- Updated `tests/test_todos.py` assertions to rely on `data-*` response-contract markers instead of transient class/id/function tokens.
+- Replaced class/function assertions (`priority-low`, `openEditTodoDialog`, `todo-item`) with stable marker checks and explicit error-partial contract validation (`<sl-alert variant="danger">` and absence of `data-todo-id`).
+- No route or template runtime behavior was changed in this remediation step.
+- Remaining issues from this report: none.

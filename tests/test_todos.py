@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-import pytest
-
 from app.database import Todo
 
 
@@ -29,10 +27,10 @@ class TestTodos:
         assert created.priority == "low"
         assert created.is_completed is False
 
-        # Verify immediate render and edit dialog payload carry low priority
+        # Verify immediate render and edit dialog payload carry stable contract markers
         assert b'data-todo-priority="low"' in response.content
-        assert b'priority-low' in response.content
-        assert b'openEditTodoDialog' in response.content
+        assert b'data-todo-title="New Todo"' in response.content
+        assert b'data-todo-note="' in response.content
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
@@ -108,7 +106,8 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"Invalid due date format" in response.content
-        assert b"todo-item" not in response.content
+        assert b'data-todo-id=' not in response.content
+        assert b'<sl-alert variant="danger"' in response.content
 
         db_session.refresh(test_todo)
         assert test_todo.title == "Test Todo"
