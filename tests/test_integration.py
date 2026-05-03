@@ -178,31 +178,56 @@ class TestUserJourneys:
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
 
-    def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
-        """Test that search filters todos correctly."""
-        # Create todos with different titles
-        todos_data = [
-            "Buy groceries",
-            "Buy new laptop",
-            "Call mom",
-            "Send email to boss",
-            "Buy birthday gift",
-        ]
-        for i, title in enumerate(todos_data):
-            todo = Todo(list_id=test_list.id, title=title, position=i)
-            db_session.add(todo)
-        db_session.commit()
 
-        # Search for "buy"
-        response = authenticated_client.get(
-            f"/api/todos/search?list_id={test_list.id}&q=buy"
-        )
-        assert response.status_code == 200
+def test_todo_delete_updates_count(authenticated_client, test_list, db_session):
+    """Test that deleting a todo updates the list count via OOB swap."""
+    # Create two incomplete todos so the decremented count is visible
+    for i in range(2):
+        todo = Todo(list_id=test_list.id, title=f"Delete Count Todo {i}", position=i)
+        db_session.add(todo)
+    db_session.commit()
 
-        # Should find 3 todos with "buy" in title
-        content = response.content.decode()
-        assert "Buy groceries" in content
-        assert "Buy new laptop" in content
-        assert "Buy birthday gift" in content
-        assert "Call mom" not in content
-        assert "Send email" not in content
+    todo_to_delete = db_session.query(Todo).filter(
+        Todo.list_id == test_list.id,
+        Todo.title == "Delete Count Todo 0",
+    ).first()
+    assert todo_to_delete is not None
+
+    response = authenticated_client.delete(f"/api/todos/{todo_to_delete.id}")
+    assert response.status_code == 200
+    assert b"hx-swap-oob" in response.content
+    assert (
+        f'id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'
+        .encode()
+        in response.content
+    )
+
+
+def test_todo_search_filters_correctly(authenticated_client, test_list, db_session):
+    """Test that search filters todos correctly."""
+    # Create todos with different titles
+    todos_data = [
+        "Buy groceries",
+        "Buy new laptop",
+        "Call mom",
+        "Send email to boss",
+        "Buy birthday gift",
+    ]
+    for i, title in enumerate(todos_data):
+        todo = Todo(list_id=test_list.id, title=title, position=i)
+        db_session.add(todo)
+    db_session.commit()
+
+    # Search for "buy"
+    response = authenticated_client.get(
+        f"/api/todos/search?list_id={test_list.id}&q=buy"
+    )
+    assert response.status_code == 200
+
+    # Should find 3 todos with "buy" in title
+    content = response.content.decode()
+    assert "Buy groceries" in content
+    assert "Buy new laptop" in content
+    assert "Buy birthday gift" in content
+    assert "Call mom" not in content
+    assert "Send email" not in content

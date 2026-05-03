@@ -91,6 +91,85 @@ class TestTodos:
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
 
+    def test_delete_todo_updates_sidebar_count(self, authenticated_client, test_todo, test_list, db_session):
+        """Test deleting a todo updates the sidebar incomplete count via OOB swap."""
+        # Add two more incomplete todos to expose a decrement
+        extra_todos = [
+            Todo(list_id=test_list.id, title="Todo A", position=1),
+            Todo(list_id=test_list.id, title="Todo B", position=2),
+        ]
+        for todo in extra_todos:
+            db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">2</span>'
+            .encode()
+            in response.content
+        )
+
+        deleted = db_session.query(Todo).filter(Todo.id == test_todo.id).first()
+        assert deleted is None
+
+    def test_delete_completed_todo_keeps_sidebar_count(self, authenticated_client, test_list, db_session):
+        """Test deleting a completed todo does not change incomplete count in sidebar."""
+        todo1 = Todo(
+            list_id=test_list.id,
+            title="Keep Count Incomplete",
+            position=0,
+            is_completed=False,
+        )
+        todo2 = Todo(
+            list_id=test_list.id,
+            title="Complete and Remove",
+            position=1,
+            is_completed=True,
+            completed_at=datetime.now(timezone.utc),
+        )
+        db_session.add_all([todo1, todo2])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{todo2.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'
+            .encode()
+            in response.content
+        )
+        assert db_session.query(Todo).filter(Todo.id == todo2.id).first() is None
+
+    def test_delete_last_incomplete_todo_updates_sidebar_count_to_zero(self, authenticated_client, test_list, db_session):
+        """Test deleting the last incomplete todo sets sidebar count to zero."""
+        incomplete = Todo(
+            list_id=test_list.id,
+            title="Last Incomplete",
+            position=0,
+            is_completed=False,
+        )
+        completed = Todo(
+            list_id=test_list.id,
+            title="Already complete",
+            position=1,
+            is_completed=True,
+            completed_at=datetime.now(timezone.utc),
+        )
+        db_session.add_all([incomplete, completed])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{incomplete.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">0</span>'
+            .encode()
+            in response.content
+        )
+        assert db_session.query(Todo).filter(Todo.id == incomplete.id).first() is None
+
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
         # Create three todos
@@ -232,3 +311,19 @@ class TestTodoAccess:
             data={"title": "Hacked!"},
         )
         assert response.status_code == 403
+
+    def test_cannot_delete_other_users_todo_does_not_emit_oob(self, client, test_todo, db_session):
+        """Test deleting another user's todo does not emit sidebar count OOB update."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        other_user = User(email="other2@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        session_id = create_session(other_user.id)
+        client.cookies.set("session_id", session_id)
+
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+        assert b"hx-swap-oob" not in response.content

@@ -31,16 +31,16 @@ When a user deletes a `Todo` from an active `TodoList`, the sidebar incomplete-c
 
 ## Success Criteria (Must Be TRUE)
 
-- [ ] Deleting an incomplete `Todo` returns a successful HTML fragment response that updates `#list-{TodoList.id}-count` via `hx-swap-oob`, so the sidebar badge decrements without a full page reload.
-- [ ] Deleting a completed `Todo` leaves the sidebar badge unchanged, proving the delete path still counts incomplete todos only.
-- [ ] Deleting the final incomplete `Todo` in a `TodoList` updates the sidebar badge to `0` rather than leaving stale markup or requiring a reload.
-- [ ] Rejected delete requests (for example, deleting another user's `Todo`) do not emit a misleading sidebar count update.
+- [x] Deleting an incomplete `Todo` returns a successful HTML fragment response that updates `#list-{TodoList.id}-count` via `hx-swap-oob`, so the sidebar badge decrements without a full page reload.
+- [x] Deleting a completed `Todo` leaves the sidebar badge unchanged, proving the delete path still counts incomplete todos only.
+- [x] Deleting the final incomplete `Todo` in a `TodoList` updates the sidebar badge to `0` rather than leaving stale markup or requiring a reload.
+- [x] Rejected delete requests (for example, deleting another user's `Todo`) do not emit a misleading sidebar count update.
 
 ### Health Metrics (Must NOT Regress)
 
-- [ ] Existing create/toggle count-update behavior continues to work and keeps using the current `#list-{id}-count` target contract.
-- [ ] Targeted delete/toggle pytest coverage for `tests/test_todos.py` and `tests/test_integration.py` remains green.
-- [ ] The client-side delete flow in `src/app/static/js/app.js` still removes the todo row with `swap: 'delete'`; no new client-side count math is introduced.
+- [x] Existing create/toggle count-update behavior continues to work and keeps using the current `#list-{id}-count` target contract.
+- [x] Targeted delete/toggle pytest coverage for `tests/test_todos.py` and `tests/test_integration.py` remains green.
+- [x] The client-side delete flow in `src/app/static/js/app.js` still removes the todo row with `swap: 'delete'`; no new client-side count math is introduced.
 
 ## Scenarios
 
@@ -140,15 +140,15 @@ file   | tests/conftest.py:71-77                        | Authenticated client f
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful todo deletes return an OOB sidebar count refresh from the server
+- [x] **TI01** Successful todo deletes return an OOB sidebar count refresh from the server
   - Follow the success-path pattern in `src/app/routes/todos.py:243-283` and reuse `src/app/templates/partials/todo_deleted_oob.html:1-2`; keep the current delete request target/swap contract in `src/app/static/js/app.js:163-173`.
   - **Verify**: `uv run pytest tests/test_todos.py::TestTodos::test_delete_todo_updates_sidebar_count -q` proves the response is `200`, the `Todo` row is removed from the database, the response body contains `hx-swap-oob`, and the badge value matches the remaining incomplete todo count.
 
-- [ ] **TI02** Delete-count semantics stay correct for completed and zero-state edge cases
+- [x] **TI02** Delete-count semantics stay correct for completed and zero-state edge cases
   - Reuse `_get_list_todo_count()` from `src/app/routes/todos.py:33-37` and the badge target contract from `src/app/templates/partials/todo_list_item.html:20`; this task depends on TI01's success-response shape.
   - **Verify**: `uv run pytest tests/test_todos.py::TestTodos::test_delete_completed_todo_keeps_sidebar_count tests/test_todos.py::TestTodos::test_delete_last_incomplete_todo_updates_sidebar_count_to_zero -q` proves completed deletes do not decrement the badge and deleting the last incomplete todo renders `0`.
 
-- [ ] **TI03** Regression coverage proves the HTMX delete flow aligns with existing OOB behavior and rejected deletes stay quiet
+- [x] **TI03** Regression coverage proves the HTMX delete flow aligns with existing OOB behavior and rejected deletes stay quiet
   - Mirror the toggle regression pattern at `tests/test_integration.py:163-179` and add a rejected-delete check without widening the route's current 403/404 contract; this task depends on TI01/TI02 response semantics.
   - **Verify**: `uv run pytest tests/test_integration.py::test_todo_delete_updates_count tests/test_todos.py::TestTodoAccess::test_cannot_delete_other_users_todo_does_not_emit_oob -q` proves successful deletes emit the badge update and rejected deletes do not contain `hx-swap-oob`.
 
@@ -174,11 +174,16 @@ file   | tests/conftest.py:71-77                        | Authenticated client f
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements
 
 ## Implementation Observations
 
-_No observations recorded yet._
+### Run: 2026-05-03T14:45:22+02:00
+#### NOTICED BUT NOT TOUCHING
+- `uv run pytest` full-suite currently has pre-existing failures in `tests/test_todos.py::TestTodos::test_create_todo` and `tests/test_todos.py::TestTodos::test_update_todo`; they are unrelated to `BUG-001`.
+- `ruff` is not installed in this environment, so no dedicated lint/type command is available here.
+- `dartclaw-ops`/`/dartclaw-review`/`/dartclaw-visual-validation-specialist` are unavailable in this environment, so those prescribed ops/review commands were executed manually via available tooling.
+- Non-scope findings surfaced during external review include unrelated defects in `docs/PRODUCT-BACKLOG.md` items (`BUG-002`, `BUG-003`, `BUG-004`) and CSRF concerns in `src/app/core/deps.py`; these are outside this FIS.
