@@ -21,6 +21,11 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"New Todo" in response.content
+        assert b"priority-low" in response.content
+        assert b"data-todo-priority=\"low\"" in response.content
+        assert b"variant=\"success\"" in response.content
+        assert b"list-%s-count" % test_list.id.encode() in response.content
+        assert b"hx-swap-oob=\"true\"" in response.content
 
         # Verify in database
         created = db_session.query(Todo).filter(Todo.title == "New Todo").first()
@@ -28,6 +33,37 @@ class TestTodos:
         assert created.list_id == test_list.id
         assert created.priority == "low"
         assert created.is_completed is False
+
+    def test_create_todo_then_update_priority(self, authenticated_client, test_list, db_session):
+        """Test quick-add then explicit priority override persists."""
+        created = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "Quick Todo",
+            },
+        )
+        assert created.status_code == 200
+
+        todo = db_session.query(Todo).filter(Todo.title == "Quick Todo").first()
+        assert todo is not None
+        assert todo.priority == "low"
+
+        response = authenticated_client.put(
+            f"/api/todos/{todo.id}",
+            data={
+                "title": "Quick Todo",
+                "note": "",
+                "due_date": "",
+                "priority": "high",
+            },
+        )
+        assert response.status_code == 200
+
+        db_session.refresh(todo)
+        assert todo.priority == "high"
+        assert b'data-todo-priority="high"' in response.content
+        assert b"variant=\"danger\"" in response.content
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
