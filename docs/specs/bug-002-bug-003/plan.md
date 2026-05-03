@@ -26,7 +26,7 @@
 _Both stories restore broken authenticated todo metadata flows without redesigning the HTMX-first UI. They can execute in parallel because the product behaviors are independent, but both specs call out the shared route and test hotspots for merge-safe coordination._
 
 #### [P] S01: Persist edited due dates
-**Status**: Spec Ready
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md`
 **Phase**: Phase 1: Defect restoration
 **Wave**: W1

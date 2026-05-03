@@ -11,7 +11,7 @@ Status: On Track
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| S01 | Spec Ready | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` | BUG-002 due-date persistence fix planned and ready for execution |
+| S01 | Done | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` | BUG-002 due-date persistence fix completed and merged in current remediation pass |
 | S02 | Spec Ready | `docs/specs/bug-002-bug-003/s02-apply-quick-add-default-priority.md` | BUG-003 quick-add priority default fix planned and ready for execution |
 
 ## Recently Completed
