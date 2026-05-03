@@ -14,7 +14,7 @@
 
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
-| S01 | Persist edited due dates | Defect restoration | W1 | - | [P] | Medium | Spec Ready | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` |
+| S01 | Persist edited due dates | Defect restoration | W1 | - | [P] | Medium | Done | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` |
 | S02 | Apply quick-add default priority | Defect restoration | W1 | - | [P] | Low | Spec Ready | `docs/specs/bug-002-bug-003/s02-apply-quick-add-default-priority.md` |
 
 > **Invariant**: each row's `FIS` path is unique - one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
