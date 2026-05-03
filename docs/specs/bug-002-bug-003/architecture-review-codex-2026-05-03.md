@@ -37,3 +37,7 @@ No new edges were introduced, and no cycles were added or exposed by this change
 
 ## 6) Recommendation Summary
 No architecture-level remediation is required for this plan delta. Continue monitoring for any future changes that introduce additional responsibilities into `todos.py` (e.g., parsing/validation policy, formatting policy, and persistence logic migration into separate services) if the route grows beyond current scope.
+
+## Remediation Status
+
+- **Findings triage for architecture review** — RESOLVED — No actionable findings above INFO were identified; behavior remains scoped to `src/app/routes/todos.py` and `tests/test_todos.py` with no cross-layer contract violations.

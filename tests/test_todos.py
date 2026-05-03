@@ -1,6 +1,6 @@
 """Tests for todo item routes."""
 
-from datetime import date, datetime, timezone
+from datetime import datetime
 
 import pytest
 
