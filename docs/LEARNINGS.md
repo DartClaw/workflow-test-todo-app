@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- Return a count OOB partial alongside `swap: 'delete'` todo deletions to keep sidebar counters in sync, because HTMX can remove the row target even when response target is otherwise absent.
 
 ## SQLAlchemy + SQLite
 
@@ -36,4 +36,4 @@
 
 <!-- Non-code knowledge: test prerequisites, agent workflow patterns, CI quirks. -->
 
-- _(none yet)_
+- Regression for OOB-delete behavior works best with route-response assertions (`hx-swap-oob`, list-id target) plus DB count checks in the same test, not browser-only checks.
