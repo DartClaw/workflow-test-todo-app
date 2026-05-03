@@ -135,3 +135,13 @@ Verify:
 ## NOTICED BUT NOT TOUCHING
 
 - `src/app/templates/partials/todo_deleted_oob.html` already exists but is not wired into `delete_todo()` today. This FIS uses that existing artifact rather than introducing a new partial.
+
+## Implementation Observations
+
+_This section records implementation observations and non-blocking notes.
+
+### Run: 2026-05-03 12:29 UTC — observations
+
+#### NOTICED BUT NOT TOUCHING
+- Pre-existing failures in tests/test_todos.py::test_create_todo and ::test_update_todo are existing defects and not introduced by this FIS.
+- Multiple high-priority findings reported by dartclaw-review are pre-existing defects outside BUG-001 scope.

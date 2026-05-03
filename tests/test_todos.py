@@ -1,5 +1,7 @@
 """Tests for todo item routes."""
 
+from uuid import uuid4
+import re
 from datetime import date, datetime, timezone
 
 import pytest
@@ -9,6 +11,16 @@ from app.database import Todo
 
 class TestTodos:
     """Tests for todo CRUD operations."""
+
+    def _extract_oob_count(self, response, list_id):
+        """Extract OOB sidebar count from a delete/toggle response."""
+        content = response.content.decode()
+        match = re.search(
+            rf'id="list-{list_id}-count" hx-swap-oob="true">(\d+)</span>',
+            content,
+        )
+        assert match is not None
+        return int(match.group(1))
 
     def test_create_todo(self, authenticated_client, test_list, db_session):
         """Test creating a new todo."""
@@ -87,9 +99,54 @@ class TestTodos:
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
 
+        count = self._extract_oob_count(response, test_todo.list_id)
+        assert count == 0
+
+        # Out-of-band response updates sidebar count
+        assert b"hx-swap-oob" in response.content
+
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_incomplete_todo_updates_sidebar_count(
+        self, authenticated_client, test_todo, test_list, db_session
+    ):
+        """Test deleting incomplete todo decrements sidebar count."""
+        db_session.add(Todo(list_id=test_list.id, title="Remaining", position=1))
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 200
+
+        count = self._extract_oob_count(response, test_list.id)
+        assert count == 1
+
+    def test_delete_completed_todo_keeps_sidebar_count(self, authenticated_client, test_todo, test_list, db_session):
+        """Test deleting completed todo keeps count unchanged."""
+        test_todo.is_completed = True
+        test_todo.completed_at = datetime.now(timezone.utc)
+        db_session.add(test_todo)
+        db_session.commit()
+
+        db_session.add(Todo(list_id=test_list.id, title="Incomplete", position=1))
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 200
+
+        count = self._extract_oob_count(response, test_list.id)
+        assert count == 1
+
+    def test_delete_last_incomplete_todo_sets_sidebar_count_to_zero(
+        self, authenticated_client, test_todo
+    ):
+        """Test deleting final incomplete todo renders zero count in OOB badge."""
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 200
+
+        count = self._extract_oob_count(response, test_todo.list_id)
+        assert count == 0
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
@@ -232,3 +289,26 @@ class TestTodoAccess:
             data={"title": "Hacked!"},
         )
         assert response.status_code == 403
+
+    def test_cannot_delete_other_users_todo(self, client, test_todo, db_session):
+        """Test users cannot delete other users' todos."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        other_user = User(email="other-delete@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        session_id = create_session(other_user.id)
+        client.cookies.set("session_id", session_id)
+
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+
+        still_there = db_session.query(Todo).filter(Todo.id == test_todo.id).first()
+        assert still_there is not None
+
+    def test_delete_missing_todo_raises_404(self, authenticated_client):
+        """Test deleting a missing todo keeps current failure behavior."""
+        response = authenticated_client.delete(f"/api/todos/{uuid4()}")
+        assert response.status_code == 404
