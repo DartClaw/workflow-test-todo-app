@@ -41,9 +41,9 @@ Restore reliable due-date persistence for the existing authenticated todo edit f
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] Saving a valid date from the existing edit dialog stores it, re-renders the todo row with the visible date, and preserves `data-todo-due-date="YYYY-MM-DD"` for reopen.
-- [ ] Reopening a todo after a saved due date shows the same date already populated, and later edits to other fields do not clear the stored due date.
-- [ ] Submitting a blank due date clears the stored value, while submitting an invalid due-date value does not return a misleading success row update.
+- [x] Saving a valid date from the existing edit dialog stores it, re-renders the todo row with the visible date, and preserves `data-todo-due-date="YYYY-MM-DD"` for reopen.
+- [x] Reopening a todo after a saved due date shows the same date already populated, and later edits to other fields do not clear the stored due date.
+- [x] Submitting a blank due date clears the stored value, while submitting an invalid due-date value does not return a misleading success row update.
 
 ### Health Metrics (Must NOT Regress)
 - [ ] Existing authenticated todo route tests remain green after the fix.
@@ -131,15 +131,15 @@ file   | tests/test_todos.py:44-62               | Current update test pattern t
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo updates accept and persist the existing date-only due-date value
+- [x] **TI01** Todo updates accept and persist the existing date-only due-date value
   - Follow the validation and partial-response pattern in `src/app/routes/todos.py:169-247`; align parsing with the date-only values already produced by `format_date_input(...)` in `src/app/utils.py:24-31`.
   - **Verify**: `uv run pytest tests/test_todos.py -k "update_todo and due_date"` proves a PUT with `due_date=2025-12-31` stores the date and re-renders the row with `data-todo-due-date="2025-12-31"`
 
-- [ ] **TI02** Reopened edit dialogs and later non-date edits preserve the stored due date
+- [x] **TI02** Reopened edit dialogs and later non-date edits preserve the stored due date
   - Follow the row-to-dialog hydration contract in `src/app/templates/partials/todo_item.html:1-40` and `src/app/static/js/app.js:111-124`; this task depends on TI01's persisted date format.
   - **Verify**: `uv run pytest tests/test_todos.py -k "reopen or preserve_due_date"` proves the returned row carries the same `data-todo-due-date` after save and after a later title-or-note-only edit
 
-- [ ] **TI03** Blank and invalid due-date submissions follow explicit clear-or-error behavior
+- [x] **TI03** Blank and invalid due-date submissions follow explicit clear-or-error behavior
   - Reuse the existing HTML error partial pattern already used for title validation in `src/app/routes/todos.py:200-213`; this task depends on TI01's date-only contract.
   - **Verify**: `uv run pytest tests/test_todos.py -k "clear_due_date or invalid_due_date"` proves blank input clears the date while an unsupported value returns the HTML error path and leaves the prior stored date unchanged
 
@@ -162,10 +162,10 @@ file   | tests/test_todos.py:44-62               | Current update test pattern t
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements
 
 
 ## Implementation Observations

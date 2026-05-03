@@ -61,6 +61,85 @@ class TestTodos:
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
 
+        assert b"Dec 31, 2025" in response.content
+        assert b'data-todo-due-date="2025-12-31"' in response.content
+
+        reopen_response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert reopen_response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in reopen_response.content
+
+    def test_update_todo_keeps_existing_due_date_when_unchanged(self, authenticated_client, test_todo, db_session):
+        """Test updating a todo without changing the due date keeps it set."""
+        # seed an existing due date
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+        db_session.refresh(test_todo)
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Edited title only",
+                "note": "Updated note",
+                "due_date": "2025-12-31",
+                "priority": "medium",
+            },
+        )
+        assert response.status_code == 200
+
+        db_session.refresh(test_todo)
+        assert test_todo.title == "Edited title only"
+        assert test_todo.due_date is not None
+        assert test_todo.due_date.year == 2025
+        assert test_todo.due_date.month == 12
+        assert test_todo.due_date.day == 31
+        assert b'data-todo-due-date="2025-12-31"' in response.content
+
+    def test_update_todo_clear_due_date(self, authenticated_client, test_todo, db_session):
+        """Test updating a todo with a blank due date clears it."""
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+        db_session.refresh(test_todo)
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Cleared date",
+                "note": "Updated note",
+                "due_date": "",
+                "priority": "low",
+            },
+        )
+        assert response.status_code == 200
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
+        assert b'data-todo-due-date=""' in response.content
+        assert b'<span class="todo-due-date' not in response.content
+
+    def test_update_todo_invalid_due_date_keeps_previous_value(self, authenticated_client, test_todo, db_session):
+        """Test updating with invalid due date returns an error and keeps stored date."""
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+        db_session.refresh(test_todo)
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Invalid date",
+                "note": "Updated note",
+                "due_date": "12/31/2025",
+                "priority": "low",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Invalid due date format" in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is not None
+        assert test_todo.due_date.year == 2025
+        assert test_todo.due_date.month == 12
+        assert test_todo.due_date.day == 31
+
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
         assert test_todo.is_completed is False
