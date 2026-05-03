@@ -24,9 +24,9 @@ BUG-001 closes the gap between todo completion and todo deletion so the sidebar 
 
 ## Success Criteria (Must Be TRUE)
 
-- [ ] Deleting an incomplete `Todo` updates `#list-{list_id}-count` in the same HTMX interaction that removes `#todo-{todo_id}`, with no full page reload.
-- [ ] Deleting a completed `Todo` or the last remaining incomplete `Todo` keeps the sidebar badge correct by recomputing the post-delete incomplete count, including rendering `0` when appropriate.
-- [ ] Successful todo delete stays aligned with the app's HTML-partial/OOB conventions and preserves current not-found / unauthorized behavior instead of introducing JSON or client-side count math.
+- [x] Deleting an incomplete `Todo` updates `#list-{list_id}-count` in the same HTMX interaction that removes `#todo-{todo_id}`, with no full page reload.
+- [x] Deleting a completed `Todo` or the last remaining incomplete `Todo` keeps the sidebar badge correct by recomputing the post-delete incomplete count, including rendering `0` when appropriate.
+- [x] Successful todo delete stays aligned with the app's HTML-partial/OOB conventions and preserves current not-found / unauthorized behavior instead of introducing JSON or client-side count math.
 
 ### Health Metrics (Must NOT Regress)
 
@@ -123,15 +123,15 @@ file   | tests/test_integration.py:163-179             | Existing OOB regression
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful todo delete returns the post-delete incomplete count as an HTMX OOB update
+- [x] **TI01** Successful todo delete returns the post-delete incomplete count as an HTMX OOB update
   - Reuse `_get_list_todo_count()` and the `toggle_todo` response pattern at `src/app/routes/todos.py:33-37` and `src/app/routes/todos.py:243-283`; render `src/app/templates/partials/todo_deleted_oob.html:1-2` for successful deletes while keeping current `403` / `404` branches.
   - **Verify**: `uv run pytest tests/test_todos.py::TestTodos::test_delete_todo_includes_oob_count_update` proves a successful delete returns `200` HTML containing `hx-swap-oob` and `id="list-{list_id}-count"` with the decremented incomplete count, and the deleted `Todo` no longer exists in the database.
 
-- [ ] **TI02** Todo delete keeps sidebar counts correct for zero-count and completed-todo boundaries
+- [x] **TI02** Todo delete keeps sidebar counts correct for zero-count and completed-todo boundaries
   - Stay compatible with `src/app/static/js/app.js:166-173` and the sidebar badge contract at `src/app/templates/partials/todo_list_item.html:20`; if TI01's server response is not enough for HTMX to process the OOB fragment, make the smallest client adjustment that preserves targeted row removal.
   - **Verify**: `uv run pytest tests/test_integration.py::TestUserJourneys::test_delete_incomplete_todo_updates_count tests/test_integration.py::TestUserJourneys::test_delete_completed_todo_keeps_count` proves deleting the last incomplete todo renders `0`, and deleting a completed todo keeps the badge value unchanged.
 
-- [ ] **TI03** Regression coverage preserves rejection-path behavior and the reference OOB contract
+- [x] **TI03** Regression coverage preserves rejection-path behavior and the reference OOB contract
   - Extend the current delete/toggle coverage at `tests/test_todos.py:64-92`, `tests/test_integration.py:163-179`, and fixture setup at `tests/conftest.py:71-113`; missing or unauthorized deletes must not masquerade as successful count updates.
   - **Verify**: `uv run pytest tests/test_todos.py::TestTodoAccess::test_cannot_delete_other_users_todo tests/test_todos.py::TestTodos::test_delete_missing_todo_returns_404` proves rejection responses keep `403` / `404` behavior and do not include `hx-swap-oob`.
 
@@ -156,11 +156,13 @@ file   | tests/test_integration.py:163-179             | Existing OOB regression
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements
 
 ## Implementation Observations
 
-_No observations recorded yet._
+#### NOTICED BUT NOT TOUCHING
+- tests/test_todos.py:29-30: `test_create_todo` expects `created.priority` to be `"low"` after creation, but newly created todos can persist `None` with current model defaults; pre-existing failure.
+- tests/test_todos.py:61: `test_update_todo` expects `due_date.year == 2025` for `due_date='2025-12-31'`, but update route parses only `%Y-%m-%dT%H:%M`; pre-existing failure.

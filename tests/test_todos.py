@@ -81,15 +81,24 @@ class TestTodos:
         assert test_todo.is_completed is False
         assert test_todo.completed_at is None
 
-    def test_delete_todo(self, authenticated_client, test_todo, db_session):
-        """Test deleting a todo."""
+    def test_delete_todo_includes_oob_count_update(self, authenticated_client, test_todo, db_session):
+        """Test todo delete returns OOB count update."""
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert f'id="list-{test_todo.list_id}-count"'.encode() in response.content
+        assert b">0<" in response.content
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_missing_todo_returns_404(self, authenticated_client):
+        """Test deleting a missing todo returns not found."""
+        response = authenticated_client.delete("/api/todos/missing-todo")
+        assert response.status_code == 404
+        assert b"hx-swap-oob" not in response.content
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
@@ -211,6 +220,25 @@ class TestTodoAccess:
         # Try to access the todo
         response = client.get(f"/api/todos/{test_todo.id}")
         assert response.status_code == 403
+
+    def test_cannot_delete_other_users_todo(self, client, test_todo, db_session):
+        """Test users cannot delete other users' todos."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        # Create another user
+        other_user = User(email="other@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        # Authenticate as other user
+        session_id = create_session(other_user.id)
+        client.cookies.set("session_id", session_id)
+
+        # Try to delete the todo
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+        assert b"hx-swap-oob" not in response.content
 
     def test_cannot_modify_other_users_todo(self, client, test_todo, db_session):
         """Test users cannot modify other users' todos."""

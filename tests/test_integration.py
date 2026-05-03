@@ -178,6 +178,49 @@ class TestUserJourneys:
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
 
+    def test_delete_incomplete_todo_updates_count(self, authenticated_client, test_list, db_session):
+        """Test that deleting an incomplete todo updates list count via OOB swap."""
+        todo = Todo(
+            list_id=test_list.id,
+            title="Delete Count Todo",
+            is_completed=False,
+            position=0,
+        )
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{todo.id}")
+        assert response.status_code == 200
+
+        # Response should include OOB swap and render a zero count
+        assert b"hx-swap-oob" in response.content
+        assert f'id="list-{test_list.id}-count"'.encode() in response.content
+        assert b">0<" in response.content
+
+    def test_delete_completed_todo_keeps_count(self, authenticated_client, test_list, db_session):
+        """Test that deleting a completed todo keeps sidebar count unchanged."""
+        incomplete = Todo(
+            list_id=test_list.id,
+            title="Remaining Incomplete Todo",
+            position=0,
+        )
+        completed = Todo(
+            list_id=test_list.id,
+            title="Completed Todo",
+            is_completed=True,
+            position=1,
+        )
+        db_session.add_all([incomplete, completed])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed.id}")
+        assert response.status_code == 200
+
+        # Response should include OOB swap and keep count at 1
+        assert b"hx-swap-oob" in response.content
+        assert f'id="list-{test_list.id}-count"'.encode() in response.content
+        assert b">1<" in response.content
+
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""
         # Create todos with different titles
