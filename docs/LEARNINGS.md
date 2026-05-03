@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- In delete flows, if the deleted row is removed client-side, still return an OOB badge update for the sidebar count so HTMX can refresh server-truth counters in the same interaction.
 
 ## SQLAlchemy + SQLite
 
