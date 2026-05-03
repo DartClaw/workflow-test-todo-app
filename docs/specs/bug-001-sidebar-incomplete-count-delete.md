@@ -28,10 +28,10 @@ Fix the `BUG-001` regression where deleting a Todo removes the row but leaves th
 - `docs/guidelines/CRITICAL-RULES-AND-GUARDRAILS.md#core-behavioral-rules` – UI changes must be verified visually and backed by actual validation.
 
 ## Success Criteria (Must Be TRUE)
-- [ ] Deleting an incomplete Todo updates the sidebar incomplete-count for that TodoList in the same HTMX response, with no full page reload.
-- [ ] Deleting a completed Todo leaves the sidebar incomplete-count unchanged while still removing the Todo from the UI and database.
-- [ ] Todo delete authorization and not-found behavior remain unchanged: unauthorized deletes still return `403`, missing Todos still return `404`, and neither path emits a misleading count update.
-- [ ] Automated tests prove the delete response contains the expected OOB swap markup and the count values are correct for incomplete and completed delete cases.
+- [x] Deleting an incomplete Todo updates the sidebar incomplete-count for that TodoList in the same HTMX response, with no full page reload.
+- [x] Deleting a completed Todo leaves the sidebar incomplete-count unchanged while still removing the Todo from the UI and database.
+- [x] Todo delete authorization and not-found behavior remain unchanged: unauthorized deletes still return `403`, missing Todos still return `404`, and neither path emits a misleading count update.
+- [x] Automated tests prove the delete response contains the expected OOB swap markup and the count values are correct for incomplete and completed delete cases.
 
 ### Health Metrics (Must NOT Regress)
 - [ ] Existing todo CRUD and access-control tests continue to pass.
@@ -116,15 +116,15 @@ file   | tests/test_todos.py:84-92                 | Existing delete coverage to
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful Todo deletes emit the same server-authoritative incomplete-count contract used by other Todo mutations
+- [x] **TI01** Successful Todo deletes emit the same server-authoritative incomplete-count contract used by other Todo mutations
   - Update the successful delete path in `src/app/routes/todos.py:286-306` to recompute the incomplete-count after commit and return a rendered partial, preserving the current `403` / `404` response branches unchanged; follow the count pattern at `src/app/routes/todos.py:125-132` and `src/app/routes/todos.py:276-283`.
   - **Verify**: `uv run pytest tests/test_todos.py -k "delete_todo"` proves successful delete responses return HTTP 200 and include `hx-swap-oob="true"` with the correct `list-{list_id}-count` value while unauthorized/missing deletes still return 403/404.`
 
-- [ ] **TI02** The delete response uses the existing sidebar OOB fragment without changing the client-side delete interaction
+- [x] **TI02** The delete response uses the existing sidebar OOB fragment without changing the client-side delete interaction
   - Reuse the existing partial contract at `src/app/templates/partials/todo_deleted_oob.html:1-2` or an equivalent server-rendered fragment that targets `src/app/templates/partials/todo_list_item.html:20`; do not change `src/app/static/js/app.js:166-173`.
   - **Verify**: `Response-body assertions show successful delete responses contain `<span id="list-{list_id}-count" hx-swap-oob="true">` and no JavaScript changes are required for the badge to refresh.`
 
-- [ ] **TI03** Regression coverage proves count correctness for incomplete and completed delete cases
+- [x] **TI03** Regression coverage proves count correctness for incomplete and completed delete cases
   - Extend `tests/test_todos.py:84-92` with delete-focused cases that distinguish incomplete from completed Todos and assert both database deletion and exact OOB count output; use authenticated fixtures from `tests/conftest.py:70-113`.
   - **Verify**: `uv run pytest tests/test_todos.py` passes with cases that fail if an incomplete delete does not decrement the count or a completed delete incorrectly changes it.`
 

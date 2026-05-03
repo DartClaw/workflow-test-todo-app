@@ -87,8 +87,40 @@ class TestTodos:
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
 
+        # Ensure sidebar count is updated via OOB swap markup
+        assert b'hx-swap-oob="true"' in response.content
+        assert f'<span id="list-{test_todo.list_id}-count">0</span>'.encode() in response.content
+
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
+        assert deleted is None
+
+    def test_delete_completed_todo_keeps_sidebar_count(self, authenticated_client, db_session, test_list):
+        """Deleting a completed todo keeps the incomplete count unchanged."""
+        incomplete_todo = Todo(
+            list_id=test_list.id,
+            title="Incomplete",
+            is_completed=False,
+            position=0,
+        )
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed",
+            is_completed=True,
+            position=1,
+        )
+        db_session.add_all([incomplete_todo, completed_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert b'hx-swap-oob="true"' in response.content
+        assert (
+            f'<span id="list-{test_list.id}-count">1</span>'.encode()
+            in response.content
+        )
+
+        deleted = db_session.query(Todo).filter(Todo.id == completed_todo.id).first()
         assert deleted is None
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
@@ -232,3 +264,27 @@ class TestTodoAccess:
             data={"title": "Hacked!"},
         )
         assert response.status_code == 403
+
+    def test_cannot_delete_other_users_todo(self, client, test_todo, db_session):
+        """Test users cannot delete other users' todos."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        # Create another user
+        other_user = User(email="other@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        # Authenticate as first user fixture still uses test_user
+        session_id = create_session(other_user.id)
+        client.cookies.set("session_id", session_id)
+
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+        assert b"hx-swap-oob=\"true\"" not in response.content
+
+    def test_delete_missing_todo_returns_404(self, authenticated_client):
+        """Test deleting non-existent todo returns 404."""
+        response = authenticated_client.delete("/api/todos/00000000-0000-0000-0000-000000000000")
+        assert response.status_code == 404
+        assert b"hx-swap-oob=\"true\"" not in response.content
