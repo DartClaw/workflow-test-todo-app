@@ -53,6 +53,7 @@ class TestTodos:
             },
         )
         assert response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in response.content
 
         # Verify in database
         db_session.refresh(test_todo)
@@ -60,6 +61,121 @@ class TestTodos:
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
+
+    def test_update_todo_reopen_shows_persisted_due_date(self, authenticated_client, test_todo):
+        """Test updating due date persists and is visible on reopen."""
+        update_response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Updated Title",
+                "due_date": "2025-12-31",
+                "priority": "low",
+            },
+        )
+        assert update_response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in update_response.content
+
+        reopen_response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert reopen_response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in reopen_response.content
+
+    def test_update_todo_due_date_accepts_trimmed_input(self, authenticated_client, test_todo, db_session):
+        """Test due dates are normalized before parsing."""
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Updated Title",
+                "due_date": " 2025-12-31 ",
+                "priority": "low",
+            },
+        )
+        assert response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date.year == 2025
+
+    def test_update_todo_clear_due_date(self, authenticated_client, db_session, test_list):
+        """Test clearing an existing due date persists as empty."""
+        todo = Todo(
+            list_id=test_list.id,
+            title="Todo with due date",
+            note="note",
+            due_date=datetime(2025, 12, 31),
+            priority="medium",
+            position=1,
+        )
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{todo.id}",
+            data={
+                "title": "Todo with due date",
+                "due_date": "",
+                "priority": "medium",
+            },
+        )
+        assert response.status_code == 200
+        assert b'data-todo-due-date=""' in response.content
+
+        db_session.refresh(todo)
+        assert todo.due_date is None
+
+    def test_update_todo_invalid_due_date_rejected_and_preserves_previous(self, authenticated_client, db_session, test_list):
+        """Test invalid due date input does not update due date and returns visible error."""
+        todo = Todo(
+            list_id=test_list.id,
+            title="Todo with valid due date",
+            due_date=datetime(2025, 12, 31),
+            priority="medium",
+            position=1,
+        )
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{todo.id}",
+            data={
+                "title": "Attempted updated title",
+                "due_date": "2025-31-99",
+                "priority": "medium",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Due date must use YYYY-MM-DD format" in response.content
+        assert b'data-todo-id="' not in response.content
+
+        db_session.refresh(todo)
+        assert todo.due_date == datetime(2025, 12, 31)
+        assert todo.title == "Todo with valid due date"
+
+    def test_update_todo_datetime_local_due_date_is_rejected(self, authenticated_client, db_session, test_list):
+        """Test datetime-local due date format is rejected as unsupported."""
+        todo = Todo(
+            list_id=test_list.id,
+            title="Todo with valid due date",
+            due_date=datetime(2025, 12, 31),
+            priority="medium",
+            position=1,
+        )
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{todo.id}",
+            data={
+                "title": "Todo with valid due date",
+                "due_date": "2025-12-31T08:30",
+                "priority": "medium",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Due date must use YYYY-MM-DD format" in response.content
+        assert b'data-todo-id="' not in response.content
+
+        db_session.refresh(todo)
+        assert todo.due_date == datetime(2025, 12, 31)
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""

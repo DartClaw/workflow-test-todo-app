@@ -16,6 +16,7 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S01** (2026-05-04): Persisted edited todo due dates through valid saves, preserved cleared/invalid paths, and added regression coverage in `tests/test_todos.py`.
 
 ## Blockers
 

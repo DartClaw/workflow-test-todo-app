@@ -45,11 +45,11 @@ Restore trust in Todo due-date editing by making the edit dialog's date input ro
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] Saving a valid `YYYY-MM-DD` Due Date from the edit dialog persists that date on the Todo and returns the normal updated todo-row partial.
-- [ ] Reopening the same Todo after save shows the persisted Due Date in the row dataset and edit dialog without requiring any client-side correction.
-- [ ] Clearing the Due Date and saving persists `None`, and the reopened edit dialog shows an empty Due Date field.
-- [ ] Submitting an invalid or unsupported Due Date swaps the form target with `partials/error.html`, keeps the dialog open, shows the exact message `Due date must use YYYY-MM-DD format`, and does not render a success-looking todo row.
-- [ ] An invalid Due Date submission preserves the previously saved valid Due Date in storage.
+- [x] Saving a valid `YYYY-MM-DD` Due Date from the edit dialog persists that date on the Todo and returns the normal updated todo-row partial.
+- [x] Reopening the same Todo after save shows the persisted Due Date in the row dataset and edit dialog without requiring any client-side correction.
+- [x] Clearing the Due Date and saving persists `None`, and the reopened edit dialog shows an empty Due Date field.
+- [x] Submitting an invalid or unsupported Due Date swaps the form target with `partials/error.html`, keeps the dialog open, shows the exact message `Due date must use YYYY-MM-DD format`, and does not render a success-looking todo row.
+- [x] An invalid Due Date submission preserves the previously saved valid Due Date in storage.
 
 ### Health Metrics (Must NOT Regress)
 - [ ] Existing todo create/update route tests continue to pass.
@@ -136,17 +136,17 @@ file   | tests/test_todos.py:44-62                 | Existing todo update test s
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo updates accept the edit dialog's valid Due Date format and persist it consistently
+- [x] **TI01** Todo updates accept the edit dialog's valid Due Date format and persist it consistently
   - Follow the existing update-path pattern at `src/app/routes/todos.py:169-233`; keep the route HTML-partial based and limit the change to Due Date parsing/clearing behavior.
-  - **Verify**: `Test: PUT /api/todos/{id} with due_date=2025-12-31 returns 200, persists the Due Date, and the rendered row contains data-todo-due-date="2025-12-31"`
+  - **Verify**: `Test: PUT /api/todos/{id} with due_date=2025-12-31 returns 200, persists the Due Date, and the rendered row contains data-todo-due-date="2025-12-31"` ✅
 
-- [ ] **TI02** Invalid Due Date submissions fail visibly and preserve the prior stored value
+- [x] **TI02** Invalid Due Date submissions fail visibly and preserve the prior stored value
   - Reuse the validation-failure response shape already used in `src/app/routes/todos.py`; on this path the dialog stays open and the form target is replaced by `partials/error.html` showing `Due date must use YYYY-MM-DD format`. Depends on TI01 keeping valid parsing behavior isolated from invalid-input handling.
-  - **Verify**: `Test: PUT /api/todos/{id} with malformed due_date returns the error partial containing Due date must use YYYY-MM-DD format, does not render the todo row as success, and leaves the previously stored Due Date unchanged`
+  - **Verify**: `Test: PUT /api/todos/{id} with malformed due_date returns the error partial containing Due date must use YYYY-MM-DD format, does not render the todo row as success, and leaves the previously stored Due Date unchanged` ✅
 
-- [ ] **TI03** Regression coverage proves save, clear, reopen-state, and invalid-input behavior
+- [x] **TI03** Regression coverage proves save, clear, reopen-state, and invalid-input behavior
   - Extend `tests/test_todos.py` using the existing route-test style; assert both DB state and rendered HTML dataset because reopen behavior is driven from the row partial.
-  - **Verify**: `Test suite covers valid Due Date save, Due Date clear-to-empty, and invalid-input preservation without breaking existing todo update assertions`
+  - **Verify**: `Test suite covers valid Due Date save, Due Date clear-to-empty, and invalid-input preservation without breaking existing todo update assertions` ✅
 
 ### Testing Strategy
 - [TI01] Scenario: Save and reopen a valid Due Date → route test that updates a Todo, checks DB persistence, and asserts `data-todo-due-date="2025-12-31"` in the returned row
@@ -167,8 +167,8 @@ file   | tests/test_todos.py:44-62                 | Existing todo update test s
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
 - [ ] **No regressions** or breaking changes introduced
 - [ ] **UI verified** to match requirements (if applicable)
 
