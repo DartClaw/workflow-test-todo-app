@@ -1,5 +1,6 @@
 """Tests for todo item routes."""
 
+import re
 from datetime import date, datetime, timezone
 
 import pytest
@@ -40,6 +41,66 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"required" in response.content
+
+    def test_quick_add_priority_row_render(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Test quick add renders row with low-priority state."""
+        response = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "Priority test",
+            },
+        )
+        assert response.status_code == 200
+        assert b'priority-low' in response.content
+        assert b'data-todo-priority="low"' in response.content
+        assert re.search(rb">\s*Low\s*</sl-badge>", response.content)
+
+    def test_quick_add_reopen_priority_preload(
+        self, authenticated_client, test_list
+    ):
+        """Test quick add stores low priority for edit dialog preload."""
+        response = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "Reopen test",
+            },
+        )
+        assert response.status_code == 200
+        assert b"data-todo-priority=\"low\"" in response.content
+
+    def test_quick_add_oob_count_update(self, authenticated_client, test_list):
+        """Test quick add keeps OOB incomplete count update marker."""
+        response = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "OOB count test",
+            },
+        )
+        assert response.status_code == 200
+        assert f'<span id="list-{test_list.id}-count"'.encode() in response.content
+        assert b'hx-swap-oob="true">' in response.content
+
+    def test_quick_add_stays_title_validation_error(self, authenticated_client, test_list, db_session):
+        """Test quick add rejects blank titles and creates no todo."""
+        before_count = db_session.query(Todo).filter(Todo.list_id == test_list.id).count()
+
+        response = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "",
+            },
+        )
+        assert response.status_code == 200
+        assert b"required" in response.content
+
+        after_count = db_session.query(Todo).filter(Todo.list_id == test_list.id).count()
+        assert before_count == after_count
 
     def test_update_todo(self, authenticated_client, test_todo, db_session):
         """Test updating a todo."""

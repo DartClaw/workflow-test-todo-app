@@ -18,7 +18,7 @@
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
 | S01 | Persist Edited Due Dates | Defect Correction | W1 | - | [P] | Medium | Done | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md` |
-| S02 | Apply Default Priority on Quick Add | Defect Correction | W1 | - | [P] | Medium | Spec Ready | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` |
+| S02 | Apply Default Priority on Quick Add | Defect Correction | W1 | - | [P] | Medium | Done | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` |
 
 > **Invariant**: each row's `FIS` path is unique – one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
 
@@ -52,7 +52,7 @@ _Parallel execution is acceptable because the stories address separate user outc
 
 <a id="story-s02"></a>
 #### [P] S02: Apply Default Priority on Quick Add
-**Status**: Spec Ready
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md`
 **Phase**: Phase 1: Defect Correction
 **Wave**: W1
@@ -61,11 +61,11 @@ _Parallel execution is acceptable because the stories address separate user outc
 **Risk**: Medium - touches the quick-add create path in the same route module and must preserve insertion order, validation, and OOB count updates while assigning default priority consistently.
 **Scope**: Fix the quick-add todo creation flow so title-only submissions persist `low` as the default Priority immediately and every downstream render path reflects that stored value. Include route-level regression coverage for created records and edit-dialog reopen state. Exclude due-date parsing changes, new quick-add fields, and any change to the priority taxonomy.
 **Acceptance Criteria**:
-- [ ] Creating a Todo through quick add with only a title stores Priority `low` on the created record.
-- [ ] The rendered todo row exposes priority data and visual state consistent with a `low` priority Todo immediately after creation.
-- [ ] Reopening a quick-added Todo in the edit dialog shows `low` selected until the user changes it.
-- [ ] Existing quick-add validation, Position ordering, ownership checks, and incomplete-count OOB behavior remain unchanged.
-- [ ] Route-level regression tests prove the default-priority behavior without depending on S01's due-date fix.
+- [x] Creating a Todo through quick add with only a title stores Priority `low` on the created record.
+- [x] The rendered todo row exposes priority data and visual state consistent with a `low` priority Todo immediately after creation.
+- [x] Reopening a quick-added Todo in the edit dialog shows `low` selected until the user changes it.
+- [x] Existing quick-add validation, Position ordering, ownership checks, and incomplete-count OOB behavior remain unchanged.
+- [x] Route-level regression tests prove the default-priority behavior without depending on S01's due-date fix.
 **Key Scenarios**:
 - Happy: user quick-adds a title-only Todo and sees `low` reflected on the row and in the edit dialog.
 - Edge: multiple quick-add submissions all persist `low` while keeping append order intact.

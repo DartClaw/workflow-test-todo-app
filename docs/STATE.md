@@ -12,9 +12,11 @@ Status: On Track
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
 | S01 | Completed | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md` | BUG-002 due-date persistence fix implemented; edited date-only values now persist correctly |
-| S02 | Spec Ready | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` | BUG-003 quick-add default-priority fix planned and specced |
+| S02 | Completed | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` | BUG-003 quick-add now persists default `low` priority and preserves the existing OOB/count behavior |
 
 ## Recently Completed
+
+- **Bug Fix Execution** (2026-05-04): Story `S02` completed for `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` — quick-add now persists default `low` priority and validates unchanged OOB/count/error behavior.
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 - **Story completed** (2026-05-04): S01 Persist Edited Due Dates completed; update flow now persists date-only edit values and preserves dialog preload behavior.

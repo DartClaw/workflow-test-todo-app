@@ -41,10 +41,10 @@ Fix the quick-add flow so title-only todo creation persists the documented defau
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] A `POST /api/todos` quick-add submission with only `list_id` and `title` stores `Todo.priority == "low"` on the new record.
-- [ ] The returned quick-add partial immediately renders row state consistent with a low-priority Todo, including row data attributes and badge output used by later interactions.
-- [ ] Reopening a quick-added Todo through the existing row-to-dialog preload path shows `low` selected in the edit dialog without any fallback-only browser behavior.
-- [ ] Title validation, list ownership checks, append ordering, and OOB incomplete-count updates stay unchanged.
+- [x] A `POST /api/todos` quick-add submission with only `list_id` and `title` stores `Todo.priority == "low"` on the new record.
+- [x] The returned quick-add partial immediately renders row state consistent with a low-priority Todo, including row data attributes and badge output used by later interactions.
+- [x] Reopening a quick-added Todo through the existing row-to-dialog preload path shows `low` selected in the edit dialog without any fallback-only browser behavior.
+- [x] Title validation, list ownership checks, append ordering, and OOB incomplete-count updates stay unchanged.
 
 ### Health Metrics (Must NOT Regress)
 - [ ] Existing create-todo coverage remains green and grows stronger rather than moving to a new API shape.
@@ -124,19 +124,19 @@ file   | tests/test_todos.py:13-30               | Existing create-todo regressi
 
 ### Implementation Tasks
 
-- [ ] **TI01** Title-only quick-add submissions persist `priority="low"` on the new `Todo`
+- [x] **TI01** Title-only quick-add submissions persist `priority="low"` on the new `Todo`
   - Follow the existing create flow at `src/app/routes/todos.py:73-132`; keep access checks, title validation, and position assignment unchanged while setting the create-time priority default
   - **Verify**: `uv run pytest tests/test_todos.py -k "test_create_todo"` passes with assertions that the created Todo stores priority == "low"`
 
-- [ ] **TI02** The returned quick-add row partial exposes low-priority render state immediately after creation
+- [x] **TI02** The returned quick-add row partial exposes low-priority render state immediately after creation
   - Use the row contract at `src/app/templates/partials/todo_item.html:1-32`; this task depends on TI01 producing authoritative stored priority so the badge, CSS class, and `data-todo-priority` all reflect `low`
   - **Verify**: `uv run pytest tests/test_todos.py -k "quick_add_priority_render"` passes with response assertions for `priority-low`, `data-todo-priority="low"`, and visible `Low` badge content`
 
-- [ ] **TI03** Reopening a quick-added Todo shows `low` selected in the edit dialog preload path
+- [x] **TI03** Reopening a quick-added Todo shows `low` selected in the edit dialog preload path
   - Reuse the selector contract in `src/app/templates/app.html:142-148` and the JS preload path in `src/app/static/js/app.js:111-118`; no new client-side fallback should be needed once stored state is correct
   - **Verify**: `uv run pytest tests/test_todos.py -k "quick_add_priority_reopen"` passes with response assertions that the created row carries the exact preload data value consumed by the dialog`
 
-- [ ] **TI04** Quick-add validation and OOB behavior remain unchanged while stronger regression coverage lands
+- [x] **TI04** Quick-add validation and OOB behavior remain unchanged while stronger regression coverage lands
   - Keep the empty-title error path and `partials/todo_item_with_oob.html` response shape from `src/app/routes/todos.py:92-132`; this task depends on TI01-TI03 not widening the route contract
   - **Verify**: `uv run pytest tests/test_todos.py -k "create_todo_empty_title or quick_add_oob"` passes with assertions that blank titles still fail and successful quick add still includes the OOB count update markup`
 
@@ -159,10 +159,10 @@ file   | tests/test_todos.py:13-30               | Existing create-todo regressi
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements (if applicable)
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements (if applicable)
 
 
 ## Implementation Observations
