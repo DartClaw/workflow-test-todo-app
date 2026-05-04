@@ -42,15 +42,15 @@ Fix the todo edit flow so a due date saved from the existing date-only dialog co
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] A `PUT /api/todos/{todo_id}` submission with a valid `YYYY-MM-DD` due date persists that date onto `Todo.due_date` and the returned row partial shows the saved due date.
-- [ ] Reopening the same Todo through the existing row-to-dialog preload path shows the exact saved date in the due-date input without manual normalization in the browser.
-- [ ] Submitting an empty due-date field clears `Todo.due_date` and removes due-date display from the refreshed row partial.
-- [ ] Malformed due-date input does not silently persist a wrong date and instead follows the existing HTML error-partial contract for invalid form input.
+- [x] A `PUT /api/todos/{todo_id}` submission with a valid `YYYY-MM-DD` due date persists that date onto `Todo.due_date` and the returned row partial shows the saved due date.
+- [x] Reopening the same Todo through the existing row-to-dialog preload path shows the exact saved date in the due-date input without manual normalization in the browser.
+- [x] Submitting an empty due-date field clears `Todo.due_date` and removes due-date display from the refreshed row partial.
+- [x] Malformed due-date input does not silently persist a wrong date and instead follows the existing HTML error-partial contract for invalid form input.
 
 ### Health Metrics (Must NOT Regress)
-- [ ] Existing todo update assertions for title, note, and priority remain green.
-- [ ] The edit flow still returns HTML partials and targets the existing row swap contract.
-- [ ] No quick-add priority behavior or OOB count behavior changes as part of this story.
+- [x] Existing todo update assertions for title, note, and priority remain green.
+- [x] The edit flow still returns HTML partials and targets the existing row swap contract.
+- [x] No quick-add priority behavior or OOB count behavior changes as part of this story.
 
 
 ## Scenarios
@@ -125,19 +125,19 @@ file   | src/app/utils.py:35-41                  | `format_date_input(...)` help
 
 ### Implementation Tasks
 
-- [ ] **TI01** The edit route accepts the current date-only dialog value and persists it onto `Todo.due_date`
+- [x] **TI01** The edit route accepts the current date-only dialog value and persists it onto `Todo.due_date`
   - Follow the existing handler structure at `src/app/routes/todos.py:169-240`; keep ownership, title validation, and priority normalization intact while replacing the mismatched due-date parsing path
   - **Verify**: `uv run pytest tests/test_todos.py -k "update_todo and not other_users"` passes with assertions that a PUT carrying due_date=2025-12-31 stores that date and returns 200`
 
-- [ ] **TI02** Clearing the due-date field removes the stored value and the returned row no longer renders due-date state
+- [x] **TI02** Clearing the due-date field removes the stored value and the returned row no longer renders due-date state
   - Reuse the existing blank-field branch in `src/app/routes/todos.py:223-230`; ensure the row partial at `src/app/templates/partials/todo_item.html:23-29` reflects the cleared state without extra client logic
   - **Verify**: `uv run pytest tests/test_todos.py -k "clear_due_date"` passes with assertions that submitting due_date='' sets Todo.due_date to None and the response content omits the due-date display`
 
-- [ ] **TI03** Malformed due-date submissions follow the HTML error-partial contract instead of silently mutating persisted state
+- [x] **TI03** Malformed due-date submissions follow the HTML error-partial contract instead of silently mutating persisted state
   - Extend the same route-level validation pattern used for empty title errors in `src/app/routes/todos.py:200-213`; keep the response in `partials/error.html` form and do not touch unrelated fields when the date is invalid
   - **Verify**: `uv run pytest tests/test_todos.py -k "invalid_due_date"` passes with assertions that malformed input returns the error partial and the previously stored due date remains unchanged`
 
-- [ ] **TI04** Regression coverage proves the row-to-dialog reopen path uses the persisted date value end to end
+- [x] **TI04** Regression coverage proves the row-to-dialog reopen path uses the persisted date value end to end
   - Build on the row data contract in `src/app/templates/partials/todo_item.html:1-7` and the preload pattern in `src/app/static/js/app.js:111-118`; this task depends on TI01 and TI02 producing correct stored state
   - **Verify**: `uv run pytest tests/test_todos.py -k "reopen_due_date"` passes with response assertions that the refreshed row includes the exact `data-todo-due-date="2025-12-31"` value used by the edit dialog preload path`
 
@@ -160,10 +160,10 @@ file   | src/app/utils.py:35-41                  | `format_date_input(...)` help
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements (if applicable)
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements (if applicable)
 
 
 ## Implementation Observations

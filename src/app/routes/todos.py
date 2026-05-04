@@ -220,12 +220,19 @@ async def update_todo(
     todo.title = title.strip()
     todo.note = note.strip() if note else None
 
-    # Parse due date
+    # Parse due date using the current date-only control format
     if due_date and due_date.strip():
+        normalized_due_date = due_date.strip()
         try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
+            parsed_due_date = datetime.strptime(normalized_due_date, "%Y-%m-%d")
         except ValueError:
-            pass  # Keep existing
+            return templates.TemplateResponse(
+                request=request,
+                name="partials/error.html",
+                context={"error": "Invalid due date format"},
+            )
+
+        todo.due_date = parsed_due_date
     else:
         todo.due_date = None
 
