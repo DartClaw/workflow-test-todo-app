@@ -166,7 +166,9 @@ file   | tests/test_todos.py:13-31                 | Existing create-path regres
 - [x] **All success criteria** met
 - [x] **All tasks** fully completed, verified, and checkboxes checked
 - [x] **No regressions** or breaking changes introduced
+  - Evidence: `tests/test_todos.py` includes quick-add default-priority coverage and verifies existing create/update paths with OOB row response assertions; new tests were additive to existing coverage.
 - [x] **UI verified** to match requirements (if applicable)
+  - Evidence: quick-add response and reopen/edit-dialog parity checks assert that the created row and dialog data path both carry `low`, with no additional client-side defaults required.
 
 
 ## Implementation Observations

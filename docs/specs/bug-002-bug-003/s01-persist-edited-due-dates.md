@@ -52,9 +52,9 @@ Restore trust in Todo due-date editing by making the edit dialog's date input ro
 - [x] An invalid Due Date submission preserves the previously saved valid Due Date in storage.
 
 ### Health Metrics (Must NOT Regress)
-- [ ] Existing todo create/update route tests continue to pass.
-- [ ] HTMX fragment behavior remains unchanged: authenticated updates still return HTML partials rather than redirects or JSON.
-- [ ] Priority, note, and title update behavior remain unchanged unless explicitly covered by due-date validation.
+- [x] Existing todo create/update route tests continue to pass. (`tests/test_todos.py` full suite passed: 65 passed)
+- [x] HTMX fragment behavior remains unchanged: authenticated updates still return HTML partials rather than redirects or JSON.
+- [x] Priority, note, and title update behavior remain unchanged unless explicitly covered by due-date validation.
 
 
 ## Scenarios
@@ -169,8 +169,10 @@ file   | tests/test_todos.py:44-62                 | Existing todo update test s
 
 - [x] **All success criteria** met
 - [x] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements (if applicable)
+- [x] **No regressions** or breaking changes introduced
+  - Evidence: `tests/test_todos.py` includes valid due-date round-trip, clear-to-empty, reopen-state, and invalid-input preservation coverage for S01; existing create/update behavior was retained in the same module while extending tests.
+- [x] **UI verified** to match requirements (if applicable)
+  - Evidence: edit-dialog state is validated via row dataset assertions and render contract checks in `tests/test_todos.py` for reopen parity and unchanged row behavior after invalid input.
 
 
 ## Implementation Observations

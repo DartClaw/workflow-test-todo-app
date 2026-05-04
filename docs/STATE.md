@@ -11,7 +11,14 @@ Status: On Track
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| S01 | Spec Ready | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` | BUG-002 due-date persistence and invalid-input dialog contract |
+| *(none)* | *(none)* | *(none)* | *(none)* |
+
+## Closed Stories
+
+| Story | Status | FIS | Notes |
+|-------|--------|-----|-------|
+| S01 | Completed | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` | BUG-002 due-date persistence and invalid-input dialog contract |
+| S02 | Completed | `docs/specs/bug-002-bug-003/s02-apply-default-quick-add-priority.md` | BUG-003 quick-add Priority defaulting + row/dialog reopen validation |
 
 ## Recently Completed
 

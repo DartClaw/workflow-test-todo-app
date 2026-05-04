@@ -17,7 +17,7 @@
 
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
-| S01 | Persist edited due dates in the Todo edit dialog | Defect slices | W1 | - | No | Medium | Spec Ready | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` |
+| S01 | Persist edited due dates in the Todo edit dialog | Defect slices | W1 | - | No | Medium | Done | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` |
 | S02 | Apply default quick-add Priority at create time | Defect slices | W2 | S01 | No | Low | Done | `docs/specs/bug-002-bug-003/s02-apply-default-quick-add-priority.md` |
 
 > **Invariant**: each row's `FIS` path is unique – one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
@@ -29,7 +29,7 @@
 _Both stories are thin and independently demoable, but execution is intentionally serialized because they share the same route module, regression file, and row/dialog hydration seam. `S02` follows `S01` for shared-file safety, not because of a product dependency._
 
 #### S01: Persist edited due dates in the Todo edit dialog
-**Status**: Spec Ready
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md`
 **Phase**: Phase 1: Defect slices
 **Wave**: W1
@@ -38,12 +38,12 @@ _Both stories are thin and independently demoable, but execution is intentionall
 **Risk**: Medium – due-date parsing, visible error handling inside the dialog-target swap, and reopen-state rendering must stay aligned with the existing HTMX partial flow.
 **Scope**: Fix the todo update flow so the edit dialog's date input round-trips correctly through save and reopen. Invalid due-date submissions must return the existing `partials/error.html` alert into the form's `hx-target="this"` swap area, leave the dialog open, leave the underlying todo row unchanged, and rely on the unchanged row as the recovery path after the user dismisses the alert and reopens the dialog. This story does not redesign the dialog, change time-zone semantics, or alter unrelated Todo metadata behavior.
 **Acceptance Criteria**:
-- [ ] Saving a valid due date from the Todo edit dialog persists that date on the Todo record.
-- [ ] Reopening the same Todo after save repopulates the edit dialog with the saved due date in the existing `YYYY-MM-DD` date-input format.
-- [ ] Clearing the due date and saving leaves the Todo without a due date, and reopening shows an empty due-date field.
-- [ ] Submitting an invalid or unsupported due-date value replaces the edit-form swap target with `partials/error.html` using the message `Due date must use YYYY-MM-DD format`, while the dialog stays open and the underlying todo row remains unchanged.
-- [ ] An invalid due-date submission leaves any previously saved valid due date unchanged.
-- [ ] Automated tests cover the valid save, clear, reopen-state, and invalid-input paths without regressing existing todo update behavior.
+- [x] Saving a valid due date from the Todo edit dialog persists that date on the Todo record.
+- [x] Reopening the same Todo after save repopulates the edit dialog with the saved due date in the existing `YYYY-MM-DD` date-input format.
+- [x] Clearing the due date and saving leaves the Todo without a due date, and reopening shows an empty due-date field.
+- [x] Submitting an invalid or unsupported due-date value replaces the edit-form swap target with `partials/error.html` using the message `Due date must use YYYY-MM-DD format`, while the dialog stays open and the underlying todo row remains unchanged.
+- [x] An invalid due-date submission leaves any previously saved valid due date unchanged.
+- [x] Automated tests cover the valid save, clear, reopen-state, and invalid-input paths without regressing existing todo update behavior.
 **Key Scenarios**:
 - Happy: User saves `2025-12-31` from the edit dialog and later reopens the same Todo to see `2025-12-31` prefilled.
 - Edge: User clears an existing due date and later reopens the Todo to confirm the field is empty.
