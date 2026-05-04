@@ -17,7 +17,7 @@
 
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
-| S01 | Persist Edited Due Dates | Defect Correction | W1 | - | [P] | Medium | Spec Ready | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md` |
+| S01 | Persist Edited Due Dates | Defect Correction | W1 | - | [P] | Medium | Done | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md` |
 | S02 | Apply Default Priority on Quick Add | Defect Correction | W1 | - | [P] | Medium | Done | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` |
 
 > **Invariant**: each row's `FIS` path is unique – one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
@@ -30,7 +30,7 @@ _Parallel execution is acceptable because the stories address separate user outc
 
 <a id="story-s01"></a>
 #### [P] S01: Persist Edited Due Dates
-**Status**: Spec Ready
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md`
 **Phase**: Phase 1: Defect Correction
 **Wave**: W1
@@ -39,11 +39,11 @@ _Parallel execution is acceptable because the stories address separate user outc
 **Risk**: Medium - touches the existing edit route and must preserve current HTMX fragment behavior while correcting date parsing and reopen state.
 **Scope**: Fix the existing todo edit flow so a valid date emitted by the current `type="date"` control persists through save, renders back on the todo row, and is shown again when the user reopens the edit dialog. Include route-level regression coverage for valid-save, clear-date, and malformed-date handling. Exclude quick-add priority behavior, time-of-day support, and edit-dialog redesign.
 **Acceptance Criteria**:
-- [ ] Saving a valid due date from the edit dialog stores a due date on the Todo record and the updated todo row renders that saved date.
-- [ ] Reopening the edit dialog for the same Todo shows the previously saved date in the due-date input.
-- [ ] Saving the edit dialog with a blank due-date field clears the stored due date and the todo row no longer renders due-date text.
-- [ ] Malformed due-date input does not silently become a different persisted date and does not change unrelated todo fields or authorization behavior.
-- [ ] Route-level regression tests cover the supported date-only format and the clear-date path without regressing existing todo update assertions.
+- [x] Saving a valid due date from the edit dialog stores a due date on the Todo record and the updated todo row renders that saved date.
+- [x] Reopening the edit dialog for the same Todo shows the previously saved date in the due-date input.
+- [x] Saving the edit dialog with a blank due-date field clears the stored due date and the todo row no longer renders due-date text.
+- [x] Malformed due-date input does not silently become a different persisted date and does not change unrelated todo fields or authorization behavior.
+- [x] Route-level regression tests cover the supported date-only format and the clear-date path without regressing existing todo update assertions.
 **Key Scenarios**:
 - Happy: user saves `2025-12-31` in edit and later reopens the same Todo with `2025-12-31` prefilled.
 - Edge: user clears an existing due date and the todo row plus reopen flow both show no due date.
@@ -61,11 +61,11 @@ _Parallel execution is acceptable because the stories address separate user outc
 **Risk**: Medium - touches the quick-add create path in the same route module and must preserve insertion order, validation, and OOB count updates while assigning default priority consistently.
 **Scope**: Fix the quick-add todo creation flow so title-only submissions persist `low` as the default Priority immediately and every downstream render path reflects that stored value. Include route-level regression coverage for created records and edit-dialog reopen state. Exclude due-date parsing changes, new quick-add fields, and any change to the priority taxonomy.
 **Acceptance Criteria**:
-- [ ] Creating a Todo through quick add with only a title stores Priority `low` on the created record.
-- [ ] The rendered todo row exposes priority data and visual state consistent with a `low` priority Todo immediately after creation.
-- [ ] Reopening a quick-added Todo in the edit dialog shows `low` selected until the user changes it.
-- [ ] Existing quick-add validation, Position ordering, ownership checks, and incomplete-count OOB behavior remain unchanged.
-- [ ] Route-level regression tests prove the default-priority behavior without depending on S01's due-date fix.
+- [x] Creating a Todo through quick add with only a title stores Priority `low` on the created record.
+- [x] The rendered todo row exposes priority data and visual state consistent with a `low` priority Todo immediately after creation.
+- [x] Reopening a quick-added Todo in the edit dialog shows `low` selected until the user changes it.
+- [x] Existing quick-add validation, Position ordering, ownership checks, and incomplete-count OOB behavior remain unchanged.
+- [x] Route-level regression tests prove the default-priority behavior without depending on S01's due-date fix.
 **Key Scenarios**:
 - Happy: user quick-adds a title-only Todo and sees `low` reflected on the row and in the edit dialog.
 - Edge: multiple quick-add submissions all persist `low` while keeping append order intact.

@@ -32,6 +32,8 @@
 |-------|------|------------|
 | _(none yet)_ | | |
 
+- Parsing date-only `<input type="date">` values with a datetime format produces a no-op silently skipping state updates. Validate against `%Y-%m-%d` and return an Error Partial on failure to avoid ambiguous persistence.
+
 ## Process & Tooling
 
 <!-- Non-code knowledge: test prerequisites, agent workflow patterns, CI quirks. -->
