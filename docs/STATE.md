@@ -1,6 +1,6 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-05-04
 
 ## Current Phase
 
@@ -14,6 +14,8 @@ Status: On Track
 | _(none)_ | | | |
 
 ## Recently Completed
+
+- **Bug Fix Execution** (2026-05-04): Story `S02` completed for `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` — quick-add now persists default `low` priority and validates unchanged OOB/count/error behavior.
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 

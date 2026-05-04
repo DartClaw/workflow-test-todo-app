@@ -18,7 +18,7 @@
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
 | S01 | Persist Edited Due Dates | Defect Correction | W1 | - | [P] | Medium | Spec Ready | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md` |
-| S02 | Apply Default Priority on Quick Add | Defect Correction | W1 | - | [P] | Medium | Spec Ready | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` |
+| S02 | Apply Default Priority on Quick Add | Defect Correction | W1 | - | [P] | Medium | Done | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` |
 
 > **Invariant**: each row's `FIS` path is unique – one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
 
@@ -52,7 +52,7 @@ _Parallel execution is acceptable because the stories address separate user outc
 
 <a id="story-s02"></a>
 #### [P] S02: Apply Default Priority on Quick Add
-**Status**: Spec Ready
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md`
 **Phase**: Phase 1: Defect Correction
 **Wave**: W1
