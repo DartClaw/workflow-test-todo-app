@@ -42,16 +42,16 @@ Make quick-add Todo creation assign the documented default Priority of `low` at 
 
 
 ## Success Criteria (Must Be TRUE)
-- [ ] Quick add with only `list_id` and `title` stores the new Todo with Priority `low`.
-- [ ] The `POST /api/todos` response still returns the existing todo-row-plus-OOB partial and the rendered row visibly reflects Priority `low`.
-- [ ] Opening that quick-added Todo in the existing edit dialog shows `low` in the Priority selector without relying on a client-side fallback.
-- [ ] Later todo updates can still change Priority away from `low` through the existing update flow.
-- [ ] Quick add does not silently create a Todo with missing or invalid Priority state.
+- [x] Quick add with only `list_id` and `title` stores the new Todo with Priority `low`.
+- [x] The `POST /api/todos` response still returns the existing todo-row-plus-OOB partial and the rendered row visibly reflects Priority `low`.
+- [x] Opening that quick-added Todo in the existing edit dialog shows `low` in the Priority selector without relying on a client-side fallback.
+- [x] Later todo updates can still change Priority away from `low` through the existing update flow.
+- [x] Quick add does not silently create a Todo with missing or invalid Priority state.
 
 ### Health Metrics (Must NOT Regress)
-- [ ] Existing todo create tests continue to pass.
-- [ ] The quick-add path still requires the existing title validation and next-position behavior.
-- [ ] The incomplete-count OOB update remains present in the quick-add response.
+- [x] Existing todo create tests continue to pass.
+- [x] The quick-add path still requires the existing title validation and next-position behavior.
+- [x] The incomplete-count OOB update remains present in the quick-add response.
 
 
 ## Scenarios
@@ -132,15 +132,15 @@ file   | tests/test_todos.py:13-31                 | Existing create-path regres
 
 ### Implementation Tasks
 
-- [ ] **TI01** Quick add stores Priority `low` as part of Todo creation
+- [x] **TI01** Quick add stores Priority `low` as part of Todo creation
   - Follow the existing create-path pattern at `src/app/routes/todos.py:73-122`; keep title validation, ownership checks, and next-position logic unchanged while making default Priority authoritative.
   - **Verify**: `Test: POST /api/todos with only list_id and title returns 200 and the created Todo in the database has priority == "low"`
 
-- [ ] **TI02** The returned quick-add row and later edit-dialog reopen-state both reflect the stored default Priority
+- [x] **TI02** The returned quick-add row and later edit-dialog reopen-state both reflect the stored default Priority
   - Reuse the existing row partial and dialog hydration contract at `src/app/templates/partials/todo_item.html` and `src/app/static/js/app.js:111-121`; depends on TI01 storing the default value.
   - **Verify**: `Test: quick-add response contains the visible low-priority row state and a reopen-state data attribute that yields low in the edit dialog`
 
-- [ ] **TI03** Regression coverage proves quick-add defaulting without breaking create or later update behavior
+- [x] **TI03** Regression coverage proves quick-add defaulting without breaking create or later update behavior
   - Extend `tests/test_todos.py`; assert DB state, returned HTML, and a follow-up update path that changes Priority away from `low`.
   - **Verify**: `Test suite covers create-with-default, reopen-state consistency, and later user override while preserving existing quick-add validation and OOB behavior`
 
@@ -163,10 +163,10 @@ file   | tests/test_todos.py:13-31                 | Existing create-path regres
 
 ## Final Validation Checklist
 
-- [ ] **All success criteria** met
-- [ ] **All tasks** fully completed, verified, and checkboxes checked
-- [ ] **No regressions** or breaking changes introduced
-- [ ] **UI verified** to match requirements (if applicable)
+- [x] **All success criteria** met
+- [x] **All tasks** fully completed, verified, and checkboxes checked
+- [x] **No regressions** or breaking changes introduced
+- [x] **UI verified** to match requirements (if applicable)
 
 
 ## Implementation Observations

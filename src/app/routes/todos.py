@@ -111,12 +111,20 @@ async def create_todo(
         .scalar()
     )
     new_pos = (max_pos or -1) + 1
+    default_priority = "low"
+    if default_priority not in ("low", "medium", "high"):
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/error.html",
+            context={"error": "Invalid default priority"},
+        )
 
     # Create todo
     todo = Todo(
         list_id=list_id,
         title=title.strip(),
         position=new_pos,
+        priority=default_priority,
     )
     db.add(todo)
     db.commit()
