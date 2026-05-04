@@ -11,12 +11,13 @@ Status: On Track
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| S01 | Spec Ready | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md` | BUG-002 due-date persistence fix planned and specced |
+| S01 | Completed | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s01-persist-edited-due-dates.md` | BUG-002 due-date persistence fix implemented; edited date-only values now persist correctly |
 | S02 | Spec Ready | `docs/specs/bug-002-bug-003-todo-edit-and-quick-add/s02-apply-default-priority-on-quick-add.md` | BUG-003 quick-add default-priority fix planned and specced |
 
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **Story completed** (2026-05-04): S01 Persist Edited Due Dates completed; update flow now persists date-only edit values and preserves dialog preload behavior.
 - **Plan created** (2026-05-04): `bug-002-bug-003-todo-edit-and-quick-add` bundle generated with 2 stories, 2 FIS files, and shared technical research
 
 ## Blockers
@@ -32,3 +33,4 @@ _(none)_
 
 - Keep the `Commands` and `Architecture` sections of `CLAUDE.md` intact — they serve as the Project Overview for AndThen skills.
 - Authentication is **intentionally** simple (plain-text passwords, in-memory sessions). Do not "fix" without explicit direction.
+- S01 completion note: `todo` due-date edits now parse and persist `YYYY-MM-DD`, clear correctly to `None`, and malformed values return `partials/error.html` without mutating `Todo` fields.
