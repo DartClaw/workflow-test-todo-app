@@ -1,6 +1,7 @@
 """Tests for todo item routes."""
 
 from datetime import date, datetime, timezone
+import re
 
 import pytest
 
@@ -22,12 +23,18 @@ class TestTodos:
         assert response.status_code == 200
         assert b"New Todo" in response.content
 
+        # Verify quick-add row rendering starts from low priority
+        assert b'data-todo-priority="low"' in response.content
+        assert b'variant="success"' in response.content
+
         # Verify in database
         created = db_session.query(Todo).filter(Todo.title == "New Todo").first()
         assert created is not None
         assert created.list_id == test_list.id
         assert created.priority == "low"
         assert created.is_completed is False
+        assert b'hx-swap-oob="true"' in response.content
+        assert b"list-" in response.content
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
@@ -40,6 +47,51 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"required" in response.content
+
+    def test_create_todo_reopen_uses_default_priority(self, authenticated_client, test_list, db_session):
+        """Test quick-add todos reopen with default low priority."""
+        response = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "Reopen Priority Todo",
+            },
+        )
+        assert response.status_code == 200
+
+        html = response.content.decode()
+        assert 'data-todo-priority="low"' in html
+
+        todo_id = re.search(r"id=\"todo-([^\"]+)\"", html)
+        assert todo_id is not None
+
+        reopen_response = authenticated_client.get(f"/api/todos/{todo_id.group(1)}")
+        assert reopen_response.status_code == 200
+        assert b'data-todo-priority="low"' in reopen_response.content
+
+    def test_create_todo_default_priority_can_be_updated(self, authenticated_client, test_list, db_session):
+        """Test quick-add low priority todo can be updated to high priority."""
+        response = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "Override Priority Todo",
+            },
+        )
+        assert response.status_code == 200
+        todo = db_session.query(Todo).filter(Todo.title == "Override Priority Todo").first()
+        assert todo is not None
+        assert todo.priority == "low"
+
+        update_response = authenticated_client.put(
+            f"/api/todos/{todo.id}",
+            data={"title": todo.title, "priority": "high", "due_date": ""},
+        )
+        assert update_response.status_code == 200
+        assert b'data-todo-priority="high"' in update_response.content
+
+        db_session.refresh(todo)
+        assert todo.priority == "high"
 
     def test_update_todo(self, authenticated_client, test_todo, db_session):
         """Test updating a todo."""

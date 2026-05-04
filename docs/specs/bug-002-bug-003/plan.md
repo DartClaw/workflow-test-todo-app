@@ -18,7 +18,7 @@
 | ID | Name | Phase | Wave | Dependencies | Parallel | Risk | Status | FIS |
 |----|------|-------|------|--------------|----------|------|--------|-----|
 | S01 | Persist edited due dates in the Todo edit dialog | Defect slices | W1 | - | No | Medium | Spec Ready | `docs/specs/bug-002-bug-003/s01-persist-edited-due-dates.md` |
-| S02 | Apply default quick-add Priority at create time | Defect slices | W2 | S01 | No | Low | Spec Ready | `docs/specs/bug-002-bug-003/s02-apply-default-quick-add-priority.md` |
+| S02 | Apply default quick-add Priority at create time | Defect slices | W2 | S01 | No | Low | Done | `docs/specs/bug-002-bug-003/s02-apply-default-quick-add-priority.md` |
 
 > **Invariant**: each row's `FIS` path is unique – one story maps to exactly one FIS. Stories that would share a spec should have been merged in Step 3's Consolidation Pass.
 
@@ -51,7 +51,7 @@ _Both stories are thin and independently demoable, but execution is intentionall
 **Asset refs**: `docs/specs/bug-002-bug-003/prd.md#fr1-persist-edited-due-dates`, `src/app/templates/app.html`, `src/app/templates/partials/todo_item.html`, `src/app/templates/partials/error.html`
 
 #### S02: Apply default quick-add Priority at create time
-**Status**: Spec Ready
+**Status**: Done
 **FIS**: `docs/specs/bug-002-bug-003/s02-apply-default-quick-add-priority.md`
 **Phase**: Phase 1: Defect slices
 **Wave**: W2
@@ -60,12 +60,12 @@ _Both stories are thin and independently demoable, but execution is intentionall
 **Risk**: Low
 **Scope**: Fix the quick-add create flow so todos created with only a title begin with the documented default Priority of `low`. This story focuses on immediate row rendering consistency, edit-dialog reopen consistency, and regression coverage for the create path, building on the shared row/dialog contract already exercised by S01. It does not change Priority options, make the default configurable, or expand quick add beyond its current title-only contract.
 **Acceptance Criteria**:
-- [ ] Creating a Todo through quick add with only a title stores the Todo with Priority `low`.
-- [ ] The created Todo row renders the default Priority state immediately in the returned HTML partial.
-- [ ] Opening that quick-added Todo in the edit dialog shows the Priority selector prefilled with `low`.
-- [ ] Later edits can still change Priority away from `low` through the existing update flow.
-- [ ] Any failure to assign a valid default Priority returns a visible HTML error response consistent with current app patterns rather than creating a partially initialized Todo.
-- [ ] Automated tests cover default assignment and reopen-state consistency without regressing existing todo create behavior.
+- [x] Creating a Todo through quick add with only a title stores the Todo with Priority `low`.
+- [x] The created Todo row renders the default Priority state immediately in the returned HTML partial.
+- [x] Opening that quick-added Todo in the edit dialog shows the Priority selector prefilled with `low`.
+- [x] Later edits can still change Priority away from `low` through the existing update flow.
+- [x] Any failure to assign a valid default Priority returns a visible HTML error response consistent with current app patterns rather than creating a partially initialized Todo.
+- [x] Automated tests cover default assignment and reopen-state consistency without regressing existing todo create behavior.
 **Key Scenarios**:
 - Happy: User quick-adds a title-only Todo and the rendered row immediately shows `Low`.
 - Edge: User opens that new Todo in the edit dialog and sees `low` selected before making any changes.
