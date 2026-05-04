@@ -76,3 +76,7 @@ No decomposition changes are recommended from this review. The current boundary 
    - Enforce tests asserting date-only parse/render round-trips through `type="date"` path.
    - Threshold: `src/app/routes/todos.py` quick-update and dialog preload assertions always use the same format token family.
    - Targets quality risk: hidden UI/form contract drift.
+
+## Remediation Status
+
+No actionable findings were identified in this architecture review. No remediation changes were required.

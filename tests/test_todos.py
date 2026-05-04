@@ -1,11 +1,13 @@
 """Tests for todo item routes."""
 
 import re
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
+from types import SimpleNamespace
 
 import pytest
 
 from app.database import Todo
+from app.utils import is_due_today, is_overdue
 
 
 class TestTodos:
@@ -353,3 +355,33 @@ class TestTodoAccess:
             data={"title": "Hacked!"},
         )
         assert response.status_code == 403
+
+
+class TestTodoHelpers:
+    """Tests for todo date utility helpers."""
+
+    def test_overdue_and_due_today_helpers_use_calendar_date(self):
+        """Date-only values should classify using date boundaries."""
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        tomorrow = today + timedelta(days=1)
+
+        due_today = SimpleNamespace(due_date=today, is_completed=False)
+        due_today_datetime = SimpleNamespace(
+            due_date=datetime.combine(today, datetime.min.time()),
+            is_completed=False,
+        )
+        overdue = SimpleNamespace(due_date=yesterday, is_completed=False)
+        not_due_today = SimpleNamespace(due_date=tomorrow, is_completed=False)
+        completed = SimpleNamespace(due_date=today, is_completed=True)
+
+        assert is_due_today(due_today) is True
+        assert is_overdue(due_today) is False
+        assert is_due_today(due_today_datetime) is True
+        assert is_overdue(due_today_datetime) is False
+        assert is_overdue(overdue) is True
+        assert is_due_today(overdue) is False
+        assert is_due_today(not_due_today) is False
+        assert is_overdue(not_due_today) is False
+        assert is_due_today(completed) is True
+        assert is_overdue(completed) is False

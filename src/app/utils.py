@@ -1,6 +1,6 @@
 """Shared utility functions for templates and routes."""
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,16 +11,22 @@ def is_overdue(todo: "Todo") -> bool:
     """Return True if due_date < today AND not completed."""
     if todo.is_completed or not todo.due_date:
         return False
-    now = datetime.now()
-    return todo.due_date < now
+    today = datetime.now().date()
+    due_date = todo.due_date
+    if isinstance(due_date, datetime):
+        due_date = due_date.date()
+    return due_date < today
 
 
 def is_due_today(todo: "Todo") -> bool:
     """Return True if due_date == today."""
     if not todo.due_date:
         return False
-    now = datetime.now()
-    return todo.due_date == now
+    today = datetime.now().date()
+    due_date = todo.due_date
+    if isinstance(due_date, datetime):
+        due_date = due_date.date()
+    return due_date == today
 
 
 def format_date(dt: datetime | date | None) -> str:

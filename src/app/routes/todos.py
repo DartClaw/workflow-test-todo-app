@@ -22,6 +22,56 @@ templates.env.globals["is_due_today"] = is_due_today
 templates.env.globals["format_date"] = format_date
 templates.env.globals["format_date_input"] = format_date_input
 
+TODO_TITLE_MAX_LENGTH = 200
+VALID_PRIORITIES = ("low", "medium", "high")
+
+
+def _error_partial(request: Request, error: str, status_code: int | None = None):
+    kwargs = {
+        "request": request,
+        "name": "partials/error.html",
+        "context": {"error": error},
+    }
+    if status_code is not None:
+        kwargs["status_code"] = status_code
+    return templates.TemplateResponse(**kwargs)
+
+
+def _normalize_title(raw_title: str) -> tuple[str, str | None]:
+    title = raw_title.strip()
+    if not title:
+        return "", "Title is required"
+    if len(title) > TODO_TITLE_MAX_LENGTH:
+        return "", f"Title must be {TODO_TITLE_MAX_LENGTH} characters or less"
+    return title, None
+
+
+def _normalize_priority(priority: str) -> str:
+    return priority if priority in VALID_PRIORITIES else "low"
+
+
+def _parse_due_date(raw_due_date: str | None) -> tuple[datetime | None, str | None]:
+    if not raw_due_date:
+        return None, None
+
+    normalized_due_date = raw_due_date.strip()
+    if not normalized_due_date:
+        return None, None
+
+    try:
+        return datetime.strptime(normalized_due_date, "%Y-%m-%d"), None
+    except ValueError:
+        return None, "Invalid due date format"
+
+
+def _get_next_todo_position(db: Session, list_id: str) -> int:
+    max_pos = (
+        db.query(func.max(Todo.position))
+        .filter(Todo.list_id == list_id)
+        .scalar()
+    )
+    return (max_pos or -1) + 1
+
 
 def _verify_list_access(db: Session, list_id: str, user_id: str) -> TodoList | None:
     """Verify user owns the list and return it."""
@@ -49,12 +99,7 @@ async def search_todos(
     # Verify list access
     list_obj = _verify_list_access(db, list_id, user_id)
     if not list_obj:
-        return templates.TemplateResponse(
-            request=request,
-            name="partials/error.html",
-            context={"error": "List not found"},
-            status_code=404,
-        )
+        return _error_partial(request, "List not found", 404)
 
     query = db.query(Todo).filter(Todo.list_id == list_id)
 
@@ -82,41 +127,18 @@ async def create_todo(
     # Verify list access
     list_obj = _verify_list_access(db, list_id, user_id)
     if not list_obj:
-        return templates.TemplateResponse(
-            request=request,
-            name="partials/error.html",
-            context={"error": "List not found"},
-            status_code=404,
-        )
+        return _error_partial(request, "List not found", 404)
 
     # Validate title
-    if not title.strip():
-        return templates.TemplateResponse(
-            request=request,
-            name="partials/error.html",
-            context={"error": "Title is required"},
-        )
-
-    if len(title) > 200:
-        return templates.TemplateResponse(
-            request=request,
-            name="partials/error.html",
-            context={"error": "Title must be 200 characters or less"},
-        )
-
-    # Calculate next position
-    max_pos = (
-        db.query(func.max(Todo.position))
-        .filter(Todo.list_id == list_id)
-        .scalar()
-    )
-    new_pos = (max_pos or -1) + 1
+    title, title_error = _normalize_title(title)
+    if title_error:
+        return _error_partial(request, title_error)
 
     # Create todo
     todo = Todo(
         list_id=list_id,
-        title=title.strip(),
-        position=new_pos,
+        title=title,
+        position=_get_next_todo_position(db, list_id),
         priority="low",
     )
     db.add(todo)
@@ -199,45 +221,20 @@ async def update_todo(
         )
 
     # Validate title
-    if not title.strip():
-        return templates.TemplateResponse(
-            request=request,
-            name="partials/error.html",
-            context={"error": "Title is required"},
-        )
-
-    if len(title) > 200:
-        return templates.TemplateResponse(
-            request=request,
-            name="partials/error.html",
-            context={"error": "Title must be 200 characters or less"},
-        )
-
-    # Validate priority
-    if priority not in ("low", "medium", "high"):
-        priority = "low"
+    title, title_error = _normalize_title(title)
+    if title_error:
+        return _error_partial(request, title_error)
 
     # Update fields
-    todo.title = title.strip()
+    todo.title = title
     todo.note = note.strip() if note else None
 
-    # Parse due date using the current date-only control format
-    if due_date and due_date.strip():
-        normalized_due_date = due_date.strip()
-        try:
-            parsed_due_date = datetime.strptime(normalized_due_date, "%Y-%m-%d")
-        except ValueError:
-            return templates.TemplateResponse(
-                request=request,
-                name="partials/error.html",
-                context={"error": "Invalid due date format"},
-            )
+    parsed_due_date, due_date_error = _parse_due_date(due_date)
+    if due_date_error:
+        return _error_partial(request, due_date_error)
 
-        todo.due_date = parsed_due_date
-    else:
-        todo.due_date = None
-
-    todo.priority = priority
+    todo.due_date = parsed_due_date
+    todo.priority = _normalize_priority(priority)
     db.commit()
     db.refresh(todo)
 
