@@ -77,7 +77,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s02-bug-003-quick-add-default-priority.md",
       "scope": "Ensure todos created from the quick-add field receive the documented default priority so the created row and the later edit dialog show a valid default selection. Includes the quick-add creation path and regression coverage for default-priority behavior; excludes due-date parsing and broader todo-editor cleanup.",
       "sourceRefs": [
