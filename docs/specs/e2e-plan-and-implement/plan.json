@@ -45,7 +45,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s01-edit-dialog-due-date-persistence.md",
       "scope": "Fix BUG-002 so a due date chosen in the edit dialog is stored, rendered back in the todo row, and reopened in the dialog without silent loss. This story covers edit/update-path persistence and malformed date handling for that path only; it does not widen into quick-add defaults or other todo presentation bugs.",
       "sourceRefs": [

@@ -47,22 +47,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Saved due date round-trips through the edit dialog**
+- [x] **S01 [OC01] [TI01,TI02] Saved due date round-trips through the edit dialog**
   - **Given** an existing todo without a due date in a list the user owns
   - **When** the user opens the edit dialog, chooses `2025-12-31`, saves, and reopens the dialog
   - **Then** the todo row shows the due date and the dialog input value is `2025-12-31`
 
-- [ ] **S02 [OC02] [TI01,TI02] Clearing the date removes the stored due date**
+- [x] **S02 [OC02] [TI01,TI02] Clearing the date removes the stored due date**
   - **Given** an existing todo with due date `2025-12-31`
   - **When** the user clears the edit dialog date input and saves
   - **Then** the persisted todo has no due date, the row no longer renders a due-date badge, and reopening the dialog shows an empty date input
 
-- [ ] **S03 [OC03] [TI01] Date-only form submissions are accepted by the update path**
+- [x] **S03 [OC03] [TI01] Date-only form submissions are accepted by the update path**
   - **Given** the edit dialog submits an HTML `type="date"` value in `YYYY-MM-DD` format
   - **When** `PUT /api/todos/{id}` handles that request
   - **Then** the server stores the chosen date instead of swallowing the change because it expected a datetime-local string
 
-- [ ] **S04 [OC03] [TI03] Malformed due-date payloads fail visibly instead of silently preserving stale state**
+- [x] **S04 [OC03] [TI03] Malformed due-date payloads fail visibly instead of silently preserving stale state**
   - **Given** an existing todo with a stored due date
   - **When** a client submits a malformed `due_date` value that does not match the accepted edit-dialog format
   - **Then** the response is the standard HTML error partial and the existing stored due date remains unchanged
@@ -70,9 +70,9 @@
 
 ## Structural Criteria
 
-- [ ] Existing title, note, and priority updates through `PUT /api/todos/{id}` remain unchanged while due-date handling is corrected.
-- [ ] Due-date values continue to round-trip through `format_date_input` as `YYYY-MM-DD` so row data attributes and dialog state stay aligned.
-- [ ] Regression coverage for BUG-002 lives in a story-owned test surface and exercises save, clear, and malformed-input behavior against the in-memory SQLite fixtures.
+- [x] Existing title, note, and priority updates through `PUT /api/todos/{id}` remain unchanged while due-date handling is corrected.
+- [x] Due-date values continue to round-trip through `format_date_input` as `YYYY-MM-DD` so row data attributes and dialog state stay aligned.
+- [x] Regression coverage for BUG-002 lives in a story-owned test surface and exercises save, clear, and malformed-input behavior against the in-memory SQLite fixtures.
 
 
 ## Scope & Boundaries
@@ -121,15 +121,15 @@ file | src/app/templates/partials/todo_item.html:1-40 | Proof surface for dialog
 
 ### Implementation Tasks
 
-- [ ] **TI01** Edit-path due dates persist from date-only dialog submissions
+- [x] **TI01** Edit-path due dates persist from date-only dialog submissions
   - Keep the existing ownership and title-validation flow in `src/app/routes/todos.py#update_todo`; align due-date parsing with the current `type="date"` dialog contract and `src/app/utils.py#format_date_input`.
   - **Verify**: `uv run pytest tests/test_bug_002_due_date_persistence.py -k "save or round_trip"` proves saving "2025-12-31" stores the date and the returned HTML exposes the same date for dialog reopen state.
 
-- [ ] **TI02** Removing a due date clears both storage and rendered row state
+- [x] **TI02** Removing a due date clears both storage and rendered row state
   - Reuse the current empty-string clear branch in `src/app/routes/todos.py#update_todo`; the returned partial and reopen data attributes must agree that no due date remains.
   - **Verify**: `uv run pytest tests/test_bug_002_due_date_persistence.py -k "clear"` proves persisted `due_date` becomes `None` and the rendered row no longer includes the due-date surface.
 
-- [ ] **TI03** Malformed due-date payloads are rejected predictably
+- [x] **TI03** Malformed due-date payloads are rejected predictably
   - Follow the app-wide HTML error pattern described in `CLAUDE.md#the-stack--and-why-it-matters-for-edits`; keep the todo unchanged when parsing fails rather than silently preserving stale state after a partial mutation.
   - **Verify**: `uv run pytest tests/test_bug_002_due_date_persistence.py -k "invalid"` returns the HTML error partial and leaves the stored due date unchanged.
 
@@ -148,9 +148,11 @@ file | src/app/templates/partials/todo_item.html:1-40 | Proof surface for dialog
 
 ## Final Validation Checklist
 
-- [ ] Save, reopen, clear, and malformed-input edit flows all behave correctly without consuming S02's create/default ownership surface.
+- [x] Save, reopen, clear, and malformed-input edit flows all behave correctly without consuming S02's create/default ownership surface.
 
 
 ## Implementation Observations
 
-_No observations recorded yet._
+### NOTICED BUT NOT TOUCHING
+
+- `uv run pytest` still has a pre-existing failure in `tests/test_todos.py::TestTodos::test_create_todo` where new todos can return `priority=None`; this is S02-owned quick-add behavior and is not part of this story.
