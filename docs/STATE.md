@@ -12,12 +12,12 @@ Status: On Track
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
 | S01 | Spec Ready | docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md | BUG-002 due-date persistence scoped to the edit-save path |
-| S02 | Spec Ready | docs/specs/e2e-plan-and-implement/s02-default-quick-add-todos-to-low-priority.md | BUG-003 quick-add default Priority scoped to creation-time defaults |
 
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 - **Plan bundle created** (2026-06-04): `docs/specs/e2e-plan-and-implement/plan.json` plus two story FIS files for BUG-002 and BUG-003
+- **Story S02 complete** (2026-06-04): `docs/specs/e2e-plan-and-implement/s02-default-quick-add-todos-to-low-priority.md` — quick-add todos now default to low priority at creation time.
 
 ## Blockers
 
