@@ -51,26 +51,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI03] Quick-add creates a low-priority Todo when the form omits priority**
+- [x] **S01 [OC01] [TI01,TI03] Quick-add creates a low-priority Todo when the form omits priority**
   - **Given** an authenticated user submits the quick-add form with only `list_id` and `title`
   - **When** `POST /api/todos` creates the Todo
   - **Then** the stored Todo has `priority == "low"` and the returned `partials/todo_item_with_oob.html` payload renders the new row with `data-todo-priority="low"` and the low-priority styling hook
 
-- [ ] **S02 [OC02] [TI01,TI02,TI03] The first edit dialog open reflects the created Todo's default priority**
+- [x] **S02 [OC02] [TI01,TI02,TI03] The first edit dialog open reflects the created Todo's default priority**
   - **Given** a Todo was created through quick-add without an explicit priority
   - **When** the user opens the edit dialog from the rendered Todo row
   - **Then** the dialog's priority selector resolves to `low` from the row payload instead of showing an empty selection
 
-- [ ] **S03 [OC03] [TI01,TI03] Quick-add validation failures still return the existing error partial**
+- [x] **S03 [OC03] [TI01,TI03] Quick-add validation failures still return the existing error partial**
   - **Given** an authenticated user submits the quick-add form with an empty `title`
   - **When** `POST /api/todos` rejects the request
   - **Then** the response remains the existing HTML error partial and no fallback low-priority Todo is created
 
 ## Structural Criteria
 
-- [ ] The model-level `Todo.priority` definition is the only source of the initial default Priority for BUG-003; the fix does not introduce a second quick-add-only default in shared route, dialog, or client code.
-- [ ] The create response continues to use the existing `partials/todo_item_with_oob.html` contract so the new row render and list-count OOB swap still happen in one response.
-- [ ] Regression coverage for BUG-003 stays on a story-owned quick-add/default-priority surface and does not widen into S01 due-date scenarios or broader todo-editor cleanup.
+- [x] The model-level `Todo.priority` definition is the only source of the initial default Priority for BUG-003; the fix does not introduce a second quick-add-only default in shared route, dialog, or client code.
+- [x] The create response continues to use the existing `partials/todo_item_with_oob.html` contract so the new row render and list-count OOB swap still happen in one response.
+- [x] Regression coverage for BUG-003 stays on a story-owned quick-add/default-priority surface and does not widen into S01 due-date scenarios or broader todo-editor cleanup.
 
 ## Scope & Boundaries
 
@@ -114,15 +114,15 @@ file   | tests/test_todo_priority_defaults.py        | Story-owned regression su
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo creation has one persisted default Priority when quick-add omits `priority`
+- [x] **TI01** Todo creation has one persisted default Priority when quick-add omits `priority`
   - Follow `src/app/database.py#Todo.priority`; define `low` at the model boundary so `src/app/routes/todos.py#create_todo` can keep its current validation, ownership, position, and `partials/todo_item_with_oob.html` response flow
   - **Verify**: `uv run pytest tests/test_todo_priority_defaults.py -k "quick_add_persists_low"` proves `POST /api/todos` without a `priority` creates a Todo with `priority == "low"`
 
-- [ ] **TI02** The rendered quick-add row remains the edit dialog's priority source of truth
+- [x] **TI02** The rendered quick-add row remains the edit dialog's priority source of truth
   - Use `src/app/templates/partials/todo_item.html` and `src/app/static/js/app.js#openEditTodoDialog` as the contract boundary; do not add a second quick-add-only default path if TI01 can make the stored row correct
   - **Verify**: a quick-add proof asserts the create response contains `data-todo-priority="low"` and `priority-low`, and browser validation shows opening the new row's edit dialog sets `#edit-todo-priority` to `low`
 
-- [ ] **TI03** BUG-003 regression coverage proves creation-time defaulting without widening into S01
+- [x] **TI03** BUG-003 regression coverage proves creation-time defaulting without widening into S01
   - Add `tests/test_todo_priority_defaults.py` as the story-owned regression surface; prove the initial quick-add path resolves to `low`, the row payload carries that value, and empty-title quick-add still returns the existing error partial
   - **Verify**: `uv run pytest tests/test_todo_priority_defaults.py` passes with assertions for `priority == "low"`, `data-todo-priority="low"`, `priority-low`, and the existing error partial on empty title
 
