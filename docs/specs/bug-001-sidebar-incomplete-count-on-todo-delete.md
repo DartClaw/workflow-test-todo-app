@@ -38,22 +38,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC03] [TI01,TI02] Deleting an incomplete todo updates both the row and the sidebar count**
+- [x] **S01 [OC01,OC03] [TI01,TI02] Deleting an incomplete todo updates both the row and the sidebar count**
   - **Given** an authenticated user is viewing a `TodoList` whose sidebar badge shows `3` incomplete todos
   - **When** the user deletes one incomplete `Todo` from that list
   - **Then** the deleted row is removed and the sidebar badge updates to `2` without a full page reload
 
-- [ ] **S02 [OC02] [TI02] Deleting a completed todo does not decrement the incomplete-count**
+- [x] **S02 [OC02] [TI02] Deleting a completed todo does not decrement the incomplete-count**
   - **Given** a `TodoList` contains both incomplete and completed todos and the sidebar badge reflects only the incomplete ones
   - **When** the user deletes a completed `Todo`
   - **Then** the deleted row is removed and the sidebar badge value stays unchanged
 
-- [ ] **S03 [OC01,OC02] [TI01,TI02] Deleting the last incomplete todo can render a zero count through OOB markup**
+- [x] **S03 [OC01,OC02] [TI01,TI02] Deleting the last incomplete todo can render a zero count through OOB markup**
   - **Given** a `TodoList` has exactly one remaining incomplete `Todo` and the sidebar badge shows `1`
   - **When** the user deletes that `Todo`
   - **Then** the delete response includes the OOB update for the existing sidebar count target and the UI shows `0` without a page reload
 
-- [ ] **S04 [OC03] [TI01] Rejected deletes do not emit a misleading count update**
+- [x] **S04 [OC03] [TI01] Rejected deletes do not emit a misleading count update**
   - **Given** a delete request targets a missing `Todo` or a `Todo` owned by another user
   - **When** the route rejects the request
   - **Then** it preserves the current `404` or `403` behavior and does not send a sidebar count swap
@@ -61,9 +61,9 @@
 
 ## Structural Criteria
 
-- [ ] Successful `DELETE /api/todos/{todo_id}` responses remain compatible with the current `htmx.ajax(..., { target: '#todo-{id}', swap: 'delete' })` contract in `src/app/static/js/app.js`.
-- [ ] Sidebar count updates continue targeting the existing `id="list-<list_id>-count"` element rendered by `src/app/templates/partials/todo_list_item.html`.
-- [ ] Automated regression coverage proves delete responses carry OOB count markup and the existing toggle-count OOB behavior still passes.
+- [x] Successful `DELETE /api/todos/{todo_id}` responses remain compatible with the current `htmx.ajax(..., { target: '#todo-{id}', swap: 'delete' })` contract in `src/app/static/js/app.js`.
+- [x] Sidebar count updates continue targeting the existing `id="list-<list_id>-count"` element rendered by `src/app/templates/partials/todo_list_item.html`.
+- [x] Automated regression coverage proves delete responses carry OOB count markup and the existing toggle-count OOB behavior still passes.
 
 
 ## Scope & Boundaries
@@ -116,15 +116,15 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Existing
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful delete responses remove the todo row and carry the sidebar count OOB update
+- [x] **TI01** Successful delete responses remove the todo row and carry the sidebar count OOB update
   - Follow `src/app/routes/todos.py#toggle_todo`, `src/app/templates/partials/todo_item_with_oob.html`, and `src/app/static/js/app.js#confirmDeleteTodo`; reuse `src/app/templates/partials/todo_deleted_oob.html` if it satisfies the current `swap: 'delete'` contract.
   - **Verify**: A delete test proves `DELETE /api/todos/{todo_id}` returns `200` with `hx-swap-oob` markup that targets `id="list-<list_id>-count"`, and the existing delete interaction still removes the `#todo-{id}` row.
 
-- [ ] **TI02** Post-delete counts reflect the remaining incomplete todos in the owning `TodoList`
+- [x] **TI02** Post-delete counts reflect the remaining incomplete todos in the owning `TodoList`
   - Reuse `_get_list_todo_count` in `src/app/routes/todos.py`; compute the count after commit from the deleted todo's preserved `list_id` so incomplete, completed, and zero-state branches stay server-authoritative.
   - **Verify**: Route tests cover three cases - deleting an incomplete todo decrements the sidebar count, deleting a completed todo leaves it unchanged, and deleting the last incomplete todo returns an OOB badge value of `0`.
 
-- [ ] **TI03** Regression coverage locks the shared count-update contract across delete and toggle flows
+- [x] **TI03** Regression coverage locks the shared count-update contract across delete and toggle flows
   - Extend the existing route/integration tests in `tests/test_todos.py` and `tests/test_integration.py` instead of creating a parallel harness; keep the toggle OOB assertion green while adding delete-specific OOB assertions.
   - **Verify**: `uv run pytest tests/test_todos.py tests/test_integration.py -k "toggle or delete"` passes with delete responses asserting `hx-swap-oob` and toggle responses still asserting the same marker.
 

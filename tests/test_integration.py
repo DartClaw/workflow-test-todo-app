@@ -176,7 +176,29 @@ class TestUserJourneys:
         assert response.status_code == 200
 
         # Response should include OOB swap for count
-        assert b"hx-swap-oob" in response.content
+        body = response.content.decode()
+        assert 'hx-swap-oob="true"' in body
+        assert f'id="list-{test_list.id}-count"' in body
+        assert f'>{0}</span>' in body.replace(" ", "")
+
+    def test_todo_delete_updates_count(self, authenticated_client, test_list, db_session):
+        """Test that deleting a todo updates the list count via OOB swap."""
+        todo = Todo(
+            list_id=test_list.id,
+            title="Delete Count Todo",
+            position=0,
+            is_completed=False,
+        )
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{todo.id}")
+        assert response.status_code == 200
+
+        body = response.content.decode()
+        assert 'hx-swap-oob="true"' in body
+        assert f'id="list-{test_list.id}-count"' in body
+        assert f'>{0}</span>' in body.replace(" ", "")
 
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""
