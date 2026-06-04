@@ -45,7 +45,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edited-due-dates.md",
       "scope": "Persist due dates entered through the edit dialog so saving and reopening the same todo shows the stored date. Includes aligning the edit submission path with the dialog's date-only input and adding regression coverage for save-and-reopen behavior. Excludes due-today or overdue styling changes and excludes expanding due dates to time-of-day support.",
       "sourceRefs": [

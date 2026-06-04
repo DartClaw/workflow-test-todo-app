@@ -1,6 +1,6 @@
 """Tests for todo item routes."""
 
-from datetime import date, datetime, timezone
+from datetime import datetime
 
 import pytest
 
@@ -43,23 +43,60 @@ class TestTodos:
 
     def test_update_todo(self, authenticated_client, test_todo, db_session):
         """Test updating a todo."""
+        stored_due_date = "2025-12-31"
+
+        def assert_edit_payload(body, due_date):
+            assert (
+                f"openEditTodoDialog('{test_todo.id}', 'Updated Title', "
+                f"'Updated note', '{due_date}', 'high')" in body
+            )
+
         response = authenticated_client.put(
             f"/api/todos/{test_todo.id}",
             data={
                 "title": "Updated Title",
                 "note": "Updated note",
-                "due_date": "2025-12-31",
+                "due_date": stored_due_date,
                 "priority": "high",
             },
         )
         assert response.status_code == 200
+        assert f'data-todo-due-date="{stored_due_date}"' in response.text
+        assert b"Dec 31, 2025" in response.content
+        assert_edit_payload(response.text, stored_due_date)
 
         # Verify in database
         db_session.refresh(test_todo)
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
-        assert test_todo.due_date.year == 2025
+        assert test_todo.due_date == datetime(2025, 12, 31)
         assert test_todo.priority == "high"
+
+        reopen_response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert reopen_response.status_code == 200
+        assert f'data-todo-due-date="{stored_due_date}"' in reopen_response.text
+        assert_edit_payload(reopen_response.text, stored_due_date)
+
+        clear_response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Updated Title",
+                "note": "Updated note",
+                "due_date": "",
+                "priority": "high",
+            },
+        )
+        assert clear_response.status_code == 200
+        assert 'data-todo-due-date=""' in clear_response.text
+        assert b"Dec 31, 2025" not in clear_response.content
+        clear_reopen_response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert clear_reopen_response.status_code == 200
+        assert 'data-todo-due-date=""' in clear_reopen_response.text
+        assert_edit_payload(clear_reopen_response.text, "")
+
+        # Verify cleared in database
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""

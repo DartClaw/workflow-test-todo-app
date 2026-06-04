@@ -46,17 +46,17 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Edited todo saves a date-only due date and republishes it in the returned row**
+- [x] **S01 [OC01] [TI01,TI02] Edited todo saves a date-only due date and republishes it in the returned row**
   - **Given** an authenticated user opens an existing `Todo` in `#edit-todo-dialog`
   - **When** the form submits `PUT /api/todos/{id}` with `due_date=2025-12-31`
   - **Then** the persisted `Todo.due_date` becomes December 31, 2025 and the returned `#todo-{id}` HTML contains `data-todo-due-date="2025-12-31"` plus visible `Dec 31, 2025`
 
-- [ ] **S02 [OC02] [TI02] Reopening the saved todo pre-fills the edit dialog with the stored date**
+- [x] **S02 [OC02] [TI02] Reopening the saved todo pre-fills the edit dialog with the stored date**
   - **Given** the rendered `.todo-item` for that `Todo` includes `data-todo-due-date="2025-12-31"`
   - **When** the user activates `.edit-todo-btn` and `openEditTodoDialog(...)`
   - **Then** `#edit-todo-due-date` opens with value `2025-12-31`
 
-- [ ] **S03 [OC02] [TI01,TI02,TI03] Clearing an edited due date removes it from persistence and reopen state**
+- [x] **S03 [OC02] [TI01,TI02,TI03] Clearing an edited due date removes it from persistence and reopen state**
   - **Given** a `Todo` already stores `2025-12-31`
   - **When** the edit dialog submits `due_date` as an empty string
   - **Then** `Todo.due_date` becomes `None`, the returned `#todo-{id}` row omits the due-date badge and sets `data-todo-due-date=""`, and reopening leaves `#edit-todo-due-date` blank
@@ -64,8 +64,8 @@
 
 ## Structural Criteria
 
-- [ ] The edit-todo due-date contract stays `YYYY-MM-DD` across `src/app/templates/app.html#edit-todo-dialog`, `src/app/routes/todos.py#update_todo`, `src/app/templates/partials/todo_item.html`, and `src/app/static/js/app.js#openEditTodoDialog`.
-- [ ] Regression coverage in `tests/test_todos.py#TestTodos.test_update_todo` fails if date-only edit submissions are silently ignored and proves both persist and clear behavior using `tests/conftest.py#test_todo`.
+- [x] The edit-todo due-date contract stays `YYYY-MM-DD` across `src/app/templates/app.html#edit-todo-dialog`, `src/app/routes/todos.py#update_todo`, `src/app/templates/partials/todo_item.html`, and `src/app/static/js/app.js#openEditTodoDialog`.
+- [x] Regression coverage in `tests/test_todos.py#TestTodos.test_update_todo` fails if date-only edit submissions are silently ignored and proves both persist and clear behavior using `tests/conftest.py#test_todo`.
 
 
 ## Scope & Boundaries
@@ -121,15 +121,15 @@ file   | tests/test_todos.py#TestTodos.test_update_todo | Existing route-level r
 
 ### Implementation Tasks
 
-- [ ] **TI01** Edited todo saves the dialog's `YYYY-MM-DD` due date into the persisted Todo
+- [x] **TI01** Edited todo saves the dialog's `YYYY-MM-DD` due date into the persisted Todo
   - Follow the existing `src/app/templates/app.html#edit-todo-dialog` contract and `src/app/utils.py#format_date_input` as read-only references; `src/app/routes/todos.py#update_todo` must accept the existing browser date payload and persist it without changing the dialog contract.
   - **Verify**: `PUT /api/todos/{id}` with `due_date=2025-12-31` changes `Todo.due_date` to 2025-12-31 and the response HTML includes `data-todo-due-date="2025-12-31"`
 
-- [ ] **TI02** Returned todo rows and reopened edit dialogs carry the same persisted due date end-to-end
+- [x] **TI02** Returned todo rows and reopened edit dialogs carry the same persisted due date end-to-end
   - Use `src/app/templates/partials/todo_item.html` and `src/app/static/js/app.js#openEditTodoDialog` as verification surfaces only; TI01's stored value must continue to flow through `format_date_input(todo.due_date)` without introducing a new client-side date transformation path or claiming ownership of those shared files.
   - **Verify**: after saving `2025-12-31`, the row shows `Dec 31, 2025`, `.todo-item` exposes `data-todo-due-date="2025-12-31"`, and reopening sets `#edit-todo-due-date` to `2025-12-31`
 
-- [ ] **TI03** Edited due-date regression coverage proves persist and clear behavior on the existing fixture
+- [x] **TI03** Edited due-date regression coverage proves persist and clear behavior on the existing fixture
   - Extend `tests/test_todos.py#TestTodos.test_update_todo` or adjacent route-level coverage; reuse `tests/conftest.py#test_todo` and keep the assertions on edited due-date persistence rather than S02's quick-add default-priority behavior.
   - **Verify**: test coverage proves `due_date=2025-12-31` persists, and confirms a follow-up empty `due_date` clears the stored value and returned `data-todo-due-date=""`
 
