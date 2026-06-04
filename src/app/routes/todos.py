@@ -220,10 +220,10 @@ async def update_todo(
     todo.title = title.strip()
     todo.note = note.strip() if note else None
 
-    # Parse due date
+    # Parse due date (edit dialog submits YYYY-MM-DD)
     if due_date and due_date.strip():
         try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
+            todo.due_date = datetime.strptime(due_date, "%Y-%m-%d")
         except ValueError:
             pass  # Keep existing
     else:
