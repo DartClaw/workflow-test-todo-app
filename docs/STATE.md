@@ -9,14 +9,14 @@ Status: On Track
 
 ## Active Stories
 
-| Story | Status | FIS | Notes |
-|-------|--------|-----|-------|
-| S02 | Spec Ready | docs/specs/e2e-plan-and-implement/s02-default-quick-add-todos-to-low-priority.md | BUG-003 quick-add default Priority scoped to creation-time defaults |
+_(none)_
 
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 - **Plan bundle created** (2026-06-04): `docs/specs/e2e-plan-and-implement/plan.json` plus two story FIS files for BUG-002 and BUG-003
+- **Story S01 complete** (2026-06-04): `docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md` — edit-dialog due dates now persist across save and reopen, and blank Due Date submissions clear the stored value.
+- **Story S02 complete** (2026-06-04): `docs/specs/e2e-plan-and-implement/s02-default-quick-add-todos-to-low-priority.md` — quick-add todos now default to low priority at creation time.
 
 ## Blockers
 
@@ -31,4 +31,3 @@ _(none)_
 
 - Keep the `Commands` and `Architecture` sections of `CLAUDE.md` intact — they serve as the Project Overview for AndThen skills.
 - Authentication is **intentionally** simple (plain-text passwords, in-memory sessions). Do not "fix" without explicit direction.
-- 2026-06-04: S01 now saves YYYY-MM-DD edit dialog dates through update_todo, returns row metadata used by reopen handoff, and clears due dates on blank input.

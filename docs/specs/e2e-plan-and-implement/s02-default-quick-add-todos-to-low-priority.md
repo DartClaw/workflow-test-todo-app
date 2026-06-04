@@ -39,26 +39,26 @@
 
 > Scenario IDs are local to this FIS.
 
-- [ ] **S01 [OC01,OC03] [TI01,TI02] Quick-add creates a new Todo with Low priority immediately visible**
+- [x] **S01 [OC01,OC03] [TI01,TI02] Quick-add creates a new Todo with Low priority immediately visible**
   - **Given** an authenticated User submits the existing quick-add form with only `list_id` and `title`
   - **When** `/api/todos` creates the Todo through the current title-only flow
   - **Then** the new row is appended, the sidebar count update still returns, and the row renders with Low priority metadata instead of a blank Priority state
 
-- [ ] **S02 [OC01,OC02] [TI01,TI02] A newly quick-added Todo reopens with Low selected in Edit**
+- [x] **S02 [OC01,OC02] [TI01,TI02] A newly quick-added Todo reopens with Low selected in Edit**
   - **Given** a Todo was created through quick-add without any explicit Priority input
   - **When** the user opens Edit on that newly rendered row
   - **Then** the row metadata driving the dialog resolves the selector to Low instead of an empty value
 
-- [ ] **S03 [OC03] [TI03] Blank-title quick-add rejection still prevents creation**
+- [x] **S03 [OC03] [TI03] Blank-title quick-add rejection still prevents creation**
   - **Given** the quick-add form is submitted with a title containing only whitespace
   - **When** the request is processed
   - **Then** no new Todo is created and the existing title-required validation error still returns
 
 ## Structural Criteria
 
-- [ ] Newly quick-added Todos no longer persist `NULL` Priority values when creation omits the field.
-- [ ] BUG-003 proof lives in a dedicated quick-add regression surface so S02 remains merge-safe with S01.
-- [ ] Existing `create_todo` HTMX response behavior, including the appended row and OOB sidebar count update, remains intact while the default Priority becomes canonical.
+- [x] Newly quick-added Todos no longer persist `NULL` Priority values when creation omits the field.
+- [x] BUG-003 proof lives in a dedicated quick-add regression surface so S02 remains merge-safe with S01.
+- [x] Existing `create_todo` HTMX response behavior, including the appended row and OOB sidebar count update, remains intact while the default Priority becomes canonical.
 
 ## Scope & Boundaries
 
@@ -105,15 +105,15 @@ file   | tests/test_todos.py#TestTodos.test_create_todo   | Existing quick-add r
 
 ### Implementation Tasks
 
-- [ ] **TI01** Newly created Todo records default Priority to `low` when quick-add omits it
+- [x] **TI01** Newly created Todo records default Priority to `low` when quick-add omits it
   - Center the change on `src/app/database.py#Todo`; keep `src/app/routes/todos.py#create_todo` as the title-only creation flow and avoid taking ownership of `src/app/routes/todos.py#update_todo`
   - **Verify**: `uv run pytest tests/test_todo_quick_add_priority.py::test_quick_add_defaults_priority_to_low -q`
 
-- [ ] **TI02** Newly quick-added todo rows expose the Low-priority metadata the existing dialog expects
+- [x] **TI02** Newly quick-added todo rows expose the Low-priority metadata the existing dialog expects
   - Reuse `src/app/routes/todos.py#create_todo`, `src/app/templates/partials/todo_item.html`, and `src/app/static/js/app.js#openEditTodoDialog`; the created row must expose `priority-low`, `Low`, and `data-todo-priority="low"` without changing the dialog shell
   - **Verify**: `uv run pytest tests/test_todo_quick_add_priority.py::test_quick_add_response_includes_low_priority_metadata -q`
 
-- [ ] **TI03** BUG-003 proof remains isolated to a dedicated quick-add regression surface
+- [x] **TI03** BUG-003 proof remains isolated to a dedicated quick-add regression surface
   - Add or move the focused creation tests into `tests/test_todo_quick_add_priority.py` so the story proves defaulting, dialog metadata, and blank-title rejection without sharing a regression file with S01
   - **Verify**: `uv run pytest tests/test_todo_quick_add_priority.py -q`
 
