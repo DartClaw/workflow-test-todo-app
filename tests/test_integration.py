@@ -178,6 +178,36 @@ class TestUserJourneys:
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
 
+    def test_todo_delete_updates_count(self, authenticated_client, test_list, db_session):
+        """Test that deleting todos updates or preserves sidebar count via OOB swap."""
+        active_todo = Todo(
+            list_id=test_list.id,
+            title="Count Active Todo",
+            position=0,
+        )
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Count Completed Todo",
+            is_completed=True,
+            position=1,
+        )
+        db_session.add_all([active_todo, completed_todo])
+        db_session.commit()
+
+        # Delete active todo should decrement count to zero
+        response = authenticated_client.delete(f"/api/todos/{active_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert f'id="list-{test_list.id}-count"'.encode() in response.content
+        assert b">0</span>" in response.content
+
+        # Delete completed todo should keep count at zero
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert f'id="list-{test_list.id}-count"'.encode() in response.content
+        assert b">0</span>" in response.content
+
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""
         # Create todos with different titles

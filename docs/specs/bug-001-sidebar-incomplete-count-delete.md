@@ -42,22 +42,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Deleting an incomplete Todo decrements the active TodoList count**
+- [x] **S01 [OC01] [TI01,TI02] Deleting an incomplete Todo decrements the active TodoList count**
   - **Given** an authenticated User is viewing `/app/lists/{list_id}` and the sidebar badge for that TodoList currently shows `2`
   - **When** the User deletes one incomplete Todo from the active list
   - **Then** `DELETE /api/todos/{todo_id}` returns `200`, includes `hx-swap-oob="true"` for `id="list-{list_id}-count"`, and the sidebar badge becomes `1` without a full page reload
 
-- [ ] **S02 [OC02] [TI01,TI02] Deleting a completed Todo leaves the incomplete-count unchanged**
+- [x] **S02 [OC02] [TI01,TI02] Deleting a completed Todo leaves the incomplete-count unchanged**
   - **Given** an authenticated User is viewing a TodoList with one incomplete Todo, one completed Todo, and the sidebar badge currently shows `1`
   - **When** the User deletes the completed Todo
   - **Then** the delete response returns `200`, includes `id="list-{list_id}-count">1<`, and the sidebar badge still shows `1`
 
-- [ ] **S03 [OC01,OC02] [TI01,TI02] Deleting the last incomplete Todo drives the badge to zero**
+- [x] **S03 [OC01,OC02] [TI01,TI02] Deleting the last incomplete Todo drives the badge to zero**
   - **Given** the Todo being deleted is the only remaining incomplete Todo in the active TodoList
   - **When** the User deletes that Todo
   - **Then** the delete response returns `200` with `id="list-{list_id}-count">0<` and the sidebar badge shows `0` immediately
 
-- [ ] **S04 [OC03] [TI03] Failed delete requests do not emit a sidebar count fragment**
+- [x] **S04 [OC03] [TI03] Failed delete requests do not emit a sidebar count fragment**
   - **Given** a delete request targets a missing Todo ID or a Todo owned by another User
   - **When** the request is sent to `DELETE /api/todos/{todo_id}`
   - **Then** the response keeps the existing `404` or `403` status-only contract and does not include `hx-swap-oob` or a `list-{list_id}-count` fragment
@@ -67,9 +67,9 @@
 
 > Non-behavioral proof requirements: invariants, regression guards, and structural checks that hold true when done. Each criterion is proved by a task Verify line, not a scenario.
 
-- [ ] Successful delete responses stay HTMX-first HTML fragments rather than introducing JSON or client-side count recalculation.
-- [ ] The sidebar count after delete is derived from the existing incomplete-only count helper so create, toggle, and delete share one counting rule.
-- [ ] Regression coverage exercises incomplete delete, completed delete, and rejection delete paths.
+- [x] Successful delete responses stay HTMX-first HTML fragments rather than introducing JSON or client-side count recalculation.
+- [x] The sidebar count after delete is derived from the existing incomplete-only count helper so create, toggle, and delete share one counting rule.
+- [x] Regression coverage exercises incomplete delete, completed delete, and rejection delete paths.
 
 
 ## Scope & Boundaries
@@ -125,19 +125,19 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Existing
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful todo deletions return the refreshed sidebar incomplete-count as an HTMX fragment
+- [x] **TI01** Successful todo deletions return the refreshed sidebar incomplete-count as an HTMX fragment
   - Follow `src/app/routes/todos.py#toggle_todo` and `src/app/templates/partials/todo_item_with_oob.html:1-4` for the OOB response contract; `src/app/static/js/app.js:170-173` already deletes the Todo row client-side, so the successful server response only needs the OOB sidebar fragment
   - **Verify**: `tests/test_todos.py::TestTodos::test_delete_incomplete_todo_returns_oob_count` proves `DELETE /api/todos/{todo_id}` returns `200`, includes `hx-swap-oob="true"`, and includes `id="list-{list_id}-count">0<` when the deleted Todo was the only incomplete Todo
 
-- [ ] **TI02** Delete count behavior stays aligned with the app's incomplete-only counting rule
+- [x] **TI02** Delete count behavior stays aligned with the app's incomplete-only counting rule
   - Reuse `src/app/routes/todos.py#_get_list_todo_count` and the `src/app/templates/partials/todo_list_item.html:20` badge target so delete, create, and toggle all derive the sidebar count from the same incomplete-only contract
   - **Verify**: `tests/test_todos.py::TestTodos::test_delete_completed_todo_keeps_incomplete_count` proves deleting a completed Todo leaves `id="list-{list_id}-count">1<` unchanged while the Todo is removed from the database
 
-- [ ] **TI03** Failed delete requests preserve the current status-only contract
+- [x] **TI03** Failed delete requests preserve the current status-only contract
   - Keep `src/app/routes/todos.py#delete_todo` aligned with its existing `Response(status_code=404|403)` behavior for missing or unauthorized deletes, even though other routes often render `partials/error.html`; only successful deletes should emit the OOB fragment
   - **Verify**: `tests/test_todos.py::TestTodoAccess::test_delete_other_users_todo_returns_403_without_oob` and `tests/test_todos.py::TestTodos::test_delete_missing_todo_returns_404_without_oob` prove `403/404` delete responses have empty bodies and no `hx-swap-oob`
 
-- [ ] **TI04** Regression coverage proves delete-driven count refresh in route and integration flows
+- [x] **TI04** Regression coverage proves delete-driven count refresh in route and integration flows
   - Extend the count-response coverage pattern at `tests/test_integration.py#test_todo_completion_updates_count` so delete is checked alongside toggle at the HTMX response level
   - **Verify**: `uv run pytest tests/test_todos.py tests/test_integration.py -k "delete or count"` passes with assertions covering incomplete delete, completed delete, and OOB markup presence
 
@@ -159,6 +159,10 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Existing
 
 ## Implementation Observations
 
-> _Managed by exec-spec post-implementation – append-only. Tag semantics: see [`data-contract.md`](data-contract.md) (FIS Mutability Contract, tag definitions). AUTO_MODE assumption-recording: see [`automation-mode.md`](automation-mode.md). Spec authors: leave this section empty._
+Implemented delete-path OOB synchronization and count-derivation consistency in `delete_todo`, with no behavior change to 403/404 status-only failures.  
+[TI01] `delete_todo` now returns `partials/todo_deleted_oob.html` after successful deletion, using the existing `list_obj` and recalculated incomplete count from `_get_list_todo_count`.  
+[TI02] `todo_deleted_oob.html` now binds to `list.id` to match sidebar target `id="list-{list.id}-count"`; incomplete-only counting remains centralized in `_get_list_todo_count`.  
+[TI03] Error contracts preserved with `Response(status_code=403|404)` and no body for unauthorized/missing deletes.  
+[TI04] Regression tests added/updated in `tests/test_todos.py` and `tests/test_integration.py`, and delete count scenarios are covered by `uv run pytest tests/test_todos.py tests/test_integration.py -k "delete or count"`.
 
 _No observations recorded yet._
