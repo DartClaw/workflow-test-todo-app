@@ -15,6 +15,7 @@ Status: On Track
 
 ## Recently Completed
 
+- **S02 Default quick-add priority** (2026-06-04): Quick-add omission of priority now persists `low`, while BUG-003 dedicated regression tests and UI smoke confirm visible priority styling and edit-dialog preselection remain correct without touching S01-owned due-date surfaces.
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 
 ## Blockers

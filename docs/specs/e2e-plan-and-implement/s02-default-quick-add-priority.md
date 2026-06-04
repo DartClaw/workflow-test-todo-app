@@ -46,17 +46,17 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Quick-add renders a new todo with the documented default priority**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Quick-add renders a new todo with the documented default priority**
   - **Given** an authenticated user is viewing a `TodoList` and submits the quick-add form with only `list_id` and `title`
   - **When** `POST /api/todos` creates the new `Todo`
   - **Then** the appended todo row shows the `Low` priority badge, applies the `priority-low` styling/data contract, and still includes the list-count OOB swap used by the quick-add response
 
-- [ ] **S02 [OC02] [TI02] Reopening the edit dialog shows the stored default priority instead of a blank selector**
+- [x] **S02 [OC02] [TI02] Reopening the edit dialog shows the stored default priority instead of a blank selector**
   - **Given** a `Todo` was created through quick-add without any explicit priority input
   - **When** the user opens the edit dialog from that todo row
   - **Then** the dialog's Priority select is pre-populated to `low`, not left empty, because the existing row and dialog consumers receive the stored priority unchanged
 
-- [ ] **S03 [OC01,OC03] [TI01,TI02] Quick-add omission of priority remains a supported input shape**
+- [x] **S03 [OC01,OC03] [TI01,TI02] Quick-add omission of priority remains a supported input shape**
   - **Given** the quick-add form continues to submit only `list_id` and `title`
   - **When** the create route persists a new `Todo` and the list is fetched again later
   - **Then** the stored `Todo.priority` remains `low` rather than `NULL` or empty, so later renders keep the same priority contract without adding a new quick-add priority field
@@ -64,9 +64,9 @@
 
 ## Structural Criteria
 
-- [ ] The quick-add create flow continues to return the existing HTML partial response shape (`partials/todo_item_with_oob.html`) while applying the priority default.
-- [ ] Regression coverage lives in a dedicated BUG-003 test file and proves both persistence and edit-dialog hydration without editing S01-owned surfaces.
-- [ ] Existing row and dialog consumers are verify-only unless proof shows the stored `low` value is still insufficient to hydrate the selector.
+- [x] The quick-add create flow continues to return the existing HTML partial response shape (`partials/todo_item_with_oob.html`) while applying the priority default.
+- [x] Regression coverage lives in a dedicated BUG-003 test file and proves both persistence and edit-dialog hydration without editing S01-owned surfaces.
+- [x] Existing row and dialog consumers are verify-only unless proof shows the stored `low` value is still insufficient to hydrate the selector.
 
 
 ## Scope & Boundaries
@@ -114,11 +114,11 @@ file   | tests/test_todos.py#TestTodos.test_create_todo | Pattern to mirror in a
 
 ### Implementation Tasks
 
-- [ ] **TI01** Quick-add created todos persist the canonical `low` priority when the request omits any priority field
+- [x] **TI01** Quick-add created todos persist the canonical `low` priority when the request omits any priority field
   - Follow `src/app/database.py#Todo` first and preserve the existing quick-add request shape and HTML/OOB response contract in `src/app/routes/todos.py#create_todo`; do not widen into edit-surface changes unless the stored default still fails proof.
   - **Verify**: `Test: POST /api/todos` with only `list_id` and `title` stores `Todo.priority == "low"` and the response markup contains visible `Low`.
 
-- [ ] **TI02** Dedicated BUG-003 regression proof covers response markup and reopened edit-dialog hydration
+- [x] **TI02** Dedicated BUG-003 regression proof covers response markup and reopened edit-dialog hydration
   - Add `tests/test_bug_003_quick_add_priority.py` using the existing create-todo test style as a pattern; assert `data-todo-priority="low"`, `priority-low`, the existing OOB count swap, and reopened dialog hydration without editing shared JavaScript or dialog markup unless the proof shows the stored value is insufficient.
   - **Verify**: `uv run pytest tests/test_bug_003_quick_add_priority.py -q` fails when quick-add leaves `Todo.priority` null/empty and passes only when the returned row and reopened dialog both carry `low`.
 
@@ -136,9 +136,9 @@ file   | tests/test_todos.py#TestTodos.test_create_todo | Pattern to mirror in a
 
 
 ## Final Validation Checklist
-- [ ] The implementation diff excludes S01-owned due-date persistence surfaces and any BUG-002 assertions.
-- [ ] The quick-add response still includes the list-count OOB swap while exposing visible `Low` priority and `data-todo-priority="low"`.
-- [ ] The bounded browser smoke confirms the reopened edit dialog preselects `low` for quick-add-created Todos.
+- [x] The implementation diff excludes S01-owned due-date persistence surfaces and any BUG-002 assertions.
+- [x] The quick-add response still includes the list-count OOB swap while exposing visible `Low` priority and `data-todo-priority="low"`.
+- [x] The bounded browser smoke confirms the reopened edit dialog preselects `low` for quick-add-created Todos.
 
 
 ## Implementation Observations

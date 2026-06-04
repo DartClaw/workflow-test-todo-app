@@ -66,7 +66,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-priority.md",
       "scope": "Ensure todos created through the quick-add form receive the documented default low priority so the created item and reopened edit dialog both show a stable priority without extra input. This story includes the quick-add creation path and regression coverage for newly created todos, while excluding changes to manual priority selection, due-date persistence, or unrelated todo defaults.",
       "sourceRefs": [
