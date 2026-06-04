@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "CLAUDE.md#architecture",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+    "docs/STACK.md"
+  ],
+  "overview": {
+    "summary": "This plan keeps the PRD's two-bug split intact and avoids introducing a shared prep story. Both stories stay in one execution phase and one wave because they are independently demoable and can be specified in parallel.\n\nThe merge-safety constraint is handled at the story boundary: BUG-002 stays on due-date edit persistence, while BUG-003 owns the no-priority creation default. If implementation reveals a shared-file dependency that breaks that isolation, the correct response is to stop and re-plan rather than widen both stories ad hoc.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Defect Slices",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Story ownership stays merge-safe",
+      "description": "S01 owns due-date persistence for edited todos; S02 owns the default priority applied when a todo is created without an explicit priority. Treat any overlap beyond those seams as a re-planning signal, not as permission to widen both stories.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "PRD",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Persist edited due dates",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edited-due-dates.md",
+      "scope": "Persist due dates entered through the edit dialog so saving and reopening the same todo shows the stored date. Includes aligning the edit submission path with the dialog's date-only input and adding regression coverage for save-and-reopen behavior. Excludes due-today or overdue styling changes and excludes expanding due dates to time-of-day support.",
+      "sourceRefs": [
+        "BUG-002",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "CLAUDE.md#architecture",
+        "docs/UBIQUITOUS_LANGUAGE.md#todo-domain"
+      ],
+      "notes": "The edit dialog submits a date-only value; keep ownership to the due-date edit persistence surface plus direct regression coverage."
+    },
+    {
+      "id": "S02",
+      "name": "Apply low priority to quick-add todos",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-apply-low-priority-to-quick-add-todos.md",
+      "scope": "Ensure quick-add created todos receive the documented default priority so the new row and the edit dialog both show Low immediately after creation. Includes setting the default at the no-priority creation seam and adding regression coverage for quick-add creation. Excludes changing available priority values or broader priority validation rules for edited todos.",
+      "sourceRefs": [
+        "BUG-003",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "CLAUDE.md#architecture",
+        "docs/UBIQUITOUS_LANGUAGE.md#todo-domain"
+      ],
+      "notes": "Prefer the source-of-truth no-priority creation seam over a JS fallback so this story stays out of due-date persistence handling."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Anchor the spec to the existing date-only edit dialog contract and require a save-and-reopen regression check so silent parse fallback cannot reappear."
+    }
+  ],
+  "executionNotes": "Both stories are intentionally thin and parallelizable. Preserve the merge-safe split by keeping S01 on edited due-date persistence and S02 on the no-priority creation default. If either fix cannot stay within that ownership boundary, stop and re-plan instead of letting both stories edit the same seam opportunistically."
+}
