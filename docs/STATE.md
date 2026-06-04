@@ -12,7 +12,6 @@ Status: On Track
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
 | S01 | Spec Ready | docs/specs/e2e-plan-and-implement/s01-edit-dialog-due-date-persistence.md | BUG-002 due-date persistence on edit/update path |
-| S02 | Spec Ready | docs/specs/e2e-plan-and-implement/s02-quick-add-default-priority.md | BUG-003 quick-add default priority on create/default path |
 
 ## Recently Completed
 
