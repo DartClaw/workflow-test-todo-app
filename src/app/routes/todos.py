@@ -37,6 +37,14 @@ def _get_list_todo_count(db: Session, list_id: str) -> int:
     ).scalar()
 
 
+def _parse_due_date(due_date: str | None) -> datetime | None:
+    """Normalize and parse due dates from the edit dialog."""
+    normalized_due_date = (due_date or "").strip()
+    if not normalized_due_date:
+        return None
+    return datetime.strptime(normalized_due_date, "%Y-%m-%d")
+
+
 @router.get("/search", response_class=HTMLResponse)
 async def search_todos(
     request: Request,
@@ -221,13 +229,15 @@ async def update_todo(
     todo.note = note.strip() if note else None
 
     # Parse due date
-    if due_date and due_date.strip():
-        try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass  # Keep existing
-    else:
-        todo.due_date = None
+    try:
+        todo.due_date = _parse_due_date(due_date)
+    except ValueError:
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/error.html",
+            context={"error": "Invalid due date format"},
+            status_code=400,
+        )
 
     todo.priority = priority
     db.commit()

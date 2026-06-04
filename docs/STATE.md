@@ -16,6 +16,7 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S01 Persist edited due dates** (2026-06-04): Edit flow now persists, rehydrates, and clears due dates using the existing `YYYY-MM-DD` contract. `tests/test_bug_002_due_date_persistence.py` added.
 
 ## Blockers
 

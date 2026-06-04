@@ -46,7 +46,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edited-due-dates.md",
       "scope": "Ensure the todo edit dialog saves due dates in a format that persists to storage and repopulates when the same todo is reopened. This story includes the broken edit-flow persistence path and regression coverage for stored and redisplayed due dates, while excluding quick-add defaults, overdue styling, and broader date-handling normalization outside the BUG-002 behavior.",
       "sourceRefs": [

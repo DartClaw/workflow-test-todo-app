@@ -42,17 +42,17 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Saved due date survives the existing edit flow**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Saved due date survives the existing edit flow**
   - **Given** an authenticated user opens the existing edit dialog for a Todo with no Due Date
   - **When** the user submits the dialog with `due_date=2025-12-31`
   - **Then** the Todo stores that Due Date and the returned todo partial exposes `data-todo-due-date="2025-12-31"` so reopening the same Todo shows `2025-12-31` in the date field
 
-- [ ] **S02 [OC01,OC02] [TI01,TI02] Editing other fields does not blank an already stored due date**
+- [x] **S02 [OC01,OC02] [TI01,TI02] Editing other fields does not blank an already stored due date**
   - **Given** an authenticated user has a Todo whose stored Due Date is `2025-12-31`
   - **When** the user reopens the existing edit dialog, changes title or note, and saves while leaving the due date field unchanged
   - **Then** the Todo keeps the same Due Date instead of losing it to a parse mismatch, and the refreshed row still reopens with `2025-12-31` populated
 
-- [ ] **S03 [OC03] [TI01,TI02] Clearing the optional due date still removes it**
+- [x] **S03 [OC03] [TI01,TI02] Clearing the optional due date still removes it**
   - **Given** an authenticated user opens the existing edit dialog for a Todo with a stored Due Date
   - **When** the user clears the date field and saves
   - **Then** the Todo stores no Due Date and reopening the same Todo shows an empty date field
@@ -60,9 +60,9 @@
 
 ## Structural Criteria
 
-- [ ] The edit-flow fix remains isolated to BUG-002 surfaces and does not change quick-add Priority defaults, overdue styling, or unrelated date normalization.
-- [ ] The existing `data-todo-due-date="YYYY-MM-DD"` row contract is treated as verify-only unless a failing proof shows the current template output is wrong.
-- [ ] Regression coverage lives in a dedicated BUG-002 test file and proves persistence, dialog rehydration, and the explicit clear-date path.
+- [x] The edit-flow fix remains isolated to BUG-002 surfaces and does not change quick-add Priority defaults, overdue styling, or unrelated date normalization.
+- [x] The existing `data-todo-due-date="YYYY-MM-DD"` row contract is treated as verify-only unless a failing proof shows the current template output is wrong.
+- [x] Regression coverage lives in a dedicated BUG-002 test file and proves persistence, dialog rehydration, and the explicit clear-date path.
 
 
 ## Scope & Boundaries
@@ -109,11 +109,11 @@ file   | tests/test_todos.py#TestTodos.test_update_todo | Pattern to mirror in a
 
 ### Implementation Tasks
 
-- [ ] **TI01** Edit-dialog Due Date submissions persist using the existing date-only contract
+- [x] **TI01** Edit-dialog Due Date submissions persist using the existing date-only contract
   - Adjust `src/app/routes/todos.py#update_todo` so the route accepts the same `YYYY-MM-DD` value produced by `src/app/utils.py#format_date_input`; keep the empty-string path clearing `Todo.due_date` and keep the change confined to BUG-002 edit-flow behavior.
   - **Verify**: A todo updated through `PUT /api/todos/{todo_id}` with `due_date=2025-12-31` stores a Due Date whose formatted input value is exactly `2025-12-31`, and submitting `due_date=` still stores `None`.
 
-- [ ] **TI02** Dedicated BUG-002 regression proof covers persistence, rehydration, and clear-date behavior
+- [x] **TI02** Dedicated BUG-002 regression proof covers persistence, rehydration, and clear-date behavior
   - Add `tests/test_bug_002_due_date_persistence.py` using the existing route-test style as a pattern; assert the returned row still carries `data-todo-due-date="2025-12-31"` after save and an empty value after clear, without editing shared template or JavaScript surfaces unless the proof shows they are wrong.
   - **Verify**: `uv run pytest tests/test_bug_002_due_date_persistence.py -q` fails against the swallowed-format behavior and passes only when edited Due Dates persist, rehydrate, and clear correctly.
 
@@ -131,9 +131,9 @@ file   | tests/test_todos.py#TestTodos.test_update_todo | Pattern to mirror in a
 
 
 ## Final Validation Checklist
-- [ ] The implementation diff excludes S02-owned quick-add default surfaces and any BUG-003 assertions.
-- [ ] The post-save row still exposes `data-todo-due-date="YYYY-MM-DD"` for persisted dates and an empty value after clearing.
-- [ ] The bounded browser smoke confirms reopened-dialog hydration for both persisted and cleared Due Date values.
+- [x] The implementation diff excludes S02-owned quick-add default surfaces and any BUG-003 assertions.
+- [x] The post-save row still exposes `data-todo-due-date="YYYY-MM-DD"` for persisted dates and an empty value after clearing.
+- [x] The bounded browser smoke confirms reopened-dialog hydration for both persisted and cleared Due Date values.
 
 
 ## Implementation Observations
