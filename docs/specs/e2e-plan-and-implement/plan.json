@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+    "CLAUDE.md#architecture",
+    "docs/STACK.md",
+    "docs/guidelines/CRITICAL-RULES-AND-GUARDRAILS.md"
+  ],
+  "overview": {
+    "summary": "This plan keeps BUG-002 and BUG-003 as two independent vertical defect slices that can execute in parallel in a single wave. S01 restores due-date persistence through the existing edit flow, while S02 restores the documented default priority for quick-add todos without depending on S01.\n\nThe PRD's conflict-free merge constraint is stronger than the absolute smallest patch size, so the plan biases toward non-overlapping ownership. Each story owns its own regression surface and avoids opportunistic dialog or template cleanup unless the story's defect cannot be resolved server-side.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent defect slices",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Bias toward merge-isolated ownership",
+      "description": "To satisfy the PRD's conflict-free merge constraint, S01 owns the due-date edit/update path while S02 owns the model-level default-priority source of truth and separate regression coverage, even where a smaller shared-file edit would be possible.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "title": "Preserve the existing HTMX partial contract",
+      "description": "Both stories keep the current server-rendered partial flow intact and avoid dialog JavaScript or template edits unless a server-side fix cannot satisfy the defect.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "PRD-CONSTRAINT-01",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "BUG-002 due date persistence in edit flow",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-bug-002-due-date-persistence-in-edit-flow.md",
+      "scope": "Restore due-date persistence for todos edited through the existing dialog so a saved date remains stored, rendered back into the todo row, and available when the dialog is reopened. Includes the edit submission path and rendered todo fragment for that path; excludes due-date styling corrections and any changes to quick-add or priority behavior.",
+      "sourceRefs": [
+        "BUG-002",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+        "CLAUDE.md#architecture"
+      ],
+      "notes": "Own the update-path change plus a dedicated due-date regression file so this story does not need to share quick-add or priority edit surfaces."
+    },
+    {
+      "id": "S02",
+      "name": "BUG-003 quick-add default priority",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-bug-003-quick-add-default-priority.md",
+      "scope": "Ensure todos created from the quick-add field receive the documented default priority so the created row and the later edit dialog show a valid default selection. Includes the quick-add creation path and regression coverage for default-priority behavior; excludes due-date parsing and broader todo-editor cleanup.",
+      "sourceRefs": [
+        "BUG-003",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+        "CLAUDE.md#architecture"
+      ],
+      "notes": "Prefer the model-level default-priority source of truth plus a dedicated regression file so this story can merge cleanly alongside the due-date fix."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Prove that a YYYY-MM-DD value persists in storage and round-trips through the rendered todo fragment without widening into unrelated dialog cleanup."
+    },
+    {
+      "story": "S02",
+      "risk": "medium",
+      "mitigation": "Anchor the default at the model-level source of truth and add quick-add regression coverage that proves the created row and first edit-dialog open both resolve to low priority without shared-file edits."
+    }
+  ],
+  "executionNotes": "Execute S01 and S02 in parallel. Preserve the PRD's merge-isolation constraint by keeping regression coverage in story-owned test files and by avoiding opportunistic edits to shared dialog or template code unless a story cannot be completed server-side."
+}
