@@ -76,7 +76,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-todos-to-low-priority.md",
       "scope": "Ensure a Todo created through the quick-add flow receives the documented default Priority so the item renders and reopens with a populated selector. Includes creation-time defaulting and a focused regression check; excludes edit-dialog date parsing and broader priority UX changes.",
       "sourceRefs": [
