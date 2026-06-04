@@ -11,12 +11,12 @@ Status: On Track
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| S01 | Spec Ready | docs/specs/e2e-plan-and-implement/s01-edit-dialog-due-date-persistence.md | BUG-002 due-date persistence on edit/update path |
 | S02 | Spec Ready | docs/specs/e2e-plan-and-implement/s02-quick-add-default-priority.md | BUG-003 quick-add default priority on create/default path |
 
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S01 completed** (2026-06-04): Edit-dialog due-date persistence implemented and story test file added under `tests/test_bug_002_due_date_persistence.py`.
 
 ## Blockers
 

@@ -89,15 +89,17 @@ async def create_todo(
             status_code=404,
         )
 
+    normalized_title = title.strip()
+
     # Validate title
-    if not title.strip():
+    if not normalized_title:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
             context={"error": "Title is required"},
         )
 
-    if len(title) > 200:
+    if len(normalized_title) > 200:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
@@ -197,15 +199,18 @@ async def update_todo(
             status_code=403,
         )
 
+    normalized_title = title.strip()
+    normalized_due_date = (due_date or "").strip()
+
     # Validate title
-    if not title.strip():
+    if not normalized_title:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
             context={"error": "Title is required"},
         )
 
-    if len(title) > 200:
+    if len(normalized_title) > 200:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
@@ -216,18 +221,22 @@ async def update_todo(
     if priority not in ("low", "medium", "high"):
         priority = "low"
 
-    # Update fields
-    todo.title = title.strip()
-    todo.note = note.strip() if note else None
-
-    # Parse due date
-    if due_date and due_date.strip():
+    if normalized_due_date:
         try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
+            parsed_due_date = datetime.strptime(normalized_due_date, "%Y-%m-%d")
         except ValueError:
-            pass  # Keep existing
+            return templates.TemplateResponse(
+                request=request,
+                name="partials/error.html",
+                context={"error": "Invalid due date format. Use YYYY-MM-DD."},
+            )
     else:
-        todo.due_date = None
+        parsed_due_date = None
+
+    # Update fields
+    todo.title = normalized_title
+    todo.note = note.strip() if note else None
+    todo.due_date = parsed_due_date
 
     todo.priority = priority
     db.commit()
