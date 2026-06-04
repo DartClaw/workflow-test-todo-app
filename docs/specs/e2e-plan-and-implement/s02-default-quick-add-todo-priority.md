@@ -52,31 +52,31 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Quick-added todo appears as Low immediately after creation**
+- [x] **S01 [OC01] [TI01,TI02] Quick-added todo appears as Low immediately after creation**
   - **Given** an authenticated user is viewing a `TodoList` that uses the existing quick-add form
   - **When** the user submits `POST /api/todos` with only `list_id` and `title`
   - **Then** the new `Todo` is stored with priority `low`, the appended fragment renders `priority-low` and a `Low` badge, and reopening Edit Todo shows Low preselected
 
-- [ ] **S02 [OC02] [TI02] Legacy missing-priority todo no longer opens with a blank selector**
+- [x] **S02 [OC02] [TI02] Legacy missing-priority todo no longer opens with a blank selector**
   - **Given** an existing `Todo` row has no stored priority
   - **When** its `todo_item` fragment is rendered and the user opens Edit Todo from that row
   - **Then** the rendered fragment exposes the same normalized Low value in its CSS class, badge text, `data-todo-priority`, and inline `openEditTodoDialog(..., priority)` argument, and the dialog shows Low instead of an empty selection
 
-- [ ] **S03 [OC03] [TI02] Explicit priorities survive the fallback path unchanged**
+- [x] **S03 [OC03] [TI02] Explicit priorities survive the fallback path unchanged**
   - **Given** an existing `Todo` already has priority `medium` or `high`
   - **When** its row is rendered and reopened in the edit dialog
   - **Then** the existing priority remains unchanged in the badge text, CSS class, metadata, and selected option rather than being coerced to Low
 
-- [ ] **S04 [OC01] [TI01] Missing quick-add priority input is accepted without a client contract change**
+- [x] **S04 [OC01] [TI01] Missing quick-add priority input is accepted without a client contract change**
   - **Given** the quick-add form continues to submit only `list_id` and `title`
   - **When** the create flow builds and saves the new `Todo` without a submitted `priority` field
   - **Then** the request succeeds without a validation error and the returned HTMX fragment still includes the existing out-of-band incomplete-count update
 
 ## Structural Criteria
 
-- [ ] Quick-add defaulting is enforced without changing the client-side quick-add contract, and the `todo_item_with_oob` response shape remains intact.
-- [ ] The rendered todo-item priority contract is total: CSS class token, badge text, `data-todo-priority`, the inline `openEditTodoDialog(..., priority)` argument, and the edit-dialog priority input never surface a blank value for a missing stored priority.
-- [ ] Focused regression coverage exists in an S02-owned test file for quick-add default persistence, legacy null-priority fallback behavior, and preservation of explicit non-low priorities.
+- [x] Quick-add defaulting is enforced without changing the client-side quick-add contract, and the `todo_item_with_oob` response shape remains intact.
+- [x] The rendered todo-item priority contract is total: CSS class token, badge text, `data-todo-priority`, the inline `openEditTodoDialog(..., priority)` argument, and the edit-dialog priority input never surface a blank value for a missing stored priority.
+- [x] Focused regression coverage exists in an S02-owned test file for quick-add default persistence, legacy null-priority fallback behavior, and preservation of explicit non-low priorities.
 
 ## Scope & Boundaries
 
@@ -120,15 +120,15 @@ file   | tests/conftest.py#test_todo                    | Fixture pattern for To
 
 ### Implementation Tasks
 
-- [ ] **TI01** Quick-add-created Todos always persist with the documented Low Priority
+- [x] **TI01** Quick-add-created Todos always persist with the documented Low Priority
   - Set the stored default in `src/app/database.py#Todo` so creating `Todo(...)` without a submitted Priority still saves `low`; preserve the quick-add request contract and the `partials/todo_item_with_oob.html` response wrapper.
   - **Verify**: `Test: POST /api/todos` with only `list_id` and `title` creates a `Todo` whose `priority == "low"` and returns HTML containing `priority-low`, `data-todo-priority="low"`, `Low`, and `hx-swap-oob="true"`.
 
-- [ ] **TI02** Todo-item rendering always provides a usable Priority value to the edit flow
+- [x] **TI02** Todo-item rendering always provides a usable Priority value to the edit flow
   - Follow `src/app/templates/partials/todo_item.html:1-47`; keep Due Date behavior untouched while ensuring missing stored Priority data renders as one normalized Low value everywhere the fragment exposes Priority, including the inline `openEditTodoDialog(..., priority)` argument, without coercing explicit `medium` or `high` values.
   - **Verify**: `Test: rendering a Todo with missing Priority yields priority-low, data-todo-priority="low", a Low badge, and an inline openEditTodoDialog argument containing "low", while a Todo seeded with priority="high" still yields priority-high, data-todo-priority="high", High, and an inline argument containing "high".`
 
-- [ ] **TI03** Priority default regressions are pinned in an S02-owned test file
+- [x] **TI03** Priority default regressions are pinned in an S02-owned test file
   - Create `tests/test_bug_003_priority_defaults.py` with focused create/render cases; move or retire BUG-003 assertions from `tests/test_todos.py`, keep S01-owned Due Date persistence assertions out of the file, and include a case that proves opening Edit Todo from a legacy missing-Priority row selects Low rather than blank.
   - **Verify**: `Test: uv run pytest tests/test_bug_003_priority_defaults.py -q` passes with coverage for quick-add default persistence, legacy missing-Priority render fallback, and preservation of explicit non-low values.
 

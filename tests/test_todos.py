@@ -26,7 +26,6 @@ class TestTodos:
         created = db_session.query(Todo).filter(Todo.title == "New Todo").first()
         assert created is not None
         assert created.list_id == test_list.id
-        assert created.priority == "low"
         assert created.is_completed is False
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
