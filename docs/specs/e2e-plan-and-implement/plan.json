@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "CLAUDE.md#architecture",
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/STACK.md",
+    "docs/STATE.md",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain"
+  ],
+  "overview": {
+    "summary": "The bundle keeps both defects as independent, merge-safe vertical slices. BUG-002 stays on the existing todo edit-save path, while BUG-003 treats default Priority as a creation-time persistence invariant so the two stories can ship in the same wave without sharing implementation files.\n\nBecause the PRD only asks for two thin fixes and explicitly requires isolation, the plan uses a single execution phase with one parallel wave. The FIS files carry the detailed proof obligations that keep the scope narrow and confirm the ownership split survives execution.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Isolated defect fixes",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Preserve file-level isolation across the bug-fix bundle",
+      "description": "S01 owns the todo edit-save due-date path, while S02 enforces the quick-add default priority at the persistence boundary and in its own regression surface so both stories remain merge-safe.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "title": "Treat todo-row metadata handoff as a read-only shared seam",
+      "description": "S01 and S02 may verify metadata emitted by src/app/templates/partials/todo_item.html and consumed by src/app/static/js/app.js#openEditTodoDialog, but neither story owns edits to that seam; any required change breaks parallel execution and requires re-scoping or serialization.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "PRD-CONSTRAINT-1",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Persist edit-dialog due dates",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md",
+      "scope": "Ensure a Todo due date submitted from the edit dialog is parsed, saved, and rendered back into the dialog on subsequent edits. Includes the existing todo update flow and its regression proof; excludes quick-add defaults and overdue styling behavior.",
+      "sourceRefs": [
+        "BUG-002",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "docs/UBIQUITOUS_LANGUAGE.md#todo-domain"
+      ],
+      "notes": "Keep ownership centered on the existing edit-save path so the fix can land independently of the quick-add default-priority story."
+    },
+    {
+      "id": "S02",
+      "name": "Default quick-add todos to low priority",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-todos-to-low-priority.md",
+      "scope": "Ensure a Todo created through the quick-add flow receives the documented default Priority so the item renders and reopens with a populated selector. Includes creation-time defaulting and a focused regression check; excludes edit-dialog date parsing and broader priority UX changes.",
+      "sourceRefs": [
+        "BUG-003",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "docs/UBIQUITOUS_LANGUAGE.md#todo-domain"
+      ],
+      "notes": "Preserve merge-safety by keeping the default-priority fix out of the existing todo edit-save surface."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Prove the HTML date-input contract with a regression that saves a YYYY-MM-DD value, reloads the Todo, and reopens the edit dialog with the same date."
+    }
+  ],
+  "executionNotes": "Both stories are schedulable in P1/W1 because the bundle's binding constraint requires isolated implementation files. The todo-row metadata handoff between src/app/templates/partials/todo_item.html and src/app/static/js/app.js#openEditTodoDialog is a read-only shared seam for both stories; if either fix requires editing that seam, stop and re-scope or serialize execution. If S02 drifts into the todo edit-save surface, or S01 expands into quick-add behavior, stop and re-scope before execution."
+}
