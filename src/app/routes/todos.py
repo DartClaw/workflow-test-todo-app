@@ -302,8 +302,13 @@ async def delete_todo(
 
     db.delete(todo)
     db.commit()
+    count = _get_list_todo_count(db, todo.list_id)
 
-    return Response(status_code=200)
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/todo_deleted_oob.html",
+        context={"list": list_obj, "count": count},
+    )
 
 
 @router.post("/{todo_id}/reorder")

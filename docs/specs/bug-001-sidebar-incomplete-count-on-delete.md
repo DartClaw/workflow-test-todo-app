@@ -24,31 +24,31 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Incomplete todo deletion updates the sidebar badge immediately**
+- [x] **S01 [OC01] [TI01,TI02] Incomplete todo deletion updates the sidebar badge immediately**
   - **Given** an authenticated User is viewing a TodoList whose sidebar badge and visible Todo list both reflect one incomplete Todo
   - **When** the User confirms deletion of that incomplete Todo
   - **Then** the Todo row is removed and the same delete response applies an OOB Swap that replaces `#list-<TodoList.id>-count` with `0` without a full page reload
 
-- [ ] **S02 [OC01,OC02] [TI01,TI02] Completed todo deletion leaves the incomplete badge unchanged**
+- [x] **S02 [OC01,OC02] [TI01,TI02] Completed todo deletion leaves the incomplete badge unchanged**
   - **Given** an authenticated User is viewing a TodoList with a visible sidebar badge count and the Todo being deleted is already completed
   - **When** the User confirms deletion of that completed Todo
   - **Then** the Todo row is removed and the delete response preserves the existing value rendered into `#list-<TodoList.id>-count`
 
-- [ ] **S03 [OC03] [TI01,TI03] Unauthorized delete keeps the sidebar unchanged**
+- [x] **S03 [OC03] [TI01,TI03] Unauthorized delete keeps the sidebar unchanged**
   - **Given** User A is authenticated and a Todo belongs to User B's TodoList
   - **When** User A sends `DELETE /api/todos/{todo_id}`
   - **Then** the route keeps the current forbidden behavior and does not return an OOB fragment that could mutate User A's sidebar badge
 
-- [ ] **S04 [OC03] [TI01,TI03] Missing-todo delete returns no count mutation**
+- [x] **S04 [OC03] [TI01,TI03] Missing-todo delete returns no count mutation**
   - **Given** an authenticated User sends `DELETE /api/todos/{todo_id}` for a Todo that does not exist
   - **When** the request is processed
   - **Then** the route keeps the current `404` behavior and does not return an OOB fragment that could desynchronize the visible sidebar
 
 ## Structural Criteria
 
-- [ ] Successful delete stays on the existing HTMX fragment path: no new full-page reload, redirect, or JSON response is introduced for the happy path.
-- [ ] Sidebar badge updates keep using the established `id="list-<TodoList.id>-count"` contract already shared by create and toggle responses.
-- [ ] Regression coverage proves delete-count synchronization for incomplete, completed, and failing delete cases.
+- [x] Successful delete stays on the existing HTMX fragment path: no new full-page reload, redirect, or JSON response is introduced for the happy path.
+- [x] Sidebar badge updates keep using the established `id="list-<TodoList.id>-count"` contract already shared by create and toggle responses.
+- [x] Regression coverage proves delete-count synchronization for incomplete, completed, and failing delete cases.
 
 ## Scope & Boundaries
 
@@ -96,19 +96,24 @@ file   | src/app/static/js/app.js#confirmDeleteTodo | HTMX `DELETE` invocation t
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful todo deletion returns a count-synchronizing HTML response
+- [x] **TI01** Successful todo deletion returns a count-synchronizing HTML response
   - Follow `src/app/routes/todos.py#toggle_todo` for the post-mutation count recompute pattern and `src/app/routes/todos.py#delete_todo` for the current guard-path order; emit the OOB fragment only after a committed delete.
   - **Verify**: With `./run.sh`, log in as `demo@example.com` / `demo123`, delete an incomplete Todo from a list with a visible sidebar badge, and confirm the row disappears and the sidebar badge decrements in the same interaction without a full page reload.
 
-- [ ] **TI02** Delete-side OOB fragment uses the shared sidebar badge contract
+- [x] **TI02** Delete-side OOB fragment uses the shared sidebar badge contract
   - Reuse `src/app/templates/partials/todo_deleted_oob.html` and the `id="list-{{ list.id }}-count"` contract from `src/app/templates/partials/todo_list_item.html`; do not add a second badge target shape or client-side count math.
   - **Verify**: `uv run pytest tests/test_todos.py -k "toggle_todo_complete or delete_todo"` passes with assertions that successful delete responses contain `hx-swap-oob="true"` and target the same `list-<list_id>-count` contract used by toggle responses.
 
-- [ ] **TI03** Delete regression coverage proves count sync and guard paths
-  - Extend `tests/test_todos.py` from the current delete happy-path check to cover completed-todo deletion plus at least one failing delete path, following the existing access-control patterns in `tests/test_todos.py#TestTodoAccess`.
-  - **Verify**: `uv run pytest tests/test_todos.py -k "delete_todo or cannot_modify_other_users_todo"` passes with assertions that completed-todo deletion leaves the badge value unchanged and failing delete responses do not contain `hx-swap-oob`.
-
+- [x] **TI03** Delete regression coverage proves count sync and guard paths
+  - Add/delete tests in `tests/test_todos.py` for:
+    - incomplete todo delete updates count to 0,
+    - completed todo delete leaves count unchanged,
+    - unauthorized and missing todo deletes emit no `hx-swap-oob`.
+  - **Verify**: `uv run pytest tests/test_todos.py -k "delete_todo or test_cannot_delete_other_users_todo or test_delete_missing_todo"` passes with count assertions and guard-path absence checks.
 ### Testing Strategy
+
+- `uv run pytest tests/test_todos.py -k "toggle_todo_complete or delete_todo"`
+- `uv run pytest tests/test_todos.py -k "delete_todo or test_cannot_delete_other_users_todo or test_delete_missing_todo"`
 
 
 ### Validation
@@ -119,7 +124,18 @@ file   | src/app/static/js/app.js#confirmDeleteTodo | HTMX `DELETE` invocation t
 
 ## Final Validation Checklist
 
+- [x] Delete route now returns OOB sidebar-count fragment after successful deletion.
+- [x] Incomplete-count computation uses existing `_get_list_todo_count` helper (post-delete state).
+- [x] Badge target id in `todo_deleted_oob` preserves canonical `list-{{ list.id }}-count` contract.
+- [x] Regression tests cover:
+  - successful delete of incomplete todo,
+  - successful delete of completed todo (count unchanged),
+  - unauthorized delete (403),
+  - missing todo delete (404).
+- [x] Visual spot check completed through UI delete flow with sidebar count update verification.
+
 
 ## Implementation Observations
 
-_No observations recorded yet._
+Implemented OOB badge synchronization by returning `todo_deleted_oob` from the delete handler with an updated incomplete-count query after commit.
+UI validation was performed by deleting a todo in `/app` as demo user and confirming the sidebar count decreased in-page without a reload.

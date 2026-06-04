@@ -86,10 +86,40 @@ class TestTodos:
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert b'hx-swap-oob="true"' in response.content
+        assert f"id=\"list-{test_todo.list_id}-count\"".encode("utf-8") in response.content
+        assert b">0<" in response.content
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_completed_todo_preserves_sidebar_count(self, authenticated_client, test_list, test_todo, db_session):
+        """Delete completed todo does not reduce incomplete count badge."""
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed todo",
+            position=1,
+            is_completed=True,
+            completed_at=datetime.now(timezone.utc),
+        )
+        db_session.add(completed_todo)
+        db_session.commit()
+        db_session.refresh(test_todo)
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert b'hx-swap-oob="true"' in response.content
+        assert f"id=\"list-{test_list.id}-count\"".encode("utf-8") in response.content
+        assert b">1<" in response.content
+
+        deleted = db_session.query(Todo).filter(Todo.id == completed_todo.id).first()
+        assert deleted is None
+        incomplete_count = db_session.query(Todo).filter(
+            Todo.list_id == test_list.id,
+            Todo.is_completed == False,
+        ).count()
+        assert incomplete_count == 1
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
@@ -232,3 +262,30 @@ class TestTodoAccess:
             data={"title": "Hacked!"},
         )
         assert response.status_code == 403
+
+    def test_cannot_delete_other_users_todo(self, client, test_todo, db_session):
+        """Test users cannot delete other users' todos."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        # Create another user
+        other_user = User(email="other@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        # Authenticate as other user
+        session_id = create_session(other_user.id)
+        client.cookies.set("session_id", session_id)
+
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+        assert b"hx-swap-oob" not in response.content
+
+        undeleted = db_session.query(Todo).filter(Todo.id == test_todo.id).first()
+        assert undeleted is not None
+
+    def test_delete_missing_todo(self, authenticated_client):
+        """Test deleting missing todo keeps 404 and sends no OOB fragment."""
+        response = authenticated_client.delete("/api/todos/nope")
+        assert response.status_code == 404
+        assert b"hx-swap-oob" not in response.content
