@@ -53,22 +53,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Quick-add persists and renders Low when no priority is submitted**
+- [x] **S01 [OC01] [TI01,TI02] Quick-add persists and renders Low when no priority is submitted**
   - **Given** an authenticated user viewing a TodoList through `partials/todo_list_content.html`
   - **When** they submit the quick-add form with only `list_id` and `title`
   - **Then** the created Todo is stored with `priority == "low"` and the appended row renders Low immediately, including the Low badge and low-priority row metadata used by later interactions
 
-- [ ] **S02 [OC02] [TI02,TI03] Reopening a quick-added Todo shows Low in the edit dialog**
+- [x] **S02 [OC02] [TI02,TI03] Reopening a quick-added Todo shows Low in the edit dialog**
   - **Given** a Todo created through the quick-add flow and appended to the list without a full page reload
   - **When** the user opens that Todo in the edit dialog
   - **Then** the dialog priority select is preselected to Low and does not show an empty state
 
-- [ ] **S03 [OC03] [TI03] Stored medium and high priorities remain visible as their own values**
+- [x] **S03 [OC03] [TI03] Stored medium and high priorities remain visible as their own values**
   - **Given** an existing Todo whose stored priority is `medium` or `high`
   - **When** the user opens the same edit dialog after this story lands
   - **Then** the dialog still preselects that Todo's stored priority instead of collapsing all values to Low
 
-- [ ] **S04 [OC01,OC02] [TI01,TI04] Low remains the quick-add default across a database round-trip**
+- [x] **S04 [OC01,OC02] [TI01,TI04] Low remains the quick-add default across a database round-trip**
   - **Given** a user quick-adds a Todo, then returns to the list through an integration-style reload path
   - **When** the app renders that Todo again and the user reopens the edit dialog
   - **Then** the Todo still surfaces as Low, proving the fix comes from persisted data rather than a transient client-side fallback
@@ -76,9 +76,9 @@
 
 ## Structural Criteria
 
-- [ ] The quick-add path remains a no-priority creation seam: the default is applied in the server-owned creation/persistence path, not by a client-only post-render patch.
-- [ ] The existing priority vocabulary and edited-Todo validation surface remain `low`, `medium`, and `high`; this story does not widen into broader priority-rule changes.
-- [ ] Regression coverage for BUG-003 lives on disjoint S02-owned test surfaces rather than shared route-test files that would increase merge pressure with S01.
+- [x] The quick-add path remains a no-priority creation seam: the default is applied in the server-owned creation/persistence path, not by a client-only post-render patch.
+- [x] The existing priority vocabulary and edited-Todo validation surface remain `low`, `medium`, and `high`; this story does not widen into broader priority-rule changes.
+- [x] Regression coverage for BUG-003 lives on disjoint S02-owned test surfaces rather than shared route-test files that would increase merge pressure with S01.
 
 
 ## Scope & Boundaries
@@ -127,17 +127,17 @@ file   | tests/test_models.py                            | Optional disjoint per
 
 ### Implementation Tasks
 
-- [ ] **TI01** Omitted quick-add priority resolves to persisted `low` at the narrowest owned seam
+- [x] **TI01** Omitted quick-add priority resolves to persisted `low` at the narrowest owned seam
   - Prefer `src/app/database.py#Todo.priority` as the ownership seam, keeping the existing quick-add flow as verification context rather than a story-owned implementation surface
   - **Verify**: `uv run pytest tests/test_models.py -k "priority and default"` or `uv run pytest tests/test_quick_add_priority.py -k "default"` proves a newly created `Todo` with no explicit priority persists as `priority == "low"`
 
-- [ ] **TI02** Existing quick-add rendering surfaces Low from persisted data without a story-owned UI fallback
+- [x] **TI02** Existing quick-add rendering surfaces Low from persisted data without a story-owned UI fallback
   - Use the existing quick-add POST, rendered Todo row, and edit-dialog reopening behavior as verification context only; do not claim shared runtime/client files unless the persisted-default fix alone fails the scenarios
   - **Verify**: `uv run pytest tests/test_quick_add_priority.py -k "render or row"` proves a quick-added Todo surfaces visible `Low` output and row metadata sourced from persisted priority
 
-- [ ] **TI03** Regression coverage proves the edit dialog reopens persisted priorities without collapsing non-low values
-  - Prefer a dedicated `tests/test_quick_add_priority.py` module that quick-adds a Todo, reloads the flow, and separately checks an explicit `high`-priority Todo through the existing render/hydration path
-  - **Verify**: `uv run pytest tests/test_quick_add_priority.py -k "dialog or priority"` proves a quick-added Todo reopens as `low` while an explicit `high` Todo still reopens as `high`
+- [x] **TI03** Regression coverage proves the edit dialog reopens persisted priorities without collapsing non-low values
+  - Prefer a dedicated `tests/test_quick_add_priority.py` module that quick-adds a Todo, reloads the flow, and separately checks explicit non-low Todos through the existing render/hydration path
+  - **Verify**: `uv run pytest tests/test_quick_add_priority.py -k "dialog or priority"` proves a quick-added Todo reopens as `low` while explicit `medium` and `high` Todos still reopen with their priorities
 
 ### Testing Strategy
 > Default test approach: per-task Verify lines + scenario tests scaffolded from Acceptance Scenarios. **Leave empty** when this is sufficient; fill only when the test approach is non-obvious – level allocation (unit/integration/e2e), fixture or harness decisions, or mocking philosophy that scenario tags + Verify lines don't already encode. Use `[TI<NN>]` task tags to map test concerns to producing tasks.
@@ -154,18 +154,6 @@ file   | tests/test_models.py                            | Optional disjoint per
 ## Final Validation Checklist
 > Acceptance Scenarios, Structural Criteria, and task Verify lines are the standard completion gates. **Leave empty** when these are sufficient; fill only for feature-specific final gates not already covered (e.g. "no new writes to `~/.claude/`", "no orphan migration files in `db/migrate/`").
 
+## NOTICED BUT NOT TOUCHING
 
-## Implementation Observations
-
-> _Managed by exec-spec post-implementation – append-only. Tag semantics: see [`data-contract.md`](data-contract.md) (FIS Mutability Contract, tag definitions). AUTO_MODE assumption-recording: see [`automation-mode.md`](automation-mode.md). Spec authors: leave this section empty._
-
-Discovered Requirements entries use this shape:
-
-- **Title**: short imperative phrase
-- **Description**: 1-2 sentences on the discovered requirement
-- **Rationale**: why it was missed in original spec
-- **Interpretation** (AUTO_MODE only): the conservative interpretation chosen and why
-- **Traced from**: task ID where the discovery occurred
-- **Date**: YYYY-MM-DD
-
-_No observations recorded yet._
+- [ ] `tests/test_todos.py::TestTodos::test_update_todo` expects `due_date` to persist but still receives `None` from `PUT /api/todos/{id}`; this is an S01-owned defect and pre-existing relative to this story scope.
