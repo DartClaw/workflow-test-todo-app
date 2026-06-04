@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+    "CLAUDE.md#architecture",
+    "docs/STACK.md#frameworks-libraries"
+  ],
+  "overview": {
+    "summary": "This plan stays intentionally small: two thin bug-fix stories matching the PRD exactly. Both target the todo flow, but they split by lifecycle boundary so the fixes remain independently mergeable instead of competing for the same production change surface.\n\nS01 owns edit-dialog due-date persistence on the update path. S02 owns quick-add default priority on the create/default path. They can execute in the same wave only if that ownership split is preserved; otherwise the implementation must stop and re-scope rather than letting the stories collapse back into one shared-file change set.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent todo defect fixes",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Split ownership by todo lifecycle path",
+      "description": "S01 stays on edit/update due-date persistence, while S02 stays on create/default priority behavior, so both bug fixes can land without conflicting production-file ownership.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "PRD-CONSTRAINT-01",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Edit-dialog due date persistence",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "s01-edit-dialog-due-date-persistence.md",
+      "scope": "Fix BUG-002 so a due date chosen in the edit dialog is stored, rendered back in the todo row, and reopened in the dialog without silent loss. This story covers edit/update-path persistence and malformed date handling for that path only; it does not widen into quick-add defaults or other todo presentation bugs.",
+      "sourceRefs": [
+        "BUG-002",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Keep ownership on edit/update surfaces and story-owned regression coverage so S02 can fix quick-add defaults without touching the same files."
+    },
+    {
+      "id": "S02",
+      "name": "Quick-add default priority",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "s02-quick-add-default-priority.md",
+      "scope": "Fix BUG-003 so todos created from the quick-add form receive the documented default priority of low and reopen in the edit dialog with that value selected. This story covers create/default-path behavior only; it does not add new quick-add inputs or consume S01's edit-dialog ownership.",
+      "sourceRefs": [
+        "BUG-003",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Prefer a create/default boundary that keeps the quick-add form title-only and avoids shared-file conflict with S01."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Prove date save, clear, and malformed-input behavior with story-owned regression coverage so the fix does not silently preserve stale due dates."
+    }
+  ],
+  "executionNotes": "Both stories are spec-ready and intended for same-wave execution only while the PRD isolation constraint holds. S01 owns edit/update due-date persistence plus its dedicated BUG-002 regression surface. S02 owns create/default priority behavior plus its dedicated BUG-003 regression surface. If either implementation requires touching the other's production or test ownership surface, stop and re-scope instead of allowing conflict-prone overlap."
+}
