@@ -70,7 +70,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-todo-priority.md",
       "scope": "Ensure todos created through the quick-add form always carry the documented default priority and that editing a priorityless todo shows Low instead of an empty selector. Include compatibility for existing null-priority rows and the rendered fragment state used by the edit dialog; exclude changes to manual priority editing, due-date handling, or visual priority styling beyond reflecting the normalized value.",
       "sourceRefs": [

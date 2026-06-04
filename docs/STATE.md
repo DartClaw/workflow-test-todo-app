@@ -14,8 +14,8 @@ Status: On Track
 | _(none)_ | | | |
 
 ## Recently Completed
-
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S02** (2026-06-04): Implemented default quick-add priority persistence and render-time low fallback for legacy missing-priority todos, with focused coverage in `tests/test_bug_003_priority_defaults.py`.
 
 ## Blockers
 
