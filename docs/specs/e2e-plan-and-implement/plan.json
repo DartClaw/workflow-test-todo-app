@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/STACK.md",
+    "docs/STATE.md",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain"
+  ],
+  "overview": {
+    "summary": "This plan stays intentionally small: one story for BUG-002 and one story for BUG-003, matching the PRD's request for two thin fixes.\n\nBoth stories can execute in the same wave because the plan assigns disjoint ownership up front. S01 owns edit-dialog due-date persistence and `tests/test_bug_002_due_dates.py`. S02 owns quick-add priority defaults, legacy null-priority fallback behavior, and `tests/test_bug_003_priority_defaults.py`. The existing mixed assertions in `tests/test_todos.py` are treated as coverage to retire or move so a story branch can validate independently without inheriting the other bug's red state.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent Todo Regression Fixes",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Enforce story isolation through file ownership",
+      "description": "S01 stays in the due-date update path and owns `tests/test_bug_002_due_dates.py`, while S02 solves priority defaults through model/render behavior and owns `tests/test_bug_003_priority_defaults.py`; each story moves or retires its bug-specific assertions from `tests/test_todos.py` before claiming isolated green validation.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "PRD-001",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Fix BUG-002 and BUG-003 from docs/PRODUCT-BACKLOG.md (Known Defects section) as two independent, thin stories."
+    },
+    {
+      "featureId": "PRD-002",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Persist edit-dialog due dates",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md",
+      "scope": "Make due dates entered through the Edit Todo dialog persist after save and round-trip back into the same dialog using the existing date-only contract. Include saving a first due date, changing an existing due date, and preserving the current clear-date behavior; exclude priority defaults, overdue styling, and broader timezone semantics.",
+      "sourceRefs": [
+        "BUG-002",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Own the due-date parsing contract end-to-end, move BUG-002 assertions into `tests/test_bug_002_due_dates.py`, and keep the change out of S02-owned priority-default surfaces."
+    },
+    {
+      "id": "S02",
+      "name": "Default quick-add todo priority",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-todo-priority.md",
+      "scope": "Ensure todos created through the quick-add form always carry the documented default priority and that editing a priorityless todo shows Low instead of an empty selector. Include compatibility for existing null-priority rows and the rendered fragment state used by the edit dialog; exclude changes to manual priority editing, due-date handling, or visual priority styling beyond reflecting the normalized value.",
+      "sourceRefs": [
+        "BUG-003",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Maintain merge-safe isolation from S01 by solving quick-add defaults outside the due-date update path and moving BUG-003 assertions into `tests/test_bug_003_priority_defaults.py`."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Lock the server-side due-date contract to the existing YYYY-MM-DD form input and add focused regression coverage for both first-save and edit-again flows."
+    },
+    {
+      "story": "S02",
+      "risk": "medium",
+      "mitigation": "Normalize the low default at the model/render boundary and add regression coverage for both newly created quick-add todos and legacy null-priority rows."
+    }
+  ],
+  "executionNotes": "Both stories are ready in P1/W1 and may execute in parallel only while honoring the ownership split above. The first verification step in each story is to extract or retire its bug-specific assertions from `tests/test_todos.py` into the story-owned test file so independent branches can run green without inheriting the sibling defect. If either story needs to touch the other story's owned runtime or test files, stop and revisit decomposition instead of letting the fixes drift into a shared patch."
+}
