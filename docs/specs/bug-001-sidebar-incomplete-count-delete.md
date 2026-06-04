@@ -32,22 +32,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC03] [TI01,TI02] Deleting the only incomplete todo refreshes the sidebar count in the same HTMX round trip**
+- [x] **S01 [OC01,OC03] [TI01,TI02] Deleting the only incomplete todo refreshes the sidebar count in the same HTMX round trip**
   - **Given** a `TodoList` contains one incomplete `Todo` and the sidebar shows `id="list-<list_id>-count"` with text `1`
   - **When** the user confirms delete for that `Todo`
   - **Then** HTMX deletes `#todo-<todo_id>` and applies an OOB swap to `id="list-<list_id>-count"` with text `0` in the same response
 
-- [ ] **S02 [OC01,OC02] [TI01,TI02] Deleting one incomplete todo leaves the count at the remaining incomplete total**
+- [x] **S02 [OC01,OC02] [TI01,TI02] Deleting one incomplete todo leaves the count at the remaining incomplete total**
   - **Given** a `TodoList` contains two incomplete `Todo` rows and the sidebar count shows `2`
   - **When** the user deletes one of those todos
   - **Then** the OOB swap updates `id="list-<list_id>-count"` to `1`, matching the remaining persisted incomplete row
 
-- [ ] **S03 [OC02,OC03] [TI01,TI02] Deleting a completed todo does not decrement the incomplete count**
+- [x] **S03 [OC02,OC03] [TI01,TI02] Deleting a completed todo does not decrement the incomplete count**
   - **Given** a `TodoList` contains one completed `Todo`, one incomplete `Todo`, and the sidebar count shows `1`
   - **When** the user deletes the completed `Todo`
   - **Then** the todo is removed and the OOB swap leaves `id="list-<list_id>-count"` at `1`
 
-- [ ] **S04 [OC03] [TI03] Delete failures keep current HTMX behavior**
+- [x] **S04 [OC03] [TI03] Delete failures keep current HTMX behavior**
   - **Given** a delete request targets a missing or unauthorized `Todo`
   - **When** the route rejects the request
   - **Then** it returns the existing failure status without an OOB count fragment and without changing unrelated sidebar counts
@@ -55,9 +55,9 @@
 
 ## Structural Criteria
 
-- [ ] Successful `DELETE /api/todos/{todo_id}` responses remain compatible with `htmx.ajax(..., { target: "#todo-<id>", swap: "delete" })` in `src/app/static/js/app.js`.
-- [ ] The shared sidebar count target remains `id="list-<list_id>-count"` so create, toggle, and delete all address the same node.
-- [ ] Automated tests explicitly prove the delete success response contains `hx-swap-oob` and the expected count text for incomplete-todo and completed-todo deletes.
+- [x] Successful `DELETE /api/todos/{todo_id}` responses remain compatible with `htmx.ajax(..., { target: "#todo-<id>", swap: "delete" })` in `src/app/static/js/app.js`.
+- [x] The shared sidebar count target remains `id="list-<list_id>-count"` so create, toggle, and delete all address the same node.
+- [x] Automated tests explicitly prove the delete success response contains `hx-swap-oob` and the expected count text for incomplete-todo and completed-todo deletes.
 
 
 ## Scope & Boundaries
@@ -111,15 +111,15 @@ file   | src/app/static/js/app.js#confirmDeleteTodo          | HTMX delete path 
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful todo deletes expose the current incomplete count for the owning `TodoList`
+- [x] **TI01** Successful todo deletes expose the current incomplete count for the owning `TodoList`
   - Follow `src/app/routes/todos.py#toggle_todo` and reuse `src/app/routes/todos.py#_get_list_todo_count`; compute the count after `db.commit()` so the response reflects the remaining persisted incomplete rows.
   - **Verify**: deleting the only incomplete todo returns `200`, removes the row from the database, and includes `hx-swap-oob` targeting `id="list-<list_id>-count"` with text `0`
 
-- [ ] **TI02** Delete-specific OOB markup matches the existing sidebar count contract
+- [x] **TI02** Delete-specific OOB markup matches the existing sidebar count contract
   - Follow `src/app/templates/partials/todo_item_with_oob.html` for OOB shape and `src/app/templates/partials/todo_list_item.html` for the target id; keep the delete fragment limited to the count swap needed alongside `swap: "delete"`.
   - **Verify**: deleting a completed todo returns an OOB fragment whose only target is `id="list-<list_id>-count"` and whose text stays at the remaining incomplete count
 
-- [ ] **TI03** Delete regression coverage makes the HTMX contract explicit
+- [x] **TI03** Delete regression coverage makes the HTMX contract explicit
   - Extend `tests/test_todos.py#test_delete_todo` and add a delete-count integration path near `tests/test_integration.py#test_todo_completion_updates_count`; keep current 404/403 status behavior under test rather than inferred.
   - **Verify**: the automated delete tests fail if the response drops `hx-swap-oob`, points at a different id, or changes the current missing/unauthorized status contract
 
@@ -141,4 +141,6 @@ file   | src/app/static/js/app.js#confirmDeleteTodo          | HTMX delete path 
 
 ## Implementation Observations
 
-> Managed by exec-spec post-implementation - append-only. Tag semantics: see `data-contract.md` (FIS Mutability Contract, tag definitions). AUTO_MODE assumption-recording: see `automation-mode.md`. Spec authors: leave this section empty.
+#### NOTICED BUT NOT TOUCHING
+
+- Full `uv run pytest` currently fails pre-existing in `tests/test_todos.py::test_create_todo` (default priority assertion expects `"low"` for new todos) and `tests/test_todos.py::test_update_todo` (date input parser expectation still expects a date-only value to populate `due_date`).

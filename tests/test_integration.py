@@ -178,6 +178,68 @@ class TestUserJourneys:
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
 
+    def test_todo_delete_updates_count_for_incomplete_only_todo(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Test deleting the only incomplete todo updates sidebar count to zero."""
+        todo = Todo(
+            list_id=test_list.id,
+            title="Only Incomplete Todo",
+            position=0,
+        )
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{todo.id}")
+        assert response.status_code == 200
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">0</span>'
+            in response.text
+        )
+
+    def test_todo_delete_updates_count_for_remaining_incomplete_todos(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Test deleting one incomplete todo updates count to remaining incomplete total."""
+        todos = [
+            Todo(list_id=test_list.id, title="Todo 1", position=0),
+            Todo(list_id=test_list.id, title="Todo 2", position=1),
+        ]
+        db_session.add_all(todos)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{todos[0].id}")
+        assert response.status_code == 200
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'
+            in response.text
+        )
+
+    def test_todo_delete_completed_does_not_change_incomplete_count(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Test deleting a completed todo keeps sidebar count unchanged."""
+        incomplete_todo = Todo(
+            list_id=test_list.id,
+            title="Incomplete Todo",
+            position=0,
+        )
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed Todo",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add_all([incomplete_todo, completed_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'
+            in response.text
+        )
+
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""
         # Create todos with different titles
