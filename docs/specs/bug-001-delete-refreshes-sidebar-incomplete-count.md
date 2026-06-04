@@ -34,31 +34,31 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI03] Incomplete Todo delete refreshes the sidebar count in place**
+- [x] **S01 [OC01,OC02] [TI01,TI03] Incomplete Todo delete refreshes the sidebar count in place**
   - **Given** an authenticated user is viewing a TodoList whose sidebar badge shows `3` incomplete Todos and the targeted Todo is incomplete
   - **When** the user confirms deletion for that Todo through the existing delete dialog
   - **Then** the Todo row is removed and the sidebar badge for that TodoList updates to `2` in the same interaction without a full page reload
 
-- [ ] **S02 [OC01,OC03] [TI01,TI02] Deleting the last incomplete Todo renders a zero badge**
+- [x] **S02 [OC01,OC03] [TI01,TI02] Deleting the last incomplete Todo renders a zero badge**
   - **Given** an authenticated user is viewing a TodoList with exactly one incomplete Todo remaining
   - **When** the user deletes that Todo
   - **Then** the delete response updates the sidebar badge for that TodoList to the literal value `0` and the list remains usable without reload
 
-- [ ] **S03 [OC03] [TI01,TI02] Deleting a completed Todo leaves the incomplete-count unchanged**
+- [x] **S03 [OC03] [TI01,TI02] Deleting a completed Todo leaves the incomplete-count unchanged**
   - **Given** an authenticated user deletes a Todo that is already completed while the same TodoList still has other incomplete Todos
   - **When** the delete succeeds
   - **Then** the Todo row is removed but the sidebar incomplete-count for that TodoList does not decrement
 
-- [ ] **S04 [OC03] [TI03] Delete failures preserve the current contract**
+- [x] **S04 [OC03] [TI03] Delete failures preserve the current contract**
   - **Given** a delete request targets a missing Todo or a Todo owned by another user
   - **When** the request is processed
   - **Then** the route keeps the current `404` or `403` response semantics and does not emit a success-path sidebar count update
 
 ## Structural Criteria
 
-- [ ] Successful Todo deletes keep the server as the single source of truth for sidebar incomplete-count values; no client-side count arithmetic is introduced.
-- [ ] The existing delete confirmation flow and `swap: 'delete'` target contract still remove the Todo row while allowing HTMX to process any returned OOB fragment.
-- [ ] Unauthorized and missing-Todo delete responses preserve their current bare `403` / `404` semantics.
+- [x] Successful Todo deletes keep the server as the single source of truth for sidebar incomplete-count values; no client-side count arithmetic is introduced.
+- [x] The existing delete confirmation flow and `swap: 'delete'` target contract still remove the Todo row while allowing HTMX to process any returned OOB fragment.
+- [x] Unauthorized and missing-Todo delete responses preserve their current bare `403` / `404` semantics.
 
 ## Scope & Boundaries
 
@@ -108,15 +108,15 @@ file   | tests/conftest.py#authenticated_client         | Authenticated test har
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful Todo deletes emit the sidebar incomplete-count OOB fragment
+- [x] **TI01** Successful Todo deletes emit the sidebar incomplete-count OOB fragment
   - Follow `src/app/routes/todos.py#toggle_todo`, `src/app/routes/todos.py#_get_list_todo_count`, and `src/app/templates/partials/todo_item_with_oob.html`; after deleting an owned Todo, recompute the parent TodoList incomplete-count and return HTMX-processible markup that targets `id="list-<list_id>-count"` with `hx-swap-oob="true"`
   - **Verify**: A route test deleting an incomplete Todo returns `200`, the response body contains `hx-swap-oob="true"` and `id="list-<list_id>-count"`, and the deleted Todo is gone from the database
 
-- [ ] **TI02** Delete count semantics stay correct for completed and zero-remaining cases
+- [x] **TI02** Delete count semantics stay correct for completed and zero-remaining cases
   - Use the same server-side incomplete-count definition as create/toggle so deleting a completed Todo leaves the sidebar badge unchanged and deleting the final incomplete Todo renders the literal value `0`
   - **Verify**: Route coverage shows deleting a completed Todo leaves the sidebar badge value unchanged, and deleting the last incomplete Todo returns OOB markup whose badge text is exactly `0`
 
-- [ ] **TI03** Delete failure contracts and in-place UX remain unchanged
+- [x] **TI03** Delete failure contracts and in-place UX remain unchanged
   - Preserve `src/app/routes/todos.py#delete_todo` missing/ownership guards and the existing `src/app/static/js/app.js#confirmDeleteTodo` `swap: 'delete'` flow; only successful owned deletes should emit the OOB fragment
   - **Verify**: Route coverage keeps `403` for unauthorized delete and `404` for missing Todo, and browser validation through the existing delete dialog shows the Todo row disappears while the sidebar badge updates without a full page reload
 
