@@ -174,9 +174,42 @@ class TestUserJourneys:
         # Toggle completion
         response = authenticated_client.patch(f"/api/todos/{todo.id}/toggle")
         assert response.status_code == 200
+        assert f'id="list-{test_list.id}-count"'.encode() in response.content
+        assert b">0</span>" in response.content
 
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
+
+    def test_todo_delete_updates_count(self, authenticated_client, test_list, db_session):
+        """Test that deleting a todo updates the list count via OOB swap."""
+        incomplete_todo = Todo(
+            list_id=test_list.id,
+            title="Delete Count Todo",
+            position=0,
+        )
+        db_session.add(incomplete_todo)
+        db_session.commit()
+
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed Todo",
+            is_completed=True,
+            position=1,
+        )
+        db_session.add(completed_todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{incomplete_todo.id}")
+        assert response.status_code == 200
+        assert f'id="list-{test_list.id}-count"'.encode() in response.content
+        assert b">0</span>" in response.content
+
+        # Response should include OOB swap for count
+        assert b"hx-swap-oob" in response.content
+
+        response_missing = authenticated_client.delete("/api/todos/non-existent-id")
+        assert response_missing.status_code == 404
+        assert b"hx-swap-oob" not in response_missing.content
 
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""

@@ -34,22 +34,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI03] Deleting an incomplete Todo refreshes the sidebar badge without a page reload**
+- [x] **S01 [OC01] [TI01,TI03] Deleting an incomplete Todo refreshes the sidebar badge without a page reload**
   - **Given** an authenticated user is viewing a TodoList whose sidebar badge `id="list-<todo-list-id>-count"` shows `2`, and the targeted Todo is incomplete
   - **When** the user confirms deletion of that Todo
   - **Then** HTMX removes `#todo-<todo-id>` and applies an OOB swap to `#list-<todo-list-id>-count` so the badge shows `1` in the same request
 
-- [ ] **S02 [OC02] [TI02,TI03] Deleting the only remaining incomplete Todo renders a zero badge**
+- [x] **S02 [OC02] [TI02,TI03] Deleting the only remaining incomplete Todo renders a zero badge**
   - **Given** an authenticated user is viewing a TodoList with one incomplete Todo and the sidebar badge shows `1`
   - **When** the user deletes that Todo
   - **Then** the delete response updates `#list-<todo-list-id>-count` to `0` without requiring a full page reload
 
-- [ ] **S03 [OC02] [TI02,TI03] Deleting a completed Todo leaves the incomplete badge unchanged**
+- [x] **S03 [OC02] [TI02,TI03] Deleting a completed Todo leaves the incomplete badge unchanged**
   - **Given** an authenticated user is viewing a TodoList with one incomplete Todo, one completed Todo, and the sidebar badge shows `1`
   - **When** the user deletes the completed Todo
   - **Then** the completed Todo is removed and the OOB swap keeps `#list-<todo-list-id>-count` at `1`
 
-- [ ] **S04 [OC03] [TI03] Missing Todo deletes keep existing failure semantics**
+- [x] **S04 [OC03] [TI03] Missing Todo deletes keep existing failure semantics**
   - **Given** an authenticated user issues `DELETE /api/todos/<todo-id>` for a Todo ID that no longer exists
   - **When** the route handles the request
   - **Then** it returns `404` without emitting a successful delete OOB fragment
@@ -57,9 +57,9 @@
 
 ## Structural Criteria
 
-- [ ] Successful todo deletes keep server-rendered HTML as the only source of sidebar count truth; no client-side count arithmetic or JSON response is introduced.
-- [ ] The sidebar badge target contract remains `id="list-<todo-list-id>-count"` across list rendering and the successful delete response.
-- [ ] `delete_todo` continues to rely on the existing HTMX `swap: 'delete'` row-removal behavior while preserving current `403` and `404` semantics.
+- [x] Successful todo deletes keep server-rendered HTML as the only source of sidebar count truth; no client-side count arithmetic or JSON response is introduced.
+- [x] The sidebar badge target contract remains `id="list-<todo-list-id>-count"` across list rendering and the successful delete response.
+- [x] `delete_todo` continues to rely on the existing HTMX `swap: 'delete'` row-removal behavior while preserving current `403` and `404` semantics.
 
 
 ## Scope & Boundaries
@@ -110,15 +110,15 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Current 
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful delete responses carry the sidebar badge's OOB refresh payload
+- [x] **TI01** Successful delete responses carry the sidebar badge's OOB refresh payload
   - Follow `src/app/routes/todos.py#toggle_todo`, `src/app/static/js/app.js#confirmDeleteTodo`, and `src/app/templates/partials/todo_deleted_oob.html`; the delete success path must preserve the row's existing `swap: 'delete'` behavior while returning the badge refresh fragment
   - **Verify**: Deleting an incomplete Todo from a list whose badge shows `2` removes `#todo-<todo-id>` and returns a response containing `hx-swap-oob`, `id="list-<todo-list-id>-count"`, and the updated badge value `1`
 
-- [ ] **TI02** Delete count semantics stay aligned with incomplete Todo membership
+- [x] **TI02** Delete count semantics stay aligned with incomplete Todo membership
   - Reuse `src/app/routes/todos.py#_get_list_todo_count` for the successful delete response so completed-todo deletes and zero-count cases stay consistent with the rest of the app
   - **Verify**: Deleting a completed Todo leaves `#list-<todo-list-id>-count` unchanged, and deleting the last incomplete Todo returns the same OOB fragment with badge value `0`
 
-- [ ] **TI03** Delete regression coverage proves the OOB contract without widening endpoint behavior
+- [x] **TI03** Delete regression coverage proves the OOB contract without widening endpoint behavior
   - Extend `tests/test_todos.py` and `tests/test_integration.py#test_todo_completion_updates_count` style coverage so success assertions check the OOB fragment and failure assertions keep `403`/`404` status-only behavior distinct
   - **Verify**: `uv run pytest tests/test_todos.py tests/test_integration.py -k "delete or count"` passes with assertions that successful delete responses include `hx-swap-oob` while missing-Todo `404` responses do not
 
