@@ -54,7 +54,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s01-bug-002-due-date-persistence-in-edit-flow.md",
       "scope": "Restore due-date persistence for todos edited through the existing dialog so a saved date remains stored, rendered back into the todo row, and available when the dialog is reopened. Includes the edit submission path and rendered todo fragment for that path; excludes due-date styling corrections and any changes to quick-add or priority behavior.",
       "sourceRefs": [
