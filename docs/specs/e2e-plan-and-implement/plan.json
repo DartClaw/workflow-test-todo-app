@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/ROADMAP.md#phase-2-defect-triage",
+    "docs/STACK.md#frameworks-libraries",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+    "CLAUDE.md#the-stack-and-why-it-matters-for-edits"
+  ],
+  "overview": {
+    "summary": "This plan keeps the two requested defect fixes as separate, execution-sized stories instead of folding them into a single todo-route cleanup. Both fixes sit in the active defect-triage phase, but each story is scoped around one user-visible contract: edited due dates must persist, and quick-add todos must materialize with the documented default priority.\n\nThe stories share product context but not a dependency chain, so they can run in the same wave. Merge safety is a binding constraint: each spec must preserve thin scope and isolate its file ownership so the two fixes can land independently without conflict.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent defect fixes",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Preserve story isolation across the todo flow",
+      "description": "S01 owns only edit-save due-date persistence plus dedicated BUG-002 regression proof, while S02 owns only quick-add default-priority persistence plus dedicated BUG-003 regression proof. Existing row-template and dialog consumers are verify-only unless a story first proves they are broken.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "BUG-002+BUG-003",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Fix BUG-002 and BUG-003 from docs/PRODUCT-BACKLOG.md (Known Defects section) as two independent, thin stories.\n\nKeep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Persist edited due dates",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edited-due-dates.md",
+      "scope": "Ensure the todo edit dialog saves due dates in a format that persists to storage and repopulates when the same todo is reopened. This story includes the broken edit-flow persistence path and regression coverage for stored and redisplayed due dates, while excluding quick-add defaults, overdue styling, and broader date-handling normalization outside the BUG-002 behavior.",
+      "sourceRefs": [
+        "BUG-002",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Keep the story confined to the existing edit flow and its regression proof. Do not widen into todo-creation defaults or unrelated date semantics."
+    },
+    {
+      "id": "S02",
+      "name": "Default quick-add priority",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-priority.md",
+      "scope": "Ensure todos created through the quick-add form receive the documented default low priority so the created item and reopened edit dialog both show a stable priority without extra input. This story includes the quick-add creation path and regression coverage for newly created todos, while excluding changes to manual priority selection, due-date persistence, or unrelated todo defaults.",
+      "sourceRefs": [
+        "BUG-003",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Keep the story confined to the quick-add creation contract and its proof. Do not broaden into edit-dialog persistence or general todo-form cleanup."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Pin the accepted date format and verify both persistence and dialog rehydration so the fix does not silently preserve the current swallow-and-clear behavior."
+    }
+  ],
+  "executionNotes": "S01 and S02 may execute in parallel only while they keep separate proof surfaces: S01 on edit-save behavior plus a dedicated BUG-002 regression file, S02 on quick-add/default behavior plus a dedicated BUG-003 regression file. Each story's validation must pair server-side proof with a bounded browser smoke check for reopened-dialog hydration. If either story needs a shared template, shared JavaScript, or an existing shared test file, or if the browser smoke fails while the server row contract is correct, stop parallel execution, narrow the story, or resequence before implementation starts."
+}
