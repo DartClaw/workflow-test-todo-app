@@ -27,6 +27,7 @@ _(none)_
 
 ## Session Continuity Notes
 
+- 2026-06-04: S01 completed: Persist edit-dialog due dates.
 - 2026-06-04: Plan created: e2e-plan-and-implement (2 stories, 1 phase)
 - Keep the `Commands` and `Architecture` sections of `CLAUDE.md` intact — they serve as the Project Overview for AndThen skills.
 - Authentication is **intentionally** simple (plain-text passwords, in-memory sessions). Do not "fix" without explicit direction.

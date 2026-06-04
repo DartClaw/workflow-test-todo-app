@@ -53,26 +53,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] First due dates survive save and reopen**
+- [x] **S01 [OC01] [TI01,TI02] First due dates survive save and reopen**
   - **Given** a Todo with no Due Date is open in the Edit Todo dialog
   - **When** the user enters `2025-12-31` in the Due Date field and saves
   - **Then** the returned todo row exposes `data-todo-due-date="2025-12-31"` and reopening the same dialog shows `2025-12-31` in the Due Date field
 
-- [ ] **S02 [OC02] [TI01,TI02] Existing due dates can be replaced with a different calendar day**
+- [x] **S02 [OC02] [TI01,TI02] Existing due dates can be replaced with a different calendar day**
   - **Given** a Todo already stores Due Date `2025-12-31`
   - **When** the user changes the Due Date to `2026-01-15` and saves from the Edit Todo dialog
   - **Then** the stored Due Date is replaced with `2026-01-15` and reopening the dialog shows `2026-01-15`, not the previous date or an empty field
 
-- [ ] **S03 [OC03] [TI01,TI02] Clearing a due date still removes it**
+- [x] **S03 [OC03] [TI01,TI02] Clearing a due date still removes it**
   - **Given** a Todo already stores Due Date `2025-12-31`
   - **When** the user clears the Due Date field and saves
   - **Then** the todo row no longer renders due-date metadata and reopening the dialog shows an empty Due Date field
 
 ## Structural Criteria
 
-- [ ] The edit-todo flow remains aligned with the existing `type="date"` and `format_date_input()` `YYYY-MM-DD` contract end-to-end.
-- [ ] The todo update route continues to return the existing `partials/todo_item.html` fragment so HTMX replacement and dialog reopen state stay in sync.
-- [ ] Focused regression coverage exists for first-set, replace-existing, and clear-date flows in an S01-owned test file, not in S02-owned priority-default coverage.
+- [x] The edit-todo flow remains aligned with the existing `type="date"` and `format_date_input()` `YYYY-MM-DD` contract end-to-end.
+- [x] The todo update route continues to return the existing `partials/todo_item.html` fragment so HTMX replacement and dialog reopen state stay in sync.
+- [x] Focused regression coverage exists for first-set, replace-existing, and clear-date flows in an S01-owned test file, not in S02-owned priority-default coverage.
 
 ## Scope & Boundaries
 
@@ -115,11 +115,11 @@ file   | tests/conftest.py#test_todo                    | Base fixture shape for
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo edit saves accept the existing `YYYY-MM-DD` Due Date payload
+- [x] **TI01** Todo edit saves accept the existing `YYYY-MM-DD` Due Date payload
   - Keep ownership in `src/app/routes/todos.py#update_todo`; reuse the current blank-input clear branch and preserve title, note, and priority validation behavior while removing the time-component requirement from Due Date persistence. This story restores the supported dialog payload and leaves unsupported malformed payload semantics unchanged.
   - **Verify**: `Test: PUT /api/todos/{id}` with `due_date=2025-12-31` persists a non-null Due Date whose `format_date_input()` value is `2025-12-31`, and the response still renders the todo row fragment rather than `partials/error.html`.
 
-- [ ] **TI02** Todo edit regression coverage proves first-set, replace-existing, and clear-date paths
+- [x] **TI02** Todo edit regression coverage proves first-set, replace-existing, and clear-date paths
   - Create `tests/test_bug_002_due_dates.py` using `tests/conftest.py#test_todo`; move or retire BUG-002 assertions from `tests/test_todos.py`, then assert the exact saved calendar date for a first save, a replacement save, and a clear-to-empty save without importing S02-owned priority behavior into the same file.
   - **Verify**: `Test: uv run pytest tests/test_bug_002_due_dates.py -q` passes with one case starting from no Due Date, one replacing an existing Due Date, and one clearing back to None.
 
@@ -139,6 +139,9 @@ file   | tests/conftest.py#test_todo                    | Base fixture shape for
 ## Implementation Observations
 
 > _Managed by exec-spec post-implementation – append-only. Tag semantics: see [`data-contract.md`](data-contract.md) (FIS Mutability Contract, tag definitions). AUTO_MODE assumption-recording: see [`automation-mode.md`](automation-mode.md). Spec authors: leave this section empty._
+
+#### NOTICED BUT NOT TOUCHING
+- tests/test_todos.py:27: `test_create_todo` in full-suite still expects a default create-todo priority of `low`, but created rows still persist `None` without this story's scope.
 
 Discovered Requirements entries use this shape:
 
