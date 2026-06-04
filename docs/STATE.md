@@ -11,10 +11,11 @@ Status: On Track
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| S01 | Spec Ready | docs/specs/e2e-plan-and-implement/s01-bug-002-due-date-persistence-in-edit-flow.md | Restore due-date persistence in the edit flow while keeping ownership isolated from the quick-add defect story. |
+| S02 | Spec Ready | docs/specs/e2e-plan-and-implement/s02-bug-003-quick-add-default-priority.md | Restore the documented quick-add default priority via a merge-isolated ownership surface. |
 
 ## Recently Completed
 
+- **S01** (2026-06-04): BUG-002 due-date persistence in edit flow implemented and verified via `tests/test_todo_due_dates.py`.
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 
 ## Blockers
