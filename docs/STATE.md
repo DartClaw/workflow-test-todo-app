@@ -11,7 +11,6 @@ Status: On Track
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| S01 | Spec Ready | docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md | BUG-002 due-date persistence scoped to the edit-save path |
 | S02 | Spec Ready | docs/specs/e2e-plan-and-implement/s02-default-quick-add-todos-to-low-priority.md | BUG-003 quick-add default Priority scoped to creation-time defaults |
 
 ## Recently Completed
@@ -32,3 +31,4 @@ _(none)_
 
 - Keep the `Commands` and `Architecture` sections of `CLAUDE.md` intact — they serve as the Project Overview for AndThen skills.
 - Authentication is **intentionally** simple (plain-text passwords, in-memory sessions). Do not "fix" without explicit direction.
+- 2026-06-04: S01 now saves YYYY-MM-DD edit dialog dates through update_todo, returns row metadata used by reopen handoff, and clears due dates on blank input.

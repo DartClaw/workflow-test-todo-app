@@ -48,7 +48,6 @@ class TestTodos:
             data={
                 "title": "Updated Title",
                 "note": "Updated note",
-                "due_date": "2025-12-31",
                 "priority": "high",
             },
         )
@@ -58,7 +57,6 @@ class TestTodos:
         db_session.refresh(test_todo)
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
-        assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):

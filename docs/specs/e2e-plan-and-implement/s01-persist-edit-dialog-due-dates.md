@@ -39,26 +39,26 @@
 
 > Scenario IDs are local to this FIS.
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Editing a todo saves a date-only Due Date**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Editing a todo saves a date-only Due Date**
   - **Given** an authenticated User opens Edit for an existing Todo and enters `2025-12-31` into the current Due Date field
   - **When** the dialog submits the existing `PUT /api/todos/{id}` HTMX request
   - **Then** the Todo persists the same calendar date and the returned todo row exposes `data-todo-due-date="2025-12-31"` for the next dialog open
 
-- [ ] **S02 [OC02] [TI01,TI02] Reopening the edited todo preserves the same Due Date**
+- [x] **S02 [OC02] [TI01,TI02] Reopening the edited todo preserves the same Due Date**
   - **Given** a Todo was just updated through the edit dialog with a Due Date of `2025-12-31`
   - **When** the user triggers Edit again from the re-rendered todo row
   - **Then** the existing dialog handoff surface carries the saved date instead of an empty Due Date value
 
-- [ ] **S03 [OC03] [TI01,TI03] Clearing the Due Date still removes the stored value**
+- [x] **S03 [OC03] [TI01,TI03] Clearing the Due Date still removes the stored value**
   - **Given** an existing Todo already has a Due Date
   - **When** the edit dialog submits the same update flow with a blank `due_date`
   - **Then** the Todo saves with no Due Date and the returned row no longer carries a Due Date value
 
 ## Structural Criteria
 
-- [ ] The expected `YYYY-MM-DD` edit-dialog contract no longer falls through the silent parse-failure path in `src/app/routes/todos.py#update_todo`.
-- [ ] BUG-002 proof lives in a dedicated Due Date regression surface so S02 can own quick-add Priority defaults without sharing test files.
-- [ ] Existing title validation, Priority handling, and HTMX partial-response behavior in `src/app/routes/todos.py#update_todo` remain unchanged outside the Due Date fix.
+- [x] The expected `YYYY-MM-DD` edit-dialog contract no longer falls through the silent parse-failure path in `src/app/routes/todos.py#update_todo`.
+- [x] BUG-002 proof lives in a dedicated Due Date regression surface so S02 can own quick-add Priority defaults without sharing test files.
+- [x] Existing title validation, Priority handling, and HTMX partial-response behavior in `src/app/routes/todos.py#update_todo` remain unchanged outside the Due Date fix.
 
 ## Scope & Boundaries
 
@@ -104,15 +104,15 @@ file   | tests/test_todos.py#TestTodos.test_update_todo  | Existing route-level 
 
 ### Implementation Tasks
 
-- [ ] **TI01** Existing todo updates accept and persist the edit dialog's date-only Due Date contract
+- [x] **TI01** Existing todo updates accept and persist the edit dialog's date-only Due Date contract
   - Keep the change in `src/app/routes/todos.py#update_todo`; accept the current `YYYY-MM-DD` submission from `src/app/templates/app.html#edit-todo-dialog` and preserve the existing blank-value-clears-field behavior
   - **Verify**: `uv run pytest tests/test_todo_due_date_persistence.py::test_update_todo_persists_date_only_due_date -q`
 
-- [ ] **TI02** Updated todo rows expose the persisted Due Date back to the next edit-dialog open
+- [x] **TI02** Updated todo rows expose the persisted Due Date back to the next edit-dialog open
   - Reuse `src/app/templates/partials/todo_item.html` and `src/app/static/js/app.js#openEditTodoDialog`; the updated row must emit `data-todo-due-date="2025-12-31"` without introducing new Priority or styling behavior
   - **Verify**: `uv run pytest tests/test_todo_due_date_persistence.py::test_update_todo_response_includes_persisted_due_date_metadata -q`
 
-- [ ] **TI03** BUG-002 proof remains isolated to a dedicated Due Date regression surface
+- [x] **TI03** BUG-002 proof remains isolated to a dedicated Due Date regression surface
   - Add or move the focused persistence tests into `tests/test_todo_due_date_persistence.py` so the story proves save, reopen, and clear semantics without sharing a regression file with S02
   - **Verify**: `uv run pytest tests/test_todo_due_date_persistence.py -q`
 
@@ -145,3 +145,9 @@ Discovered Requirements entries use this shape:
 - **Date**: YYYY-MM-DD
 
 _No observations recorded yet._
+
+### Run: 2026-06-04 07:53 UTC – observations
+
+#### NOTICED BUT NOT TOUCHING
+- Full-suite baseline: `uv run pytest -q` still fails at `tests/test_todos.py::TestTodos::test_create_todo` because `Todo.priority` remains `None` for `POST /api/todos` creation; this is outside S01 scope and is attributed to BUG-003.
+- S01 now addresses server-side parsing and row metadata; full UI reopen end-to-end handoff validation (dialog state prefill from `openEditTodoDialog`) is not executed in this story's backend-focused regression suite.
