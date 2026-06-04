@@ -21,6 +21,8 @@ templates.env.globals["is_overdue"] = is_overdue
 templates.env.globals["is_due_today"] = is_due_today
 templates.env.globals["format_date"] = format_date
 templates.env.globals["format_date_input"] = format_date_input
+DATE_INPUT_FORMAT = "%Y-%m-%d"
+INVALID_DUE_DATE_ERROR = "Invalid due date format"
 
 
 def _verify_list_access(db: Session, list_id: str, user_id: str) -> TodoList | None:
@@ -221,11 +223,17 @@ async def update_todo(
     todo.note = note.strip() if note else None
 
     # Parse due date
-    if due_date and due_date.strip():
+    normalized_due_date = due_date.strip() if due_date else ""
+    if normalized_due_date:
         try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
+            todo.due_date = datetime.strptime(normalized_due_date, DATE_INPUT_FORMAT)
         except ValueError:
-            pass  # Keep existing
+            return templates.TemplateResponse(
+                request=request,
+                name="partials/error.html",
+                context={"error": INVALID_DUE_DATE_ERROR},
+                status_code=400,
+            )
     else:
         todo.due_date = None
 

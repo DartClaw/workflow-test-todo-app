@@ -54,7 +54,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md",
       "scope": "Ensure a Todo due date submitted from the edit dialog is parsed, saved, and rendered back into the dialog on subsequent edits. Includes the existing todo update flow and its regression proof; excludes quick-add defaults and overdue styling behavior.",
       "sourceRefs": [
