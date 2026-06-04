@@ -65,7 +65,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s02-quick-add-default-priority.md",
       "scope": "Fix BUG-003 so todos created from the quick-add form receive the documented default priority of low and reopen in the edit dialog with that value selected. This story covers create/default-path behavior only; it does not add new quick-add inputs or consume S01's edit-dialog ownership.",
       "sourceRefs": [
