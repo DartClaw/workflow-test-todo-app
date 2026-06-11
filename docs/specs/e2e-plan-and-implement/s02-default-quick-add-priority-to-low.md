@@ -54,31 +54,31 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Title-only quick-add creates a low-priority todo immediately**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Title-only quick-add creates a low-priority todo immediately**
   - **Given** an authenticated user has a `TodoList` selected and uses the existing quick-add form, which submits only `list_id` and `title`
   - **When** the user posts a new todo title to `POST /api/todos`
   - **Then** the created `Todo` is persisted with `priority == "low"` and the returned HTML row shows the low-priority presentation expected by the current UI contract
 
-- [ ] **S02 [OC02] [TI02] Edit dialog opens with low selected for a quick-added todo**
+- [x] **S02 [OC02] [TI02] Edit dialog opens with low selected for a quick-added todo**
   - **Given** a todo was created through the quick-add path without any explicit priority input
   - **When** the user activates that row’s edit action
   - **Then** the row’s existing dialog seed data provides `low` to the edit dialog and the priority selector is not blank
 
-- [ ] **S03 [OC01,OC02,OC03] [TI01,TI03] Reloading the list preserves the low-priority rendering**
+- [x] **S03 [OC01,OC02,OC03] [TI01,TI03] Reloading the list preserves the low-priority rendering**
   - **Given** a quick-added todo has already been committed to the database
   - **When** the user revisits the list or reloads the page and the todo is rendered again from persisted state
   - **Then** the todo row still renders with the low-priority badge and low-priority dialog seed data, proving the fix is stored state rather than a transient UI fallback
 
-- [ ] **S04 [OC03] [TI03] Blank-title quick-add still fails without creating a todo**
+- [x] **S04 [OC03] [TI03] Blank-title quick-add still fails without creating a todo**
   - **Given** the quick-add form submits a blank or whitespace-only title
   - **When** `POST /api/todos` rejects the request
   - **Then** the route still returns the error partial and no new `Todo` is created with an inferred priority
 
 ## Structural Criteria
 
-- [ ] Quick-add keeps its existing ownership check, title validation, position calculation, and `partials/todo_item_with_oob.html` response contract while gaining a creation-time default priority.
-- [ ] The fix makes low priority true in persisted quick-add records; the template and dialog continue consuming stored `todo.priority` instead of introducing UI-only fallback logic.
-- [ ] S02 stays isolated from S01’s due-date persistence surface by owning the model-backed default and its dedicated regression coverage instead of editing S01-owned route logic.
+- [x] Quick-add keeps its existing ownership check, title validation, position calculation, and `partials/todo_item_with_oob.html` response contract while gaining a creation-time default priority.
+- [x] The fix makes low priority true in persisted quick-add records; the template and dialog continue consuming stored `todo.priority` instead of introducing UI-only fallback logic.
+- [x] S02 stays isolated from S01’s due-date persistence surface by owning the model-backed default and its dedicated regression coverage instead of editing S01-owned route logic.
 
 ## Scope & Boundaries
 
@@ -125,15 +125,15 @@ file   | tests/test_todo_quick_add_priority.py       | S02-owned regression surf
 
 ### Implementation Tasks
 
-- [ ] **TI01** Quick-add created todos inherit low priority from the persisted model default
+- [x] **TI01** Quick-add created todos inherit low priority from the persisted model default
   - Follow `src/app/database.py#Todo` and the existing `src/app/models/todo.py#TodoCreate` default semantics so title-only quick-add records are stored with `priority == "low"` before render.
   - **Verify**: `uv run pytest tests/test_todo_quick_add_priority.py -k persisted_default -vv` proves title-only quick-add stores `created.priority == "low"`.
 
-- [ ] **TI02** Existing quick-add response and reopen flow expose the stored low priority without UI fallback
+- [x] **TI02** Existing quick-add response and reopen flow expose the stored low priority without UI fallback
   - Keep `src/app/templates/partials/todo_item.html` and `src/app/static/js/app.js#openEditTodoDialog` as read-set context only: row class, badge text, and `data-todo-priority` must continue to derive from persisted `todo.priority` without this story taking ownership of those files.
   - **Verify**: focused route coverage proves the success HTML for `POST /api/todos` contains `priority-low`, `data-todo-priority="low"`, and `Low`.
 
-- [ ] **TI03** Dedicated regression coverage proves revisit behavior and preserves current quick-add safeguards
+- [x] **TI03** Dedicated regression coverage proves revisit behavior and preserves current quick-add safeguards
   - Keep BUG-003 proof in `tests/test_todo_quick_add_priority.py`, including a follow-up render path and the existing blank-title rejection behavior, so S02 stays merge-safe beside S01.
   - **Verify**: `uv run pytest tests/test_todo_quick_add_priority.py -vv` proves low-priority persistence on revisit and no regression to blank-title rejection.
 
@@ -150,10 +150,11 @@ file   | tests/test_todo_quick_add_priority.py       | S02-owned regression surf
 
 ## Final Validation Checklist
 
-- [ ] The only behavior change is that quick-add created todos now persist and render with low priority immediately.
-- [ ] No UI-only fallback was introduced for missing priority values.
-- [ ] S02 remains merge-safe with S01 by avoiding due-date persistence surfaces.
+- [x] The only behavior change is that quick-add created todos now persist and render with low priority immediately.
+- [x] No UI-only fallback was introduced for missing priority values.
+- [x] S02 remains merge-safe with S01 by avoiding due-date persistence surfaces.
 
 ## Implementation Observations
 
-_No observations recorded yet._
+#### NOTICED BUT NOT TOUCHING
+- `tests/test_todos.py::TestTodos::test_update_todo` currently fails in this worktree because `due_date` update parsing stores `None` for date-only input; this failure is unrelated to S02 and remains pre-existing.

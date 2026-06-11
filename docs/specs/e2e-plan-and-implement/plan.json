@@ -84,7 +84,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-priority-to-low.md",
       "owner": null,
       "scope": "Todos created from the quick-add form start with the documented low priority so the created record and rendered todo row both show a valid priority immediately. This story includes defaulting creation-time state for quick-add flows and proving the visible result through regression coverage. It excludes edit-dialog due-date persistence, priority redesign, and changes to other todo creation flows beyond what is required to make quick-add correct.",
