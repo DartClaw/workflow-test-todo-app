@@ -221,11 +221,12 @@ async def update_todo(
     todo.note = note.strip() if note else None
 
     # Parse due date
-    if due_date and due_date.strip():
+    due_date_text = (due_date or "").strip()
+    if due_date_text:
         try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
+            todo.due_date = datetime.strptime(due_date_text, "%Y-%m-%d")
         except ValueError:
-            pass  # Keep existing
+            pass  # Keep existing on malformed values to preserve current safety behavior
     else:
         todo.due_date = None
 
