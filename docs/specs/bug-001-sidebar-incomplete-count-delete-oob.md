@@ -33,17 +33,17 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC03] [TI01,TI02] Deleting an incomplete Todo refreshes the sidebar count without reload**
+- [x] **S01 [OC01,OC03] [TI01,TI02] Deleting an incomplete Todo refreshes the sidebar count without reload**
   - **Given** an authenticated user is viewing a TodoList whose sidebar count target `#list-<list_id>-count` shows `3` incomplete Todos
   - **When** the user deletes one incomplete Todo through `/api/todos/{todo_id}`
   - **Then** the Todo row is removed, and the same response includes an HTMX OOB swap that updates `#list-<list_id>-count` to `2` without a full page reload
 
-- [ ] **S02 [OC02,OC03] [TI01,TI02] Deleting a completed Todo leaves the incomplete count unchanged**
+- [x] **S02 [OC02,OC03] [TI01,TI02] Deleting a completed Todo leaves the incomplete count unchanged**
   - **Given** an authenticated user is viewing a TodoList that contains both completed and incomplete Todos
   - **When** the user deletes a completed Todo through `/api/todos/{todo_id}`
   - **Then** the Todo row is removed, and the response updates `#list-<list_id>-count` with the same value it showed before the delete
 
-- [ ] **S03 [OC03] [TI01,TI03] Deleting a missing Todo keeps the rejection path unchanged**
+- [x] **S03 [OC03] [TI01,TI03] Deleting a missing Todo keeps the rejection path unchanged**
   - **Given** an authenticated delete request targets a Todo ID that does not exist
   - **When** `/api/todos/{todo_id}` receives the delete request
   - **Then** the route returns `404` and does not emit an OOB count update that would imply a successful delete
@@ -51,9 +51,9 @@
 
 ## Structural Criteria
 
-- [ ] Successful Todo delete responses emit an HTMX OOB swap for `#list-<list_id>-count` while preserving the existing row-removal flow driven by `swap: delete`.
-- [ ] Toggle and delete both derive sidebar incomplete-count values from `src/app/routes/todos.py#_get_list_todo_count`.
-- [ ] Automated coverage proves incomplete-delete decrement, completed-delete stability, and missing-todo rejection on the delete path.
+- [x] Successful Todo delete responses emit an HTMX OOB swap for `#list-<list_id>-count` while preserving the existing row-removal flow driven by `swap: delete`.
+- [x] Toggle and delete both derive sidebar incomplete-count values from `src/app/routes/todos.py#_get_list_todo_count`.
+- [x] Automated coverage proves incomplete-delete decrement, completed-delete stability, and missing-todo rejection on the delete path.
 
 
 ## Scope & Boundaries
@@ -105,15 +105,15 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Existing
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful Todo deletes return the same sidebar count-refresh contract used by toggle
+- [x] **TI01** Successful Todo deletes return the same sidebar count-refresh contract used by toggle
   - Follow `src/app/routes/todos.py#toggle_todo` and reuse `src/app/routes/todos.py#_get_list_todo_count`; preserve the current ownership check and the existing bare `404`/`403` `Response` branches in `src/app/routes/todos.py#delete_todo`
   - **Verify**: `DELETE /api/todos/{incomplete_todo_id}` returns `200`, removes the Todo row from the database, and the response body contains `hx-swap-oob` plus `id="list-<list_id>-count"` with the decremented incomplete-count value
 
-- [ ] **TI02** Delete-path OOB markup targets the existing sidebar count element without widening the swap surface
+- [x] **TI02** Delete-path OOB markup targets the existing sidebar count element without widening the swap surface
   - Match `src/app/templates/partials/todo_item_with_oob.html` and `src/app/templates/partials/todo_list_item.html`; the delete success payload should remain compatible with `swap: delete` by emitting only the count update fragment from `src/app/templates/partials/todo_deleted_oob.html`
   - **Verify**: deleting a completed Todo leaves `#list-<list_id>-count` unchanged, and the delete response does not include unrelated sidebar or main-content markup
 
-- [ ] **TI03** Delete-path regression coverage proves the bug fix and guards the rejection path
+- [x] **TI03** Delete-path regression coverage proves the bug fix and guards the rejection path
   - Extend `tests/test_todos.py#TestTodos.test_delete_todo` and add integration coverage alongside `tests/test_integration.py#test_todo_completion_updates_count`; this task depends on TI01 and TI02 defining the successful response contract
   - **Verify**: `uv run pytest tests/test_todos.py tests/test_integration.py -k "delete or count"` passes with assertions for incomplete delete decrement, completed delete count stability, and missing-Todo `404` behavior without OOB success markup
 

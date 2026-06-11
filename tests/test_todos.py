@@ -82,14 +82,47 @@ class TestTodos:
         assert test_todo.completed_at is None
 
     def test_delete_todo(self, authenticated_client, test_todo, db_session):
-        """Test deleting a todo."""
+        """Test deleting an incomplete todo returns OOB count update."""
+        # Baseline list has one incomplete todo from the fixture.
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert f'id="list-{test_todo.list_id}-count"'.encode() in response.content
+        assert b">0<" in response.content
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_completed_todo_keeps_sidebar_count_unchanged(
+        self, authenticated_client, test_todo, test_list, db_session
+    ):
+        """Test deleting a completed todo keeps the sidebar count unchanged."""
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed Todo",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add(completed_todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert f'id="list-{test_todo.list_id}-count"'.encode() in response.content
+        # Count remains 1 because only test_todo is incomplete.
+        assert b">1<" in response.content
+
+        deleted = db_session.query(Todo).filter(Todo.id == completed_todo.id).first()
+        assert deleted is None
+
+    def test_delete_missing_todo_returns_404_without_oob(self, authenticated_client):
+        """Test deleting a missing todo keeps rejection semantics unchanged."""
+        response = authenticated_client.delete("/api/todos/missing")
+        assert response.status_code == 404
+        assert b"hx-swap-oob" not in response.content
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
