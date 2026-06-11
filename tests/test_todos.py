@@ -61,6 +61,72 @@ class TestTodos:
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
 
+    def test_update_todo_due_date_round_trip(self, authenticated_client, test_todo, db_session):
+        """S01: save due date and reopen exposes the same YYYY-MM-DD value."""
+        update_response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Updated Title",
+                "note": "Updated note",
+                "due_date": "2025-12-31",
+                "priority": "high",
+            },
+        )
+        assert update_response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in update_response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is not None
+        assert test_todo.due_date.date() == date(2025, 12, 31)
+
+        reopen_response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert reopen_response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in reopen_response.content
+
+    def test_update_todo_clear_due_date(self, authenticated_client, test_todo, db_session):
+        """S02: empty due date clears stored value instead of preserving it."""
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Cleared due date",
+                "note": "Updated note",
+                "due_date": "",
+                "priority": "medium",
+            },
+        )
+        assert response.status_code == 200
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
+
+        reopen_response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert reopen_response.status_code == 200
+        assert b'data-todo-due-date=""' in reopen_response.content
+
+    def test_update_todo_rejects_malformed_due_date(self, authenticated_client, test_todo, db_session):
+        """S03: malformed due date returns error partial and keeps prior value."""
+        test_todo.due_date = datetime(2025, 1, 2)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Still unchanged",
+                "note": "Updated note",
+                "due_date": "not-a-date",
+                "priority": "medium",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Invalid due date format" in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is not None
+        assert test_todo.due_date == datetime(2025, 1, 2)
+
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
         assert test_todo.is_completed is False
