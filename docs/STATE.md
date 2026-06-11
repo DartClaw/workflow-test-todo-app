@@ -1,6 +1,6 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-06-11
 
 ## Current Phase
 
@@ -14,6 +14,8 @@ Status: On Track
 | _(none)_ | | | |
 
 ## Recently Completed
+
+- **S02 (done)** (2026-06-11): Quick-add default priority model-backed to low and added S02 regression coverage in `tests/test_todo_quick_add_priority.py`.
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 
