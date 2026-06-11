@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+    "docs/STACK.md#frameworks-libraries"
+  ],
+  "overview": {
+    "summary": "This plan keeps the PRD intentionally thin: one story for BUG-002 and one story for BUG-003. Both stories stay in a single execution wave because the requested fixes are independent and small, but the plan constrains ownership so they can still land without merge conflicts.\n\nS01 owns the edit-dialog due-date persistence path and its regression proof. S02 owns the quick-add default-priority path and its regression proof. Any implementation that needs to cross those ownership lines should stop and re-plan rather than widening the story silently.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent Bug Fix Slices",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Isolate the bug fixes by ownership boundary",
+      "description": "S01 owns edit-dialog due-date persistence behavior and its regression coverage; S02 owns quick-add default-priority behavior and its regression coverage so the two stories can merge cleanly.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "title": "Honor the existing HTML date contract end-to-end",
+      "description": "S01 must preserve the date-only format already emitted by the edit dialog so saved values round-trip back into the same control without widening the scope into broader date-time behavior.",
+      "stories": [
+        "S01"
+      ]
+    },
+    {
+      "title": "Make default priority true at creation time",
+      "description": "S02 must ensure quick-add todos are stored and rendered with low priority from the moment they are created, avoiding UI-only fixes that leave persisted state inconsistent.",
+      "stories": [
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "PRD-001",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Fix BUG-002 and BUG-003 from docs/PRODUCT-BACKLOG.md (Known Defects section) as two independent, thin stories."
+    },
+    {
+      "featureId": "PRD-002",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Persist edit-dialog due dates",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md",
+      "owner": null,
+      "scope": "Todo edits persist a date chosen in the existing edit dialog, and reopening the same todo shows that saved date back in the due-date control. This story includes round-tripping valid date-only input and preserving the existing clear-date behavior. It excludes overdue styling changes, quick-add priority behavior, and any broader date-time redesign.",
+      "sourceRefs": [
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "BUG-002"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Own only the edit/update due-date path and its regression proof so the story stays isolated from quick-add priority work."
+    },
+    {
+      "id": "S02",
+      "name": "Default quick-add priority to low",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-priority-to-low.md",
+      "owner": null,
+      "scope": "Todos created from the quick-add form start with the documented low priority so the created record and rendered todo row both show a valid priority immediately. This story includes defaulting creation-time state for quick-add flows and proving the visible result through regression coverage. It excludes edit-dialog due-date persistence, priority redesign, and changes to other todo creation flows beyond what is required to make quick-add correct.",
+      "sourceRefs": [
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "BUG-003"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Own only the quick-add default-priority path and its regression proof so the story remains merge-safe beside S01."
+    }
+  ],
+  "riskSummary": [],
+  "executionNotes": "Execute S01 and S02 in parallel within W1. Preserve the PRD isolation rule by keeping S01 on the edit-dialog due-date persistence surface and S02 on the quick-add default-priority surface; if either fix requires crossing into the other's ownership boundary, stop and regenerate the plan instead of broadening the write set."
+}
