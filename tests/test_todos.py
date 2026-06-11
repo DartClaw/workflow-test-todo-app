@@ -86,10 +86,117 @@ class TestTodos:
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert b"hx-swap-oob=\"true\"" in response.content
+        assert f"list-{test_todo.list_id}-count".encode() in response.content
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_todo_incomplete_updates_sidebar_count(self, authenticated_client, test_list, db_session):
+        """Deleting an incomplete todo refreshes the sidebar incomplete count."""
+        first_todo = Todo(
+            list_id=test_list.id,
+            title="First incomplete",
+            position=0,
+            is_completed=False,
+        )
+        second_todo = Todo(
+            list_id=test_list.id,
+            title="Second incomplete",
+            position=1,
+            is_completed=False,
+        )
+        db_session.add_all([first_todo, second_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{first_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob=\"true\"" in response.content
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'.encode()
+            in response.content
+        )
+
+    def test_delete_todo_completed_keeps_sidebar_count(self, authenticated_client, test_list, db_session):
+        """Deleting a completed todo keeps the incomplete count unchanged."""
+        incomplete_todo = Todo(
+            list_id=test_list.id,
+            title="Incomplete todo",
+            position=0,
+            is_completed=False,
+        )
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed todo",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add_all([incomplete_todo, completed_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob=\"true\"" in response.content
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'.encode()
+            in response.content
+        )
+
+    def test_delete_todo_last_incomplete_drives_count_to_zero(
+        self,
+        authenticated_client,
+        test_list,
+        db_session,
+    ):
+        """Deleting the last incomplete todo sets the count to zero."""
+        last_todo = Todo(
+            list_id=test_list.id,
+            title="Only incomplete",
+            position=0,
+            is_completed=False,
+        )
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Done already",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add_all([last_todo, completed_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{last_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob=\"true\"" in response.content
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">0</span>'.encode()
+            in response.content
+        )
+
+    def test_delete_todo_missing_and_unauthorized_does_not_return_success_fragment(
+        self,
+        client,
+        authenticated_client,
+        test_todo,
+        db_session,
+    ):
+        """Deleting missing or unauthorized todos does not return the success OOB fragment."""
+        missing_response = authenticated_client.delete("/api/todos/missing-todo-id")
+        assert missing_response.status_code == 404
+        assert b"hx-swap-oob=\"true\"" not in missing_response.content
+
+        from app.core.deps import create_session
+        from app.database import User
+
+        other_user = User(email="other-delete@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        unauthorized_session = create_session(other_user.id)
+        client.cookies.set("session_id", unauthorized_session)
+        unauthorized_response = client.delete(f"/api/todos/{test_todo.id}")
+        assert unauthorized_response.status_code == 403
+        assert b"hx-swap-oob=\"true\"" not in unauthorized_response.content
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""

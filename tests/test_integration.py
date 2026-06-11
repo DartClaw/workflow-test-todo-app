@@ -178,6 +178,54 @@ class TestUserJourneys:
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
 
+    def test_delete_todo_incomplete_updates_count(self, authenticated_client, test_list, db_session):
+        """Deleting an incomplete todo updates the sidebar count via OOB swap."""
+        todo_one = Todo(
+            list_id=test_list.id,
+            title="Incomplete One",
+            position=0,
+            is_completed=False,
+        )
+        todo_two = Todo(
+            list_id=test_list.id,
+            title="Incomplete Two",
+            position=1,
+            is_completed=False,
+        )
+        db_session.add_all([todo_one, todo_two])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{todo_one.id}")
+        assert response.status_code == 200
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'.encode()
+            in response.content
+        )
+
+    def test_delete_todo_completed_keeps_count(self, authenticated_client, test_list, db_session):
+        """Deleting a completed todo keeps the sidebar count unchanged."""
+        incomplete = Todo(
+            list_id=test_list.id,
+            title="Incomplete",
+            position=0,
+            is_completed=False,
+        )
+        completed = Todo(
+            list_id=test_list.id,
+            title="Completed",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add_all([incomplete, completed])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed.id}")
+        assert response.status_code == 200
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'.encode()
+            in response.content
+        )
+
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""
         # Create todos with different titles
