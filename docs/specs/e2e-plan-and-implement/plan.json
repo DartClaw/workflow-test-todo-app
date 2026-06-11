@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md",
+    "docs/UBIQUITOUS_LANGUAGE.md",
+    "docs/STACK.md",
+    "CLAUDE.md"
+  ],
+  "overview": {
+    "summary": "This bundle keeps the defect scope intentionally thin and mirrors the PRD's split: one story owns edit-dialog due-date persistence and one story owns quick-add default priority.\n\nBoth stories sit in the same phase and wave because they are behaviorally independent. The plan preserves the PRD's merge-safety requirement by assigning S01 to the update/edit path and S02 to the create/default path instead of broadening both stories across the same surfaces.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Thin defect fixes",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Disjoint ownership of todo update and create paths",
+      "description": "S01 owns the edit/update persistence path, while S02 should source the quick-add default at the create/model boundary so the two fixes stay merge-safe.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "BUG-002/BUG-003",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Edit dialog due dates persist",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-edit-dialog-due-dates-persist.md",
+      "owner": null,
+      "scope": "Due dates entered through the existing edit todo dialog persist after save, reappear when the dialog is reopened, and fail explicitly on malformed payloads instead of silently disappearing. This story excludes quick-add priority defaults, overdue styling, and broader date-model changes.",
+      "sourceRefs": [
+        "BUG-002",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Own the edit/update path only so this fix does not collide with S02."
+    },
+    {
+      "id": "S02",
+      "name": "Quick-add assigns low priority by default",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-quick-add-assigns-low-priority-by-default.md",
+      "owner": null,
+      "scope": "Title-only quick-add creates todos with the documented default priority of low so the new row, badges, and reopened edit dialog all reflect a persisted value. This story excludes due-date parsing, manual priority edits, and any retroactive data cleanup.",
+      "sourceRefs": [
+        "BUG-003",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Own create/default semantics and avoid widening into the edit-path bug fix."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Keep the fix inside the edit/update path, accept the YYYY-MM-DD payload produced by the current date input, and cover persistence, clearing, and malformed-input handling so silent parser failures do not survive."
+    }
+  ],
+  "executionNotes": "S01 and S02 are intended to execute in parallel after spec review. Preserve the disjoint ownership contract from the PRD: S01 fixes edit-dialog persistence in the update flow, while S02 fixes title-only creation defaults at the create/model boundary. If implementation pressure forces both stories into the same write surface, stop and revisit decomposition rather than broadening both patches."
+}
