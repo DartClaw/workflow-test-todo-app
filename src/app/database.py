@@ -19,6 +19,7 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy.pool import NullPool
 
 DATABASE_URL = "sqlite:///./todo.db"
+DEFAULT_TODO_PRIORITY = "low"
 
 engine = create_engine(
     DATABASE_URL,
@@ -80,7 +81,7 @@ class Todo(Base):
     is_completed = Column(Boolean, default=False)
     completed_at = Column(DateTime, nullable=True)
     due_date = Column(DateTime, nullable=True)
-    priority = Column(String(10))  # low, medium, high
+    priority = Column(String(10), default=DEFAULT_TODO_PRIORITY)  # low, medium, high
     position = Column(Integer, default=0)
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)

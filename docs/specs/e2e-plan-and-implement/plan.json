@@ -66,7 +66,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s02-quick-add-assigns-low-priority-by-default.md",
       "owner": null,
       "scope": "Title-only quick-add creates todos with the documented default priority of low so the new row, badges, and reopened edit dialog all reflect a persisted value. This story excludes due-date parsing, manual priority edits, and any retroactive data cleanup.",

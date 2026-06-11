@@ -36,26 +36,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Title-only quick-add creates a low-priority todo**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Title-only quick-add creates a low-priority todo**
   - **Given** an authenticated user with an open `TodoList`
   - **When** the quick-add form submits only `list_id` and `title`
   - **Then** the created `Todo` persists with `priority="low"` and the returned row exposes low-priority badge and dialog metadata
 
-- [ ] **S02 [OC02] [TI01,TI02] Reopening a quick-add-created todo preserves the low-priority selection**
+- [x] **S02 [OC02] [TI01,TI02] Reopening a quick-add-created todo preserves the low-priority selection**
   - **Given** a todo that was created through the quick-add flow
   - **When** the user opens the edit dialog for that todo
   - **Then** the dialog reads back `low` instead of an empty priority selector
 
-- [ ] **S03 [OC03] [TI03] Invalid quick-add submissions still create nothing**
+- [x] **S03 [OC03] [TI03] Invalid quick-add submissions still create nothing**
   - **Given** the quick-add form submits a blank or whitespace-only title
   - **When** the create route rejects the request
   - **Then** the response stays the standard error partial and no new `Todo` is persisted
 
 ## Structural Criteria
 
-- [ ] The default priority source applies to quick-add creation without widening this story into the edit-path due-date fix.
-- [ ] Existing todos with explicit `medium` or `high` priorities continue rendering those values unchanged.
-- [ ] The quick-add route keeps its HTML partial plus OOB count-update response shape.
+- [x] The default priority source applies to quick-add creation without widening this story into the edit-path due-date fix.
+- [x] Existing todos with explicit `medium` or `high` priorities continue rendering those values unchanged.
+- [x] The quick-add route keeps its HTML partial plus OOB count-update response shape.
 
 ## Scope & Boundaries
 
@@ -98,15 +98,15 @@ file   | tests/test_todos.py#TestTodos.test_create_todo | Existing route-level q
 
 ### Implementation Tasks
 
-- [ ] **TI01** Title-only quick-add persists `priority="low"` on every valid new todo
+- [x] **TI01** Title-only quick-add persists `priority="low"` on every valid new todo
   - Source the default from the `Todo` creation boundary in `src/app/database.py#Todo.priority`; treat `src/app/routes/todos.py#create_todo` as the proof surface, not the preferred write surface, so S01 keeps ownership of edit-path route changes
   - **Verify**: `Test: POST /api/todos` with only `list_id` and `title` creates a `Todo` whose `priority == "low"`
 
-- [ ] **TI02** Quick-add response and reopened dialog expose the same low-priority value
+- [x] **TI02** Quick-add response and reopened dialog expose the same low-priority value
   - Use `src/app/templates/partials/todo_item.html` as the proof surface; the returned row must contain the persisted low-priority badge and `data-todo-priority="low"` consumed by the edit dialog
   - **Verify**: `Test: the quick-add response HTML contains both `priority-low` and `data-todo-priority="low"` for the created todo`
 
-- [ ] **TI03** Quick-add validation behavior stays intact while defaulting applies only to valid creates
+- [x] **TI03** Quick-add validation behavior stays intact while defaulting applies only to valid creates
   - Keep the existing blank-title rejection in `src/app/routes/todos.py#create_todo` unchanged; this story must not create partially initialized todos on invalid input
   - **Verify**: `uv run pytest tests/test_todos.py -k "create_todo"` passes, including the blank-title rejection and the low-priority default case
 

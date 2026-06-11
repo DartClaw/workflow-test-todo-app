@@ -1,36 +1,79 @@
 """Tests for todo item routes."""
 
-from datetime import date, datetime, timezone
-
 import pytest
 
-from app.database import Todo
+from app.database import DEFAULT_TODO_PRIORITY, Todo
 
 
 class TestTodos:
     """Tests for todo CRUD operations."""
 
-    def test_create_todo(self, authenticated_client, test_list, db_session):
-        """Test creating a new todo."""
-        response = authenticated_client.post(
+    @staticmethod
+    def _quick_add_todo(client, list_id: str, title: str):
+        """Create a quick-add todo and return the response."""
+        return client.post(
             "/api/todos",
             data={
-                "list_id": test_list.id,
-                "title": "New Todo",
+                "list_id": list_id,
+                "title": title,
             },
+        )
+
+    @staticmethod
+    def _get_todo_by_title(db_session, list_id: str, title: str) -> Todo | None:
+        """Lookup a todo by title in the specified list."""
+        return (
+            db_session.query(Todo)
+            .filter(Todo.title == title, Todo.list_id == list_id)
+            .first()
+        )
+
+    def test_create_todo(self, authenticated_client, test_list, db_session):
+        """Test creating a new todo."""
+        response = self._quick_add_todo(
+            authenticated_client, test_list.id, "New Todo"
         )
         assert response.status_code == 200
         assert b"New Todo" in response.content
 
         # Verify in database
-        created = db_session.query(Todo).filter(Todo.title == "New Todo").first()
+        created = self._get_todo_by_title(db_session, test_list.id, "New Todo")
         assert created is not None
         assert created.list_id == test_list.id
-        assert created.priority == "low"
+        assert created.priority == DEFAULT_TODO_PRIORITY
         assert created.is_completed is False
 
-    def test_create_todo_empty_title(self, authenticated_client, test_list):
+        # Response surface includes the persisted low-priority metadata
+        response_text = response.content.decode()
+        assert f"priority-{DEFAULT_TODO_PRIORITY}" in response_text
+        assert f'data-todo-priority="{DEFAULT_TODO_PRIORITY}"' in response_text
+
+    def test_create_todo_reopen_preserves_priority(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Test reopening a quick-add-created todo keeps low priority."""
+        response = self._quick_add_todo(
+            authenticated_client, test_list.id, "Persistent Priority Todo"
+        )
+        assert response.status_code == 200
+
+        created = self._get_todo_by_title(
+            db_session, test_list.id, "Persistent Priority Todo"
+        )
+        assert created is not None
+        assert created.priority == DEFAULT_TODO_PRIORITY
+
+        response = authenticated_client.get(f"/api/todos/{created.id}")
+        assert response.status_code == 200
+        response_text = response.content.decode()
+        assert (
+            response_text.count(f'data-todo-priority="{DEFAULT_TODO_PRIORITY}"') == 1
+        )
+
+    def test_create_todo_empty_title(self, authenticated_client, test_list, db_session):
         """Test creating todo with empty title fails."""
+        before = db_session.query(Todo).filter(Todo.list_id == test_list.id).count()
+
         response = authenticated_client.post(
             "/api/todos",
             data={
@@ -40,6 +83,9 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"required" in response.content
+
+        after = db_session.query(Todo).filter(Todo.list_id == test_list.id).count()
+        assert after == before
 
     def test_update_todo(self, authenticated_client, test_todo, db_session):
         """Test updating a todo."""
