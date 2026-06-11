@@ -45,7 +45,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s01-edit-dialog-due-dates-persist.md",
       "owner": null,
       "scope": "Due dates entered through the existing edit todo dialog persist after save, reappear when the dialog is reopened, and fail explicitly on malformed payloads instead of silently disappearing. This story excludes quick-add priority defaults, overdue styling, and broader date-model changes.",

@@ -13,6 +13,8 @@ from app.core.deps import get_current_user_id
 from app.database import Todo, TodoList, get_db
 from app.utils import format_date, format_date_input, is_due_today, is_overdue
 
+DUE_DATE_INPUT_FORMAT = "%Y-%m-%d"
+
 router = APIRouter(prefix="/api/todos", tags=["todos"])
 templates = Jinja2Templates(directory="src/app/templates")
 
@@ -35,6 +37,11 @@ def _get_list_todo_count(db: Session, list_id: str) -> int:
     return db.query(func.count(Todo.id)).filter(
         Todo.list_id == list_id, Todo.is_completed == False
     ).scalar()
+
+
+def _normalize_due_date_input(due_date: str | None) -> str:
+    """Normalize HTML date input value before parsing."""
+    return (due_date or "").strip()
 
 
 @router.get("/search", response_class=HTMLResponse)
@@ -221,11 +228,16 @@ async def update_todo(
     todo.note = note.strip() if note else None
 
     # Parse due date
-    if due_date and due_date.strip():
+    normalized_due_date = _normalize_due_date_input(due_date)
+    if normalized_due_date:
         try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
+            todo.due_date = datetime.strptime(normalized_due_date, DUE_DATE_INPUT_FORMAT)
         except ValueError:
-            pass  # Keep existing
+            return templates.TemplateResponse(
+                request=request,
+                name="partials/error.html",
+                context={"error": "Invalid due date format"},
+            )
     else:
         todo.due_date = None
 
