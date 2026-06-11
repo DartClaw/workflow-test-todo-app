@@ -63,7 +63,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md",
       "owner": null,
       "scope": "Todo edits persist a date chosen in the existing edit dialog, and reopening the same todo shows that saved date back in the due-date control. This story includes round-tripping valid date-only input and preserving the existing clear-date behavior. It excludes overdue styling changes, quick-add priority behavior, and any broader date-time redesign.",

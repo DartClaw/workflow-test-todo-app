@@ -49,26 +49,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Saving a date in the edit dialog persists and round-trips back into the same control**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Saving a date in the edit dialog persists and round-trips back into the same control**
   - **Given** an authenticated user opens the existing edit dialog for a Todo with no due date
   - **When** they submit the dialog with `due_date=2025-12-31`
   - **Then** the Todo persists that date, the returned Todo row carries `data-todo-due-date="2025-12-31"`, and reopening the same Todo shows `2025-12-31` in the due-date control
 
-- [ ] **S02 [OC01,OC02] [TI01,TI02] Editing an existing due date replaces it with the newly chosen date**
+- [x] **S02 [OC01,OC02] [TI01,TI02] Editing an existing due date replaces it with the newly chosen date**
   - **Given** a Todo already has a saved due date
   - **When** the user saves the edit dialog with a different valid date and other in-scope field edits
   - **Then** the Todo stores the new chosen date rather than the old date or an empty value, and the reopened dialog reflects the new date
 
-- [ ] **S03 [OC03] [TI03] Clearing the due-date control removes an existing due date**
+- [x] **S03 [OC03] [TI03] Clearing the due-date control removes an existing due date**
   - **Given** a Todo already has a saved due date
   - **When** the user submits the edit dialog with an empty due-date control
   - **Then** the Todo no longer renders a due-date badge and reopening the dialog shows an empty due-date control
 
 ## Structural Criteria
 
-- [ ] The edit-todo route keeps its existing ownership checks, title validation, priority handling, and HTML partial response shape while fixing only the due-date persistence seam.
-- [ ] The due-date round-trip uses the existing date-only contract end to end (`type="date"` input, stored Todo value, `format_date_input`, row metadata, dialog reopen) without widening into datetime-local or timezone redesign.
-- [ ] Regression coverage proves both set-date and clear-date behavior with exact `YYYY-MM-DD` assertions so silent date-loss regressions fail tests.
+- [x] The edit-todo route keeps its existing ownership checks, title validation, priority handling, and HTML partial response shape while fixing only the due-date persistence seam.
+- [x] The due-date round-trip uses the existing date-only contract end to end (`type="date"` input, stored Todo value, `format_date_input`, row metadata, dialog reopen) without widening into datetime-local or timezone redesign.
+- [x] Regression coverage proves both set-date and clear-date behavior with exact `YYYY-MM-DD` assertions so silent date-loss regressions fail tests.
 
 ## Scope & Boundaries
 
@@ -116,19 +116,19 @@ file   | tests/test_todo_due_date_persistence.py     | S01-owned regression surf
 
 ### Implementation Tasks
 
-- [ ] **TI01** Valid date-only submissions from the edit dialog persist on the Todo
+- [x] **TI01** Valid date-only submissions from the edit dialog persist on the Todo
   - Follow `src/app/routes/todos.py#update_todo` and the date-only precedent in `src/app/models/todo.py#TodoUpdate.parse_due_date`; keep ownership, title validation, and priority behavior unchanged.
   - **Verify**: `uv run pytest tests/test_todo_due_date_persistence.py -k persist -vv` proves `due_date="2025-12-31"` persists as a saved Todo due date.
 
-- [ ] **TI02** Returned Todo rows feed the saved date back into the existing reopen flow
+- [x] **TI02** Returned Todo rows feed the saved date back into the existing reopen flow
   - Follow `src/app/templates/partials/todo_item.html`, `src/app/static/js/app.js#openEditTodoDialog`, and `src/app/utils.py#format_date_input` as read-set context; the same saved date must appear in `data-todo-due-date` and in the reopened control without claiming S02-owned surfaces.
   - **Verify**: focused route coverage proves the update response contains `data-todo-due-date="2025-12-31"` and would repopulate `#edit-todo-due-date` with `2025-12-31`.
 
-- [ ] **TI03** Empty due-date submissions clear existing saved dates through the same edit flow
+- [x] **TI03** Empty due-date submissions clear existing saved dates through the same edit flow
   - Preserve the current clear-date behavior in `src/app/routes/todos.py#update_todo`; clearing must remove both persisted date state and rendered due-date UI without affecting the rest of the edit.
   - **Verify**: `uv run pytest tests/test_todo_due_date_persistence.py -k clear -vv` proves submitting `due_date=""` leaves `todo.due_date is None` and the returned Todo HTML exposes no saved due date.
 
-- [ ] **TI04** Regression proof fails on silent date-loss regressions
+- [x] **TI04** Regression proof fails on silent date-loss regressions
   - Keep the BUG-002 proof in the dedicated `tests/test_todo_due_date_persistence.py` surface so the story stays merge-safe beside S02.
   - **Verify**: `uv run pytest tests/test_todo_due_date_persistence.py -vv` fails if the route reverts to swallowing valid date-only submissions.
 
@@ -147,10 +147,11 @@ file   | tests/test_todo_due_date_persistence.py     | S01-owned regression surf
 
 ## Final Validation Checklist
 
-- [ ] Saving `2025-12-31` in the edit dialog persists that exact date.
-- [ ] Reopening the same Todo shows `2025-12-31` in the due-date control.
-- [ ] Clearing the control removes the saved due date without changing unrelated edit behavior.
+- [x] Saving `2025-12-31` in the edit dialog persists that exact date.
+- [x] Reopening the same Todo shows `2025-12-31` in the due-date control.
+- [x] Clearing the control removes the saved due date without changing unrelated edit behavior.
 
 ## Implementation Observations
 
-_No observations recorded yet._
+### NOTICED BUT NOT TOUCHING
+- `uv run pytest` currently reports `tests/test_todos.py::TestTodos::test_create_todo` failure because `Todo.priority` is not persisted as `"low"` for quick-add flow; this is owned by `S02` and is a known baseline issue.
