@@ -81,15 +81,65 @@ class TestTodos:
         assert test_todo.is_completed is False
         assert test_todo.completed_at is None
 
-    def test_delete_todo(self, authenticated_client, test_todo, db_session):
-        """Test deleting a todo."""
-        todo_id = test_todo.id
-        response = authenticated_client.delete(f"/api/todos/{todo_id}")
+    def test_delete_todo_incomplete_updates_sidebar_count(self, authenticated_client, test_todo, test_list, db_session):
+        """Test deleting an incomplete todo updates sidebar count via OOB swap."""
+        additional_todo = Todo(list_id=test_list.id, title="Additional Todo", position=1)
+        db_session.add(additional_todo)
+        db_session.commit()
+
+        initial_count = (
+            db_session.query(Todo)
+            .filter(Todo.list_id == test_list.id, Todo.is_completed.is_(False))
+            .count()
+        )
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+
         assert response.status_code == 200
 
+        expected_count = initial_count - 1
+        content = response.text
+        assert content.count(f'id="list-{test_list.id}-count"') == 1
+        assert 'hx-swap-oob="true"' in content
+        assert f">{expected_count}<" in content
+
         # Verify deleted
-        deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
+        deleted = db_session.query(Todo).filter(Todo.id == test_todo.id).first()
         assert deleted is None
+
+    def test_delete_todo_completed_keeps_sidebar_count(self, authenticated_client, test_todo, test_list, db_session):
+        """Test deleting a completed todo does not change sidebar incomplete count."""
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed Todo",
+            is_completed=True,
+            position=1,
+        )
+        db_session.add(completed_todo)
+        db_session.commit()
+
+        initial_count = (
+            db_session.query(Todo)
+            .filter(Todo.list_id == test_list.id, Todo.is_completed.is_(False))
+            .count()
+        )
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+
+        assert response.status_code == 200
+
+        content = response.text
+        assert content.count(f'id="list-{test_list.id}-count"') == 1
+        assert 'hx-swap-oob="true"' in content
+        assert f">{initial_count}<" in content
+
+        deleted = db_session.query(Todo).filter(Todo.id == completed_todo.id).first()
+        assert deleted is None
+
+        remaining_incomplete = (
+            db_session.query(Todo)
+            .filter(Todo.list_id == test_list.id, Todo.is_completed.is_(False))
+            .count()
+        )
+        assert remaining_incomplete == initial_count
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
@@ -232,3 +282,27 @@ class TestTodoAccess:
             data={"title": "Hacked!"},
         )
         assert response.status_code == 403
+
+    def test_delete_todo_other_users_forbidden(self, client, test_todo, db_session):
+        """Test users cannot delete other users' todos."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        # Create another user
+        other_user = User(email="another@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        # Authenticate as other user
+        session_id = create_session(other_user.id)
+        client.cookies.set("session_id", session_id)
+
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+        assert b"hx-swap-oob" not in response.content
+
+    def test_delete_todo_missing_todo_returns_not_found(self, authenticated_client):
+        """Test deleting a missing todo returns 404 without OOB content."""
+        response = authenticated_client.delete("/api/todos/does-not-exist")
+        assert response.status_code == 404
+        assert b"hx-swap-oob" not in response.content
