@@ -177,6 +177,40 @@ class TestUserJourneys:
 
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">'.encode()
+            in response.content
+        )
+
+    def test_todo_delete_without_permission_does_not_emit_count_fragment(
+        self,
+        client,
+        test_todo,
+        db_session,
+    ):
+        """A delete by non-owner should not emit a success-path OOB fragment."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        other_user = User(email="other-user@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        other_session = create_session(other_user.id)
+        client.cookies.set("session_id", other_session)
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+        assert b"hx-swap-oob" not in response.content
+
+    def test_delete_missing_todo_does_not_emit_count_fragment(
+        self,
+        authenticated_client,
+        test_list,
+    ):
+        """Deleting a missing todo should not emit a success-path OOB fragment."""
+        response = authenticated_client.delete(f"/api/todos/not-a-real-todo-id")
+        assert response.status_code == 404
+        assert b"hx-swap-oob" not in response.content
 
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""

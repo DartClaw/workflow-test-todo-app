@@ -29,31 +29,31 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Incomplete todo deletion refreshes the sidebar count immediately**
+- [x] **S01 [OC01] [TI01,TI02] Incomplete todo deletion refreshes the sidebar count immediately**
   - **Given** a TodoList sidebar item shows `2` incomplete Todos and one visible Todo row is incomplete
   - **When** the user confirms deletion for that Todo from the current list view
   - **Then** the deleted row is removed and the same response updates `list-<list_id>-count` from `2` to `1` without a full page reload
 
-- [ ] **S02 [OC02] [TI01,TI03] Deleting the last incomplete todo shows zero instead of a stale count**
+- [x] **S02 [OC02] [TI01,TI03] Deleting the last incomplete todo shows zero instead of a stale count**
   - **Given** a TodoList has exactly one incomplete Todo remaining and the sidebar count shows `1`
   - **When** the user deletes that Todo
   - **Then** the row is removed and the sidebar count updates to `0` in the delete response
 
-- [ ] **S03 [OC02] [TI01,TI03] Completed todo deletion leaves the incomplete count unchanged**
+- [x] **S03 [OC02] [TI01,TI03] Completed todo deletion leaves the incomplete count unchanged**
   - **Given** a TodoList contains at least one completed Todo and the sidebar count reflects only incomplete Todos
   - **When** the user deletes a completed Todo
   - **Then** the row is removed and the sidebar count is re-rendered with the same numeric value rather than decremented blindly
 
-- [ ] **S04 [OC03] [TI02,TI03] Failed deletes do not masquerade as successful count updates**
+- [x] **S04 [OC03] [TI02,TI03] Failed deletes do not masquerade as successful count updates**
   - **Given** a delete request targets a missing Todo or one the current user does not own
   - **When** the request is processed
   - **Then** the response keeps the existing failure status and does not include a success-path OOB sidebar count fragment
 
 ## Structural Criteria
 
-- [ ] Successful todo deletes still work with the existing `htmx.ajax(... swap: 'delete')` row-removal flow from `src/app/static/js/app.js`
-- [ ] The delete-path OOB fragment targets the existing sidebar count element contract `id="list-<list_id>-count"` with `hx-swap-oob="true"`
-- [ ] Existing create and toggle count-refresh behavior remains unchanged
+- [x] Successful todo deletes still work with the existing `htmx.ajax(... swap: 'delete')` row-removal flow from `src/app/static/js/app.js`
+- [x] The delete-path OOB fragment targets the existing sidebar count element contract `id="list-<list_id>-count"` with `hx-swap-oob="true"`
+- [x] Existing create and toggle count-refresh behavior remains unchanged
 
 ## Scope & Boundaries
 
@@ -104,15 +104,15 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Existing
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful todo deletes return the authoritative incomplete count for the owning TodoList
+- [x] **TI01** Successful todo deletes return the authoritative incomplete count for the owning TodoList
   - Follow `src/app/routes/todos.py#toggle_todo` and reuse `src/app/routes/todos.py#_get_list_todo_count`; recompute after `db.commit()` so incomplete, completed, and zero-count cases all come from persisted state
   - **Verify**: `Test: DELETE /api/todos/<incomplete-id> returns 200 and the response body includes the owning list count fragment with the decremented value; deleting the last incomplete Todo returns the same fragment with >0 replaced by 0`
 
-- [ ] **TI02** Successful delete responses preserve the current HTMX row-removal contract while refreshing the sidebar count out-of-band
+- [x] **TI02** Successful delete responses preserve the current HTMX row-removal contract while refreshing the sidebar count out-of-band
   - Follow `src/app/static/js/app.js` and `src/app/templates/partials/todo_item_with_oob.html`; the delete path must keep working with `swap: 'delete'` and target `id="list-<list_id>-count"` via `hx-swap-oob="true"`
   - **Verify**: `Test: a successful todo DELETE response contains hx-swap-oob="true" and id="list-<list_id>-count" while the client still deletes #todo-<todo_id> as the primary swap target`
 
-- [ ] **TI03** Delete/count regression coverage distinguishes successful refreshes from failure paths
+- [x] **TI03** Delete/count regression coverage distinguishes successful refreshes from failure paths
   - Extend the current route/integration coverage in `tests/test_todos.py` and `tests/test_integration.py`; cover incomplete delete, completed delete, last-incomplete delete, and a failed delete that keeps 403/404 without a success-path count fragment
   - **Verify**: `uv run pytest tests/test_todos.py tests/test_integration.py -k "delete or count"` proves the delete response includes the OOB count fragment only on successful deletes and that existing toggle-count coverage still passes`
 
