@@ -38,26 +38,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Quick-add create response renders a low-priority todo immediately**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Quick-add create response renders a low-priority todo immediately**
   - **Given** an authenticated user with an existing todo list
   - **When** `/api/todos` receives a quick-add POST containing only `list_id` and `title`
   - **Then** the created `Todo` persists with `priority="low"` and the returned row includes `data-todo-priority="low"`, `priority-low`, and visible `Low` priority UI
 
-- [ ] **S02 [OC01,OC03] [TI01,TI02] Low priority survives the create-to-reopen round-trip**
+- [x] **S02 [OC01,OC03] [TI01,TI02] Low priority survives the create-to-reopen round-trip**
   - **Given** a todo was created through quick-add with no explicit priority input
   - **When** the user later loads the list again and reopens the todo in the existing Edit Todo dialog flow
   - **Then** the rendered row still supplies `data-todo-priority="low"` and the dialog shows `Low` selected instead of a blank selector
 
-- [ ] **S03 [OC03] [TI01,TI02] Omitted priority input no longer yields an invalid blank selector**
+- [x] **S03 [OC03] [TI01,TI02] Omitted priority input no longer yields an invalid blank selector**
   - **Given** the quick-add form sends no `priority` field at all
   - **When** the created todo is fed through `todo_item` rendering and `openEditTodoDialog()`
   - **Then** the selector must resolve to the valid existing `low` option, not an empty state caused by a null or invalid stored priority
 
 ## Structural Criteria
 
-- [ ] The quick-add form remains title-only for users; this story does not add new quick-add inputs or hidden priority plumbing.
-- [ ] BUG-003 lands without edits to the BUG-002 due-date conflict surface in `src/app/routes/todos.py`, `src/app/templates/partials/todo_item.html`, `src/app/templates/app.html`, or `tests/test_todos.py`.
-- [ ] Regression proof for BUG-003 lives on an isolated integration path that exercises create response plus later reopen rendering, matching the story note about a non-overlapping test path.
+- [x] The quick-add form remains title-only for users; this story does not add new quick-add inputs or hidden priority plumbing.
+- [x] BUG-003 lands without edits to the BUG-002 due-date conflict surface in `src/app/routes/todos.py`, `src/app/templates/partials/todo_item.html`, `src/app/templates/app.html`, or `tests/test_todos.py`.
+- [x] Regression proof for BUG-003 lives on an isolated integration path that exercises create response plus later reopen rendering, matching the story note about a non-overlapping test path.
 
 ## Scope & Boundaries
 
@@ -103,15 +103,15 @@ file   | tests/test_integration.py#TestUserJourneys.test_register_create_list_ad
 
 ### Implementation Tasks
 
-- [ ] **TI01** Quick-add-created todos persist `priority="low"` when no explicit priority is supplied
+- [x] **TI01** Quick-add-created todos persist `priority="low"` when no explicit priority is supplied
   - Use `src/app/database.py#Todo` as the default seam; align with the existing `low` intent already present in `src/app/templates/app.html:121-149` and `src/app/models/todo.py#TodoCreate`, while leaving the quick-add request contract unchanged
   - **Verify**: `tests/test_integration.py::TestUserJourneys::test_quick_add_todo_defaults_priority_low_round_trip` proves POST `/api/todos` with only `list_id` and `title` stores `priority == "low"` and returns `data-todo-priority="low"`, `priority-low`, and `Low`
 
-- [ ] **TI02** Quick-add priority round-trip stays visible on later render and dialog reopen
+- [x] **TI02** Quick-add priority round-trip stays visible on later render and dialog reopen
   - Add the BUG-003 regression in `tests/test_integration.py#TestUserJourneys`, not `tests/test_todos.py`, and exercise create response plus a later list render that still feeds `src/app/static/js/app.js#openEditTodoDialog` a valid `low` value through `src/app/templates/partials/todo_item.html:1-40`
   - **Verify**: `uv run pytest tests/test_integration.py::TestUserJourneys::test_quick_add_todo_defaults_priority_low_round_trip -vv`
 
-- [ ] **TI03** BUG-003 ships on a merge-isolated surface
+- [x] **TI03** BUG-003 ships on a merge-isolated surface
   - Keep S02 edits out of `src/app/routes/todos.py`, `src/app/templates/partials/todo_item.html`, `src/app/templates/app.html`, and `tests/test_todos.py`; if the fix cannot land within the isolated S02 surface, stop and re-split instead of overlapping BUG-002
   - **Verify**: `git diff --name-only HEAD -- src/app/routes/todos.py src/app/templates/partials/todo_item.html src/app/templates/app.html tests/test_todos.py` returns no paths, and `uv run pytest tests/test_integration.py::TestUserJourneys::test_quick_add_todo_defaults_priority_low_round_trip -vv` stays green
 
@@ -129,9 +129,9 @@ file   | tests/test_integration.py#TestUserJourneys.test_register_create_list_ad
 
 ## Final Validation Checklist
 
-- [ ] Quick-add-created todo rows show `Low` immediately after the HTMX create response
-- [ ] Reopening Edit Todo for that row shows `Low` selected, not a blank selector
-- [ ] S02 changes remain isolated from BUG-002's shared file surface
+- [x] Quick-add-created todo rows show `Low` immediately after the HTMX create response
+- [x] Reopening Edit Todo for that row shows `Low` selected, not a blank selector
+- [x] S02 changes remain isolated from BUG-002's shared file surface
 
 ## Implementation Observations
 

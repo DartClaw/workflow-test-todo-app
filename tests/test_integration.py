@@ -1,5 +1,7 @@
 """Integration tests for full user journeys."""
 
+import re
+
 import pytest
 
 from app.database import Todo, TodoList, User
@@ -206,3 +208,42 @@ class TestUserJourneys:
         assert "Buy birthday gift" in content
         assert "Call mom" not in content
         assert "Send email" not in content
+
+    def test_quick_add_todo_defaults_priority_low_round_trip(self, authenticated_client, test_list, db_session):
+        """BUG-003: quick-add-created todo keeps low priority through render and reopen."""
+        response = authenticated_client.post(
+            "/api/todos",
+            data={
+                "list_id": test_list.id,
+                "title": "Quick Add Low Priority",
+            },
+        )
+        assert response.status_code == 200
+
+        create_payload = response.content.decode()
+        assert 'data-todo-priority="low"' in create_payload
+        assert "priority-low" in create_payload
+        assert "Low" in create_payload
+
+        created_todo = (
+            db_session.query(Todo)
+            .filter(Todo.list_id == test_list.id, Todo.title == "Quick Add Low Priority")
+            .first()
+        )
+        assert created_todo is not None
+        assert created_todo.priority == "low"
+
+        list_response = authenticated_client.get(f"/app/lists/{test_list.id}")
+        assert list_response.status_code == 200
+        list_payload = list_response.content.decode()
+        row_marker = f'id="todo-{created_todo.id}"'
+        row_start = list_payload.find(row_marker)
+        assert row_start != -1
+        assert f'data-todo-priority="{created_todo.priority}"' in list_payload[row_start:]
+
+        # Confirm reopen dialog receives a low value from the rendered row payload.
+        assert re.search(
+            rf"openEditTodoDialog\('{re.escape(created_todo.id)}'.*?'low'\)",
+            list_payload,
+            re.S,
+        )
