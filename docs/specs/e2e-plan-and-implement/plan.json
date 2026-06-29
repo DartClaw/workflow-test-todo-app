@@ -41,7 +41,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s01-bug-002-due-date-edit-persistence.md",
       "owner": null,
       "scope": "Restore the due-date edit flow so a date saved from the todo edit dialog persists in storage, re-renders on the todo item, and is still present when the dialog is reopened. Includes the update endpoint and its regression coverage. Excludes broader due-date styling or timezone behavior changes.",
