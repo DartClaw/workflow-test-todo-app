@@ -62,7 +62,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s02-bug-003-quick-add-default-priority.md",
       "owner": null,
       "scope": "Ensure todos created through quick-add receive the documented default priority so the created item and subsequent edit-dialog reopen both show a low priority without extra user input. Excludes new quick-add inputs and unrelated todo edit behavior.",

@@ -13,6 +13,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    text,
     create_engine,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -80,7 +81,7 @@ class Todo(Base):
     is_completed = Column(Boolean, default=False)
     completed_at = Column(DateTime, nullable=True)
     due_date = Column(DateTime, nullable=True)
-    priority = Column(String(10))  # low, medium, high
+    priority = Column(String(10), default="low", server_default=text("'low'"))  # low, medium, high
     position = Column(Integer, default=0)
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
