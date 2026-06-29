@@ -35,17 +35,17 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC03] [TI01,TI03] Incomplete Todo delete refreshes the sidebar count**
+- [x] **S01 [OC01,OC03] [TI01,TI03] Incomplete Todo delete refreshes the sidebar count**
   - **Given** an authenticated User is viewing a TodoList whose sidebar badge shows `3`, and the Todo being deleted is incomplete
   - **When** the User confirms deletion for that Todo
   - **Then** the Todo row is removed by the current HTMX delete flow, and the server response includes an OOB swap targeting `id="list-{todo.list_id}-count"` with the rendered count `2`
 
-- [ ] **S02 [OC02,OC03] [TI01,TI02,TI03] Completed Todo delete preserves the sidebar count**
+- [x] **S02 [OC02,OC03] [TI01,TI02,TI03] Completed Todo delete preserves the sidebar count**
   - **Given** an authenticated User is viewing a TodoList whose sidebar badge shows `2`, and the Todo being deleted is already completed
   - **When** the User confirms deletion for that Todo
   - **Then** the Todo row is removed, and the server response includes an OOB swap targeting `id="list-{todo.list_id}-count"` with the rendered count still `2`
 
-- [ ] **S03 [OC03] [TI02,TI03] Failed deletes do not advertise a count change**
+- [x] **S03 [OC03] [TI02,TI03] Failed deletes do not advertise a count change**
   - **Given** a delete request targets a missing Todo or a Todo outside the current User's TodoList
   - **When** the server rejects the delete
   - **Then** the response keeps the existing `404` or `403` behavior and does not return a success fragment claiming a sidebar count refresh
@@ -53,9 +53,9 @@
 
 ## Structural Criteria
 
-- [ ] Successful delete responses compute the sidebar count from persisted incomplete Todo rows using the same rule as create and toggle flows.
-- [ ] The Todo row-removal mechanism remains the existing HTMX `swap: 'delete'` path from `src/app/static/js/app.js#confirmDeleteTodo`; the server response only augments it with the sidebar OOB fragment.
-- [ ] Automated regression coverage proves both decrement and no-change delete cases, plus the current failure semantics.
+- [x] Successful delete responses compute the sidebar count from persisted incomplete Todo rows using the same rule as create and toggle flows.
+- [x] The Todo row-removal mechanism remains the existing HTMX `swap: 'delete'` path from `src/app/static/js/app.js#confirmDeleteTodo`; the server response only augments it with the sidebar OOB fragment.
+- [x] Automated regression coverage proves both decrement and no-change delete cases, plus the current failure semantics.
 
 
 ## Scope & Boundaries
@@ -111,15 +111,15 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Existing
 
 ### Implementation Tasks
 
-- [ ] **TI01 Successful Todo deletes carry the sidebar count refresh contract**
+- [x] **TI01 Successful Todo deletes carry the sidebar count refresh contract**
   - Reuse `src/app/routes/todos.py#_get_list_todo_count` after the delete commit and return `src/app/templates/partials/todo_deleted_oob.html` using the same DOM target contract as `src/app/templates/partials/todo_item_with_oob.html`.
   - **Verify**: `DELETE /api/todos/{id}` for an incomplete Todo returns `200` content containing `hx-swap-oob="true"` and `id="list-{list.id}-count"`, and the rendered count is one less than before delete.
 
-- [ ] **TI02 Completed deletes and rejected deletes keep the count truthful**
+- [x] **TI02 Completed deletes and rejected deletes keep the count truthful**
   - The success payload must render the persisted incomplete count whether the deleted Todo was complete or incomplete; `src/app/routes/todos.py#delete_todo` must keep current `403` and `404` behavior for unauthorized or missing Todos.
   - **Verify**: Automated coverage proves a completed Todo delete returns the unchanged count, and missing or unauthorized deletes return `404` or `403` without a false success fragment.
 
-- [ ] **TI03 Regression proof covers the server contract and the HTMX-visible outcome**
+- [x] **TI03 Regression proof covers the server contract and the HTMX-visible outcome**
   - Extend `tests/test_todos.py` and `tests/test_integration.py` so the delete path is guarded at both route-response and interaction-contract levels, mirroring the existing OOB assertion style used for toggle responses.
   - **Verify**: Test assertions confirm successful delete responses include `hx-swap-oob`, and browser validation with the demo User shows deleting an incomplete Todo removes the row and updates the matching sidebar count without a full page reload.
 
