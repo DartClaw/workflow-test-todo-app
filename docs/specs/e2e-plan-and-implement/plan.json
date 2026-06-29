@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/STATE.md",
+    "docs/UBIQUITOUS_LANGUAGE.md",
+    "CLAUDE.md"
+  ],
+  "overview": {
+    "summary": "This bundle fixes two known todo defects as separate vertical bugfix slices. The plan preserves the PRD's requirement that the stories stay thin, independent, and safe to merge in parallel.\n\nS01 restores due-date persistence through the edit dialog round-trip. S02 restores the documented default priority for quick-add-created todos without coupling that fix to the due-date parsing surface.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent defect slices",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [],
+  "bindingConstraints": [
+    {
+      "featureId": "BUG-002+BUG-003",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Fix BUG-002 and BUG-003 from docs/PRODUCT-BACKLOG.md (Known Defects section) as two independent, thin stories."
+    },
+    {
+      "featureId": "BUG-002+BUG-003",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "BUG-002 due date edit persistence",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "s01-bug-002-due-date-edit-persistence.md",
+      "owner": null,
+      "scope": "Restore the due-date edit flow so a date saved from the todo edit dialog persists in storage, re-renders on the todo item, and is still present when the dialog is reopened. Includes the update endpoint and its regression coverage. Excludes broader due-date styling or timezone behavior changes.",
+      "sourceRefs": [
+        "BUG-002",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Honor the PRD isolation rule by keeping this story on the due-date update path and its own regression surface."
+    },
+    {
+      "id": "S02",
+      "name": "BUG-003 quick-add default priority",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "s02-bug-003-quick-add-default-priority.md",
+      "owner": null,
+      "scope": "Ensure todos created through quick-add receive the documented default priority so the created item and subsequent edit-dialog reopen both show a low priority without extra user input. Excludes new quick-add inputs and unrelated todo edit behavior.",
+      "sourceRefs": [
+        "BUG-003",
+        "docs/PRODUCT-BACKLOG.md#known-defects",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Honor the PRD isolation rule by keeping this story out of the due-date parsing surface and verifying the quick-add round-trip through a non-overlapping test path."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Cover the date-only form contract and the reopen round-trip so the fix cannot regress back to a silently ignored save."
+    }
+  ],
+  "executionNotes": "Execute S01 and S02 in parallel if desired, but preserve the PRD's non-overlap constraint while implementing. If either story requires touching the other story's primary surface to land safely, stop and re-split before coding rather than forcing a conflicting merge."
+}
