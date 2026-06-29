@@ -12,7 +12,6 @@ Note: Plan created: e2e-plan-and-implement (2 stories, 1 phase)
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| S01 | spec-ready | `docs/specs/e2e-plan-and-implement/s01-bug-002-due-date-edit-persistence.md` | BUG-002 due-date persistence via edit dialog |
 | S02 | spec-ready | `docs/specs/e2e-plan-and-implement/s02-bug-003-quick-add-default-priority.md` | BUG-003 quick-add low-priority default |
 
 ## Recently Completed

@@ -216,18 +216,22 @@ async def update_todo(
     if priority not in ("low", "medium", "high"):
         priority = "low"
 
+    due_date_input = (due_date or "").strip()
+    if due_date_input:
+        try:
+            todo.due_date = datetime.strptime(due_date_input, "%Y-%m-%d")
+        except ValueError:
+            return templates.TemplateResponse(
+                request=request,
+                name="partials/error.html",
+                context={"error": "Due date must be in YYYY-MM-DD format"},
+            )
+    else:
+        todo.due_date = None
+
     # Update fields
     todo.title = title.strip()
     todo.note = note.strip() if note else None
-
-    # Parse due date
-    if due_date and due_date.strip():
-        try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass  # Keep existing
-    else:
-        todo.due_date = None
 
     todo.priority = priority
     db.commit()

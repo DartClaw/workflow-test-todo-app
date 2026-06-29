@@ -43,8 +43,9 @@ class TestTodos:
 
     def test_update_todo(self, authenticated_client, test_todo, db_session):
         """Test updating a todo."""
+        todo_url = f"/api/todos/{test_todo.id}"
         response = authenticated_client.put(
-            f"/api/todos/{test_todo.id}",
+            todo_url,
             data={
                 "title": "Updated Title",
                 "note": "Updated note",
@@ -53,13 +54,63 @@ class TestTodos:
             },
         )
         assert response.status_code == 200
+        assert b"Dec 31, 2025" in response.content
+        assert b'data-todo-due-date="2025-12-31"' in response.content
 
         # Verify in database
         db_session.refresh(test_todo)
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
-        assert test_todo.due_date.year == 2025
+        assert test_todo.due_date.date().isoformat() == "2025-12-31"
         assert test_todo.priority == "high"
+
+    def test_update_todo_clears_due_date(self, authenticated_client, test_todo, db_session):
+        """Test clearing a due date in update."""
+        test_todo.due_date = datetime(2025, 6, 1)
+        db_session.commit()
+        todo_url = f"/api/todos/{test_todo.id}"
+
+        response = authenticated_client.put(
+            todo_url,
+            data={
+                "title": "Updated Title",
+                "note": "Updated note",
+                "due_date": "",
+                "priority": "low",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Jun 01, 2025" not in response.content
+        assert b'data-todo-due-date=""' in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
+
+    def test_update_todo_rejects_invalid_due_date(
+        self,
+        authenticated_client,
+        test_todo,
+        db_session,
+    ):
+        """Test rejecting malformed due-date input."""
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+        todo_url = f"/api/todos/{test_todo.id}"
+
+        response = authenticated_client.put(
+            todo_url,
+            data={
+                "title": "Updated Title",
+                "note": "Updated note",
+                "due_date": "2025-12-31T09:30",
+                "priority": "low",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Due date must be in YYYY-MM-DD format" in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date.date().isoformat() == "2025-12-31"
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
