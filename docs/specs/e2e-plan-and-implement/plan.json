@@ -87,7 +87,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "low",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s02-default-quick-add-priority-to-low.md",
       "owner": null,
       "scope": "Ensure Todos created from the quick-add form always start with the documented `low` priority so the rendered row and subsequent edit dialog show a populated priority value immediately. Includes create-time defaulting and regression coverage for quick-add output; excludes edit-dialog due-date parsing and broader priority UX changes.",
