@@ -21,13 +21,11 @@
     <div class="list-actions">
         <sl-icon-button name="pencil"
                         label="Edit list"
-                        class="edit-list-btn"
-                        onclick="event.stopPropagation(); openEditListDialog('{{ list.id }}', '{{ list.name | e }}', '{{ (list.description or '') | e }}', '{{ list.color }}')">
+                        class="edit-list-btn">
         </sl-icon-button>
         <sl-icon-button name="trash"
                         label="Delete list"
-                        class="delete-list-btn danger-icon"
-                        onclick="event.stopPropagation(); confirmDeleteList('{{ list.id }}', '{{ list.name | e }}')">
+                        class="delete-list-btn danger-icon">
         </sl-icon-button>
     </div>
 </div>

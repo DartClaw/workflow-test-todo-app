@@ -100,6 +100,40 @@ class TestTodos:
 
         assert f'<span id="list-{test_list.id}-count" hx-swap-oob="true">0</span>' in response.text
 
+    def test_todo_row_does_not_use_inline_handlers(
+        self, authenticated_client, test_todo, db_session
+    ):
+        """Unsafe todo values should not appear in inline JS handlers."""
+        test_todo.title = "Unsafe\"'><script>alert('x')</script>"
+        test_todo.note = "Note\"'><img src=x onerror=alert(1)>"
+        db_session.commit()
+
+        response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 200
+        html = response.text
+
+        assert "onclick=\"openEditTodoDialog(" not in html
+        assert "onclick=\"confirmDeleteTodo(" not in html
+        assert 'class="edit-todo-btn"' in html
+        assert 'class="delete-todo-btn danger-icon"' in html
+
+    def test_list_row_does_not_use_inline_handlers(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Unsafe list values should not appear in inline JS handlers."""
+        test_list.name = "List\"'><script>alert('x')</script>"
+        test_list.description = "Description\"'><img src=x onerror=alert(1)>"
+        db_session.commit()
+
+        response = authenticated_client.get("/api/lists")
+        assert response.status_code == 200
+        html = response.text
+
+        assert "onclick=\"event.stopPropagation(); openEditListDialog(" not in html
+        assert "onclick=\"event.stopPropagation(); confirmDeleteList(" not in html
+        assert 'class="edit-list-btn"' in html
+        assert 'class="delete-list-btn danger-icon"' in html
+
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
         # Create three todos
