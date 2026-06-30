@@ -178,6 +178,86 @@ class TestUserJourneys:
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
 
+    def test_delete_incomplete_todo_decrements_count_response(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Test that deleting an incomplete todo decrements the sidebar badge count."""
+        todo_1 = Todo(list_id=test_list.id, title="Count Todo A", position=0)
+        todo_2 = Todo(list_id=test_list.id, title="Count Todo B", position=1)
+        db_session.add_all([todo_1, todo_2])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{todo_2.id}")
+        assert response.status_code == 200
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'
+            in response.text
+        )
+
+        remaining = (
+            db_session.query(Todo)
+            .filter(Todo.list_id == test_list.id, Todo.is_completed == False)
+            .count()
+        )
+        assert remaining == 1
+
+    def test_delete_completed_todo_does_not_change_incomplete_count(
+        self, authenticated_client, test_list, db_session
+    ):
+        """Test that deleting a completed todo keeps incomplete badge count unchanged."""
+        incomplete_todo = Todo(list_id=test_list.id, title="Incomplete", position=0)
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add_all([incomplete_todo, completed_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">1</span>'
+            in response.text
+        )
+
+        remaining = (
+            db_session.query(Todo)
+            .filter(Todo.list_id == test_list.id, Todo.is_completed == False)
+            .count()
+        )
+        assert remaining == 1
+
+    def test_delete_todo_does_not_update_other_list_count(
+        self, authenticated_client, test_user, db_session
+    ):
+        """Test delete count response touches only the owning list badge."""
+        first_list = TodoList(user_id=test_user.id, name="First List", position=0)
+        second_list = TodoList(user_id=test_user.id, name="Second List", position=1)
+        db_session.add_all([first_list, second_list])
+        db_session.commit()
+
+        first_todo = Todo(list_id=first_list.id, title="First list todo", position=0)
+        second_todo = Todo(list_id=second_list.id, title="Second list todo", position=0)
+        db_session.add_all([first_todo, second_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{first_todo.id}")
+        assert response.status_code == 200
+        assert (
+            f'<span id="list-{first_list.id}-count" hx-swap-oob="true">0</span>'
+            in response.text
+        )
+        assert f'list-{second_list.id}-count"' not in response.text
+
+        unchanged_count = (
+            db_session.query(Todo)
+            .filter(Todo.list_id == second_list.id, Todo.is_completed == False)
+            .count()
+        )
+        assert unchanged_count == 1
+
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""
         # Create todos with different titles

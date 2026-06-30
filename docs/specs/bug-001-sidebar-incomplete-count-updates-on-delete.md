@@ -46,22 +46,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC03] [TI01,TI02] Incomplete Todo deletion decrements the owning sidebar badge without a page reload**
+- [x] **S01 [OC01,OC03] [TI01,TI02] Incomplete Todo deletion decrements the owning sidebar badge without a page reload**
   - **Given** an authenticated user is viewing a TodoList with multiple incomplete Todos and the sidebar badge shows that list's current incomplete count
   - **When** the user confirms deletion for one incomplete Todo from that list
   - **Then** the deleted Todo row is removed by the existing HTMX delete flow and the response also updates `list-<todo_list_id>-count` to the decremented value via `hx-swap-oob`
 
-- [ ] **S02 [OC01,OC02] [TI01,TI02] Deleting the last incomplete Todo renders a zero badge**
+- [x] **S02 [OC01,OC02] [TI01,TI02] Deleting the last incomplete Todo renders a zero badge**
   - **Given** a TodoList has exactly one incomplete Todo remaining and its sidebar badge shows `1`
   - **When** the user deletes that Todo
   - **Then** the response updates `list-<todo_list_id>-count` to `0` via the delete response's OOB fragment and no full page reload is required
 
-- [ ] **S03 [OC02,OC03] [TI01,TI03] Completed Todo deletion leaves the incomplete badge unchanged**
+- [x] **S03 [OC02,OC03] [TI01,TI03] Completed Todo deletion leaves the incomplete badge unchanged**
   - **Given** a TodoList contains at least one completed Todo and at least one other incomplete Todo, and the sidebar badge reflects only the incomplete Todos
   - **When** the user deletes a completed Todo from that list
   - **Then** the deleted Todo row is removed and the sidebar badge value stays the same because completed Todos do not contribute to the incomplete count
 
-- [ ] **S04 [OC03] [TI01,TI03] Delete responses do not retarget unrelated TodoList badges**
+- [x] **S04 [OC03] [TI01,TI03] Delete responses do not retarget unrelated TodoList badges**
   - **Given** the authenticated user owns two TodoLists with different incomplete counts visible in the sidebar
   - **When** the user deletes a Todo from the first TodoList
   - **Then** only the first list's `list-<id>-count` badge changes and the second list's badge remains untouched
@@ -69,9 +69,9 @@
 
 ## Structural Criteria
 
-- [ ] Todo delete responses remain compatible with the current HTMX `swap: delete` request against `#todo-<todo_id>` while also delivering the sidebar OOB badge fragment.
-- [ ] Sidebar badge values continue to be derived from server-side incomplete-Todo counts, including `0` and completed-Todo deletions.
-- [ ] Regression coverage proves delete-count behavior without weakening the existing toggle-count OOB contract.
+- [x] Todo delete responses remain compatible with the current HTMX `swap: delete` request against `#todo-<todo_id>` while also delivering the sidebar OOB badge fragment.
+- [x] Sidebar badge values continue to be derived from server-side incomplete-Todo counts, including `0` and completed-Todo deletions.
+- [x] Regression coverage proves delete-count behavior without weakening the existing toggle-count OOB contract.
 
 
 ## Scope & Boundaries
@@ -123,15 +123,15 @@ file   | src/app/static/js/app.js#confirmDeleteTodo   | HTMX delete request targ
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo delete responses carry the refreshed incomplete count for the owning TodoList
+- [x] **TI01** Todo delete responses carry the refreshed incomplete count for the owning TodoList
   - Follow `src/app/routes/todos.py#toggle_todo` for the server-side OOB pattern and preserve `src/app/routes/todos.py#delete_todo` ownership checks plus delete semantics.
   - **Verify**: `uv run pytest tests/test_todos.py::TestTodos::test_delete_todo tests/test_todos.py::TestTodos::test_delete_todo_updates_incomplete_count_response` passes, and the delete response body includes `hx-swap-oob="true"` with the owning list badge id.
 
-- [ ] **TI02** Delete OOB badge markup matches the sidebar contract for decremented and zero-count cases
+- [x] **TI02** Delete OOB badge markup matches the sidebar contract for decremented and zero-count cases
   - Keep `src/app/templates/partials/todo_deleted_oob.html` aligned with `src/app/templates/partials/todo_list_item.html`; the response must render `list-<todo_list_id>-count` with the server-calculated count, including `0`.
   - **Verify**: deleting the last incomplete Todo yields `<span id="list-<todo_list_id>-count" hx-swap-oob="true">0</span>` in the response fragment and the sidebar badge shows `0` after visual validation.
 
-- [ ] **TI03** Regression coverage proves delete-count behavior across incomplete, completed, and multi-list cases
+- [x] **TI03** Regression coverage proves delete-count behavior across incomplete, completed, and multi-list cases
   - Extend the existing Todo and integration tests around `tests/test_integration.py#test_todo_completion_updates_count` to cover incomplete delete decrement, completed delete no-op on count, and unrelated TodoList badge stability.
   - **Verify**: `uv run pytest tests/test_todos.py tests/test_integration.py -k "delete and count"` passes with assertions for OOB markup, count values, and unchanged second-list badge content.
 
