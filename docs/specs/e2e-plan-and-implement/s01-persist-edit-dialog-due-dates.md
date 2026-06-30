@@ -38,26 +38,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Saved edit-dialog due dates survive immediate reopen**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Saved edit-dialog due dates survive immediate reopen**
   - **Given** an authenticated user opens the existing Edit Todo dialog for a Todo with no due date
   - **When** the user saves the dialog with `due_date=2025-12-31`
   - **Then** the returned Todo row shows the due date, and reopening Edit Todo immediately pre-fills the date input with `2025-12-31`
 
-- [ ] **S02 [OC02] [TI01,TI02] Persisted due dates survive later row re-render**
+- [x] **S02 [OC02] [TI01,TI02] Persisted due dates survive later row re-render**
   - **Given** a Todo already has a persisted due date of `2025-12-31`
   - **When** the app later renders that Todo row again and the user reopens Edit Todo
   - **Then** the row metadata and reopened dialog input still show `2025-12-31`
 
-- [ ] **S03 [OC03] [TI01,TI02] Clearing the due date removes persisted state**
+- [x] **S03 [OC03] [TI01,TI02] Clearing the due date removes persisted state**
   - **Given** an authenticated user opens Edit Todo for a Todo whose due date is currently `2025-12-31`
   - **When** the user clears the `Due Date` field and saves the dialog
   - **Then** the Todo no longer renders a due-date badge, and reopening Edit Todo shows an empty date input
 
 ## Structural Criteria
 
-- [ ] The existing HTMX partial contract remains server-rendered HTML, and `todo_item.html` stays the source of truth for dialog rehydration via `data-todo-due-date`.
-- [ ] BUG-002 regression coverage lands in `tests/test_todos.py`, keeping S01 ownership separate from S02's quick-add surfaces.
-- [ ] S01 does not change quick-add priority defaults, overdue styling, or due-today styling semantics owned by BUG-003 and BUG-004.
+- [x] The existing HTMX partial contract remains server-rendered HTML, and `todo_item.html` stays the source of truth for dialog rehydration via `data-todo-due-date`.
+- [x] BUG-002 regression coverage lands in `tests/test_todos.py`, keeping S01 ownership separate from S02's quick-add surfaces.
+- [x] S01 does not change quick-add priority defaults, overdue styling, or due-today styling semantics owned by BUG-003 and BUG-004.
 
 ## Scope & Boundaries
 
@@ -105,15 +105,15 @@ file   | tests/test_todos.py#TestTodos.test_update_todo | Existing route test to
 
 ### Implementation Tasks
 
-- [ ] **TI01** Existing edit updates persist date-only `due_date` submissions and still clear on blank input
+- [x] **TI01** Existing edit updates persist date-only `due_date` submissions and still clear on blank input
   - Follow `src/app/routes/todos.py#update_todo` and the current route-level validation pattern; accept the dialog's `YYYY-MM-DD` payload without widening into BUG-004 styling logic or unrelated request-model changes
   - **Verify**: `uv run pytest tests/test_todos.py -k "persist_due_date or clear_due_date"` proves PUT `/api/todos/{id}` with `due_date=2025-12-31` stores a value whose `date().isoformat()` is `2025-12-31`, and PUT with `due_date=` clears `Todo.due_date` to `None`
 
-- [ ] **TI02** Rendered Todo rows rehydrate Edit Todo with the persisted due-date value
+- [x] **TI02** Rendered Todo rows rehydrate Edit Todo with the persisted due-date value
   - Keep the existing HTMX fragment contract across `src/app/templates/partials/todo_item.html:1-40`, `src/app/templates/app.html#edit-todo-dialog`, and `src/app/static/js/app.js#openEditTodoDialog`; the dialog must keep reading `data-todo-due-date="{{ format_date_input(todo.due_date) }}"`
   - **Verify**: response assertions or targeted tests confirm the saved-row HTML contains `data-todo-due-date="2025-12-31"`, and browser validation shows reopening Edit Todo pre-fills `#edit-todo-due-date` with `2025-12-31`
 
-- [ ] **TI03** BUG-002 proof and change ownership stay isolated on S01 surfaces
+- [x] **TI03** BUG-002 proof and change ownership stay isolated on S01 surfaces
   - Extend `tests/test_todos.py#TestTodos.test_update_todo`; keep regression coverage out of S02 quick-add flows and out of BUG-004 styling assertions so the stories remain merge-safe
   - **Verify**: `uv run pytest tests/test_todos.py -k "update_todo or persist_due_date or clear_due_date"` passes, and the implementation diff is limited to `src/app/routes/todos.py`, `src/app/templates/partials/todo_item.html`, and `tests/test_todos.py`
 
