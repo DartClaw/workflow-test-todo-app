@@ -221,14 +221,17 @@ async def update_todo(
     todo.note = note.strip() if note else None
 
     # Parse due date
-    if due_date and due_date.strip():
-        try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass  # Keep existing
-    else:
+    normalized_due_date = (due_date or "").strip()
+    if not normalized_due_date:
         todo.due_date = None
-
+    else:
+        for date_format in ("%Y-%m-%d", "%Y-%m-%dT%H:%M"):
+            try:
+                todo.due_date = datetime.strptime(normalized_due_date, date_format)
+                break
+            except ValueError:
+                continue
+        # Keep existing due date for malformed dialog payloads.
     todo.priority = priority
     db.commit()
     db.refresh(todo)

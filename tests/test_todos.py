@@ -10,6 +10,14 @@ from app.database import Todo
 class TestTodos:
     """Tests for todo CRUD operations."""
 
+    def _todo_update_payload(self, test_todo, due_date):
+        return {
+            "title": test_todo.title,
+            "note": test_todo.note or "",
+            "due_date": due_date,
+            "priority": test_todo.priority,
+        }
+
     def test_create_todo(self, authenticated_client, test_list, db_session):
         """Test creating a new todo."""
         response = authenticated_client.post(
@@ -60,6 +68,42 @@ class TestTodos:
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
+
+    def test_persist_due_date(self, authenticated_client, test_todo, db_session):
+        """Test due-date persistence from edit dialog."""
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data=self._todo_update_payload(test_todo, "2025-12-31"),
+        )
+        assert response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is not None
+        assert test_todo.due_date.date().isoformat() == "2025-12-31"
+
+        reopen_response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+        assert reopen_response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in reopen_response.content
+
+    def test_clear_due_date(self, authenticated_client, test_todo, db_session):
+        """Test clearing due date from edit dialog."""
+        update_response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data=self._todo_update_payload(test_todo, "2025-12-31"),
+        )
+        assert update_response.status_code == 200
+
+        clear_response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data=self._todo_update_payload(test_todo, ""),
+        )
+        assert clear_response.status_code == 200
+        assert b'data-todo-due-date=""' in clear_response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
+        assert b'class="todo-due-date' not in clear_response.content
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""

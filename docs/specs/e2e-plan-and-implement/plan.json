@@ -65,7 +65,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s01-persist-edit-dialog-due-dates.md",
       "owner": null,
       "scope": "Persist the date selected in the Todo edit dialog through save, reload, and re-open so users see the same due date they chose. Includes the date-only input round-trip and clear-date behavior for the existing update flow; excludes overdue or due-today styling fixes from BUG-004 and any quick-add priority changes.",
