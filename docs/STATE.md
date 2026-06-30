@@ -1,10 +1,10 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-06-30
 
 ## Current Phase
 
-Phase: AndThen workflow bootstrap
+Phase: Phase 1: Independent Todo defect fixes
 Status: On Track
 
 ## Active Stories
@@ -24,6 +24,7 @@ _(none)_
 ## Recent Decisions
 
 - Adopted AndThen workflow (Project Document Index, shared guidelines, specs directory) on top of existing educational FastAPI + HTMX todo app.
+- Created `docs/specs/e2e-plan-and-implement/plan.json` with 2 spec-ready stories for BUG-002 and BUG-003.
 
 ## Session Continuity Notes
 

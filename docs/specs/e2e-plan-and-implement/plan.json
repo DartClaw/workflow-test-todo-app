@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+    "CLAUDE.md#architecture"
+  ],
+  "overview": {
+    "summary": "This plan resolves two existing Todo defects as independent, execution-sized stories. The bundle keeps the due-date persistence fix and the quick-add priority default fix on separate ownership surfaces so the stories can proceed in parallel and merge without conflict.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent Todo defect fixes",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Preserve story isolation by file ownership",
+      "description": "S01 owns the edit/update due-date path and its regression coverage; S02 owns create-time quick-add defaulting on non-overlapping surfaces plus separate regression coverage so the two stories stay merge-safe.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "title": "Keep the HTMX partial contract stable",
+      "description": "Both stories must preserve HTML fragment responses and the `todo_item.html` data-attribute contract because the edit dialog is populated from the rendered row state.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "title": "Prefer existing patterns without forcing shared-file edits",
+      "description": "Stay aligned with the current HTML-fragment and ad-hoc validation patterns, but allow S02 to satisfy defaulting at the existing persistence boundary when that is the only clean way to preserve the PRD's file-isolation constraint.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "PRD-01",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Fix BUG-002 and BUG-003 from docs/PRODUCT-BACKLOG.md (Known Defects section) as two independent, thin stories."
+    },
+    {
+      "featureId": "PRD-02",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Persist edit-dialog due dates",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "s01-persist-edit-dialog-due-dates.md",
+      "owner": null,
+      "scope": "Persist the date selected in the Todo edit dialog through save, reload, and re-open so users see the same due date they chose. Includes the date-only input round-trip and clear-date behavior for the existing update flow; excludes overdue or due-today styling fixes from BUG-004 and any quick-add priority changes.",
+      "sourceRefs": [
+        "BUG-002",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "notes": "Keep regression coverage in a file S02 does not need to edit; do not widen into due-date styling semantics."
+    },
+    {
+      "id": "S02",
+      "name": "Default quick-add priority to low",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "s02-default-quick-add-priority-to-low.md",
+      "owner": null,
+      "scope": "Ensure Todos created from the quick-add form always start with the documented `low` priority so the rendered row and subsequent edit dialog show a populated priority value immediately. Includes create-time defaulting and regression coverage for quick-add output; excludes edit-dialog due-date parsing and broader priority UX changes.",
+      "sourceRefs": [
+        "BUG-003",
+        "prd.md#product-feature-document"
+      ],
+      "provenance": null,
+      "assetRefs": [
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "notes": "Keep verification out of S01's test file and prefer create-time defaulting on S02-owned surfaces so both stories remain merge-safe under the PRD constraint."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Cover both save-and-reopen persistence and explicit due-date clearing so the fix cannot silently preserve stale values or reintroduce the current parse mismatch."
+    }
+  ],
+  "executionNotes": "S01 and S02 may execute in parallel once ownership is claimed, but they must preserve disjoint file surfaces to satisfy the PRD isolation constraint. Re-check the rendered `todo_item.html` data attributes after each story because the edit dialog state is populated from those values."
+}
