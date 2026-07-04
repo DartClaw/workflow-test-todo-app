@@ -13,11 +13,11 @@ Note: Plan created: e2e-plan-and-implement (2 stories, 1 phase)
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
 | S01 | spec-ready | docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md | BUG-002 – due date persistence through edit dialog |
-| S02 | spec-ready | docs/specs/e2e-plan-and-implement/s02-default-quick-add-priority-to-low.md | BUG-003 – quick-add default priority restored through non-route seam |
 
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S02** (2026-07-04): Quick-add Todos now persist with low default priority through model default.
 
 ## Blockers
 
