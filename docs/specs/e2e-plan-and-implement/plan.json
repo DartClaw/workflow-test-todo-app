@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "1",
+  "prd": "prd.md",
+  "references": [
+    "docs/PRODUCT-BACKLOG.md#known-defects",
+    "docs/UBIQUITOUS_LANGUAGE.md#todo-domain",
+    "CLAUDE.md#architecture"
+  ],
+  "overview": {
+    "summary": "This bundle fixes two known todo defects as independent, thin vertical slices. S01 restores edit-dialog due date persistence without widening the todo editing surface; S02 restores the documented low-priority default for quick-add creation without entering the edit/update route owned by S01.\n\nBoth stories are intentionally parallel and conflict-averse. The plan keeps write ownership disjoint so the fixes can land independently and merge cleanly.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Independent defect slices",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [
+    {
+      "title": "Disjoint route ownership",
+      "description": "S01 owns the todo edit/update route surface; S02 must avoid `src/app/routes/todos.py` and restore the default priority through a different persistence seam so the stories do not collide.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "title": "Per-bug regression files",
+      "description": "Each story gets its own focused regression test file so parallel execution does not force both stories into the same test module.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "title": "Current HTMX and route contracts stay intact",
+      "description": "Both fixes preserve the existing HTML-partial and ad-hoc route-validation architecture; no story introduces JSON responses, Pydantic wiring, or auth changes.",
+      "stories": [
+        "S01",
+        "S02"
+      ]
+    }
+  ],
+  "bindingConstraints": [
+    {
+      "featureId": "BUG-002",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Story 1: BUG-002 - due dates set in the edit dialog do not persist after save."
+    },
+    {
+      "featureId": "BUG-002",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    },
+    {
+      "featureId": "BUG-003",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Story 2: BUG-003 - quick-add todos have no default priority."
+    },
+    {
+      "featureId": "BUG-003",
+      "anchor": "prd.md#product-feature-document",
+      "verbatim": "Keep each story isolated to its own files; they must merge without conflict."
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Persist edit-dialog due dates",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "medium",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md",
+      "owner": null,
+      "scope": "Ensure a due date chosen in the edit dialog survives save-and-reopen by aligning the edit form's date value with the server persistence path, while keeping the fix limited to todo edit behavior and a dedicated BUG-002 regression file. Excludes priority-default behavior, due-date styling, and broader todo-creation changes.",
+      "sourceRefs": [
+        "BUG-002",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Own the todo edit/update surface only; avoid model-level default changes and avoid shared test modules with S02."
+    },
+    {
+      "id": "S02",
+      "name": "Default quick-add priority to low",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "spec-ready",
+      "fis": "docs/specs/e2e-plan-and-implement/s02-default-quick-add-priority-to-low.md",
+      "owner": null,
+      "scope": "Ensure todos created through the quick-add flow always persist with the documented low priority so reopening the edit dialog shows a populated selector, while keeping the fix off the todo edit/update route and in a dedicated BUG-003 regression file. Excludes due-date parsing, visual priority styling, and broader todo-edit behavior.",
+      "sourceRefs": [
+        "BUG-003",
+        "prd.md#product-feature-document",
+        "docs/PRODUCT-BACKLOG.md#known-defects"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "notes": "Restore the default through a non-route persistence seam so the story stays merge-safe with S01."
+    }
+  ],
+  "riskSummary": [
+    {
+      "story": "S01",
+      "risk": "medium",
+      "mitigation": "Pin the accepted edit-dialog date format in a dedicated BUG-002 regression test and verify save-and-reopen behavior against the stored todo."
+    }
+  ],
+  "executionNotes": "Execute S01 and S02 in parallel within W1. Preserve the shared decision on disjoint write ownership: S01 may own the edit/update route surface, while S02 must restore the quick-add default through a different file surface and its own regression file. Treat full-file `tests/test_todos.py` runs as bundle-level validation after both stories land; each story's execution gate should use only its dedicated bug regression plus targeted pre-existing route checks."
+}

@@ -1,17 +1,19 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-07-04
 
 ## Current Phase
 
-Phase: AndThen workflow bootstrap
+Phase: Phase 1: Independent defect slices
 Status: On Track
+Note: Plan created: e2e-plan-and-implement (2 stories, 1 phase)
 
 ## Active Stories
 
 | Story | Status | FIS | Notes |
 |-------|--------|-----|-------|
-| _(none)_ | | | |
+| S01 | spec-ready | docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md | BUG-002 – due date persistence through edit dialog |
+| S02 | spec-ready | docs/specs/e2e-plan-and-implement/s02-default-quick-add-priority-to-low.md | BUG-003 – quick-add default priority restored through non-route seam |
 
 ## Recently Completed
 
