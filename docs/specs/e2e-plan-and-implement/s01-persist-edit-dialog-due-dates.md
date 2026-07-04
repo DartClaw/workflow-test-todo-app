@@ -61,26 +61,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC03] [TI01,TI02,TI03] Date-only edit-dialog submission persists and reopens populated**
+- [x] **S01 [OC01,OC03] [TI01,TI02,TI03] Date-only edit-dialog submission persists and reopens populated**
   - **Given** an authenticated user owns a Todo with no Due Date
   - **When** the edit Todo form submits `due_date=2025-12-31` to `PUT /api/todos/{todo_id}` with valid title, note, and priority fields
   - **Then** the response is the updated `partials/todo_item.html` HTML partial, the stored Todo has Due Date `2025-12-31`, and the returned Todo row exposes `data-todo-due-date="2025-12-31"` for the next edit-dialog open
 
-- [ ] **S02 [OC02,OC03] [TI01,TI02,TI03] Blank edit-dialog due date clears an existing Due Date**
+- [x] **S02 [OC02,OC03] [TI01,TI02,TI03] Blank edit-dialog due date clears an existing Due Date**
   - **Given** an authenticated user owns a Todo with Due Date `2025-12-31`
   - **When** the edit Todo form submits a blank `due_date` to `PUT /api/todos/{todo_id}` with otherwise valid edit fields
   - **Then** the response is the updated Todo HTML partial, the stored Todo has no Due Date, and the returned Todo row has an empty `data-todo-due-date` value
 
-- [ ] **S03 [OC03] [TI01,TI03] Existing edit fields and access checks still work**
+- [x] **S03 [OC03] [TI01,TI03] Existing edit fields and access checks still work**
   - **Given** an authenticated user owns a Todo and another authenticated user does not
   - **When** the owner edits title, note, Due Date, and priority, and the non-owner attempts to edit the same Todo
   - **Then** the owner edit persists all submitted fields through the existing HTML partial response, and the non-owner still receives the existing `403` Error Partial behavior
 
 ## Structural Criteria
 
-- [ ] The BUG-002 regression lives in a dedicated test file, not in `tests/test_todos.py` or another shared S02-owned test module.
-- [ ] S01 does not change quick-add Todo creation, model-level Priority defaults, Priority selector defaults, Due Date styling, or overdue/today date classification.
-- [ ] `PUT /api/todos/{todo_id}` continues returning server-rendered HTML partials and ad-hoc route validation errors; no JSON endpoint, Pydantic route wiring, or auth/session changes are introduced.
+- [x] The BUG-002 regression lives in a dedicated test file, not in `tests/test_todos.py` or another shared S02-owned test module.
+- [x] S01 does not change quick-add Todo creation, model-level Priority defaults, Priority selector defaults, Due Date styling, or overdue/today date classification.
+- [x] `PUT /api/todos/{todo_id}` continues returning server-rendered HTML partials and ad-hoc route validation errors; no JSON endpoint, Pydantic route wiring, or auth/session changes are introduced.
 
 ## Scope & Boundaries
 
@@ -132,19 +132,19 @@ file   | tests/test_todos.py#TestTodos.test_update_todo | Existing update-route 
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo edit/update persists date-only Due Dates from the edit dialog
+- [x] **TI01** Todo edit/update persists date-only Due Dates from the edit dialog
   - Follow `src/app/routes/todos.py#update_todo`; keep existing title, note, priority, ownership, commit, refresh, and `partials/todo_item.html` response behavior.
   - **Verify**: A BUG-002 regression submits `PUT /api/todos/{todo_id}` with `due_date=2025-12-31`, then asserts `response.status_code == 200`, `db_session.refresh(todo)`, `todo.due_date.date().isoformat() == "2025-12-31"`, and the response HTML contains `data-todo-due-date="2025-12-31"`.
 
-- [ ] **TI02** Clearing a Todo Due Date through the edit dialog remains supported
+- [x] **TI02** Clearing a Todo Due Date through the edit dialog remains supported
   - Blank or omitted edit-dialog Due Date values must result in no stored Due Date, preserving the current clear-field behavior in `src/app/routes/todos.py#update_todo`.
   - **Verify**: A BUG-002 regression starts from a Todo with `due_date=datetime(2025, 12, 31)`, submits a valid edit request with `due_date=""`, then asserts `todo.due_date is None` and the response HTML has an empty `data-todo-due-date` value.
 
-- [ ] **TI03** BUG-002 regression coverage is isolated from S02 and proves save-and-reopen behavior
+- [x] **TI03** BUG-002 regression coverage is isolated from S02 and proves save-and-reopen behavior
   - Create a dedicated regression file such as `tests/test_bug_002_edit_dialog_due_date.py`; use `tests/conftest.py#authenticated_client` and do not add this story's assertions to `tests/test_todos.py`.
   - **Verify**: `uv run pytest tests/test_bug_002_edit_dialog_due_date.py -q` passes, and `rg "due_date=2025-12-31|data-todo-due-date" tests/test_bug_002_edit_dialog_due_date.py` finds the dedicated regression evidence.
 
-- [ ] **TI04** Existing Todo edit route contracts remain unchanged outside BUG-002
+- [x] **TI04** Existing Todo edit route contracts remain unchanged outside BUG-002
   - Preserve HTML partial responses, Error Partial behavior, auth ownership checks, ad-hoc validation, and Priority handling in `src/app/routes/todos.py#update_todo`.
   - **Verify**: `uv run pytest tests/test_bug_002_edit_dialog_due_date.py tests/test_todos.py::TestTodos::test_update_todo tests/test_todos.py::TestTodoAccess::test_cannot_modify_other_users_todo` passes.
 
@@ -163,8 +163,8 @@ file   | tests/test_todos.py#TestTodos.test_update_todo | Existing update-route 
 
 ## Final Validation Checklist
 
-- [ ] `uv run pytest tests/test_bug_002_edit_dialog_due_date.py tests/test_todos.py::TestTodos::test_update_todo tests/test_todos.py::TestTodoAccess::test_cannot_modify_other_users_todo -q` passes.
-- [ ] No S01 change modifies quick-add Priority default behavior, Todo creation defaults, Due Date styling, overdue/today classification, auth/session handling, JSON response shape, or Pydantic route wiring.
+- [x] `uv run pytest tests/test_bug_002_edit_dialog_due_date.py tests/test_todos.py::TestTodos::test_update_todo tests/test_todos.py::TestTodoAccess::test_cannot_modify_other_users_todo -q` passes.
+- [x] No S01 change modifies quick-add Priority default behavior, Todo creation defaults, Due Date styling, overdue/today classification, auth/session handling, JSON response shape, or Pydantic route wiring.
 
 ## Implementation Observations
 
