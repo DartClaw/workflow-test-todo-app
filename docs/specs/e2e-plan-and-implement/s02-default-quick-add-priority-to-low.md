@@ -70,32 +70,32 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Quick-add Todo persists the documented low Priority**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Quick-add Todo persists the documented low Priority**
   - **Given** an authenticated User with an existing TodoList
   - **When** the User submits the quick-add form to `POST /api/todos` with only `list_id` and `title`
   - **Then** the persisted Todo has `priority == "low"` and the returned Todo partial includes `data-todo-priority="low"`
 
-- [ ] **S02 [OC02] [TI01,TI02] Quick-add Todo opens the edit dialog with Low selected**
+- [x] **S02 [OC02] [TI01,TI02] Quick-add Todo opens the edit dialog with Low selected**
   - **Given** a Todo created through the quick-add flow without a submitted Priority field
   - **When** the rendered Todo row calls `openEditTodoDialog(..., priority)` from its edit button
   - **Then** the priority argument is `low`, so `#edit-todo-priority` receives the `low` value instead of an empty value
 
-- [ ] **S03 [OC03] [TI01,TI02] Quick-add behavior outside Priority remains unchanged**
+- [x] **S03 [OC03] [TI01,TI02] Quick-add behavior outside Priority remains unchanged**
   - **Given** the quick-add route receives a valid title for an owned TodoList
   - **When** the Todo is created
   - **Then** the title is trimmed, the Todo is appended at the next `position`, completion defaults to incomplete, and the response still renders `partials/todo_item_with_oob.html`
 
-- [ ] **S04 [OC03] [TI02] Invalid quick-add requests still fail through existing HTML error behavior**
+- [x] **S04 [OC03] [TI02] Invalid quick-add requests still fail through existing HTML error behavior**
   - **Given** an authenticated User submits the quick-add form with a blank title
   - **When** `POST /api/todos` handles the request
   - **Then** the response remains the existing HTML Error Partial containing `Title is required` and no Todo is created
 
 ## Structural Criteria
 
-- [ ] `src/app/routes/todos.py` remains untouched by this story.
-- [ ] No JSON endpoint, Pydantic route wiring, or auth/session behavior is introduced.
-- [ ] BUG-003 regression coverage lives in a dedicated test file, not a shared BUG-002 file or broad route-test rewrite.
-- [ ] S02 validation uses dedicated BUG-003 coverage plus targeted quick-add route checks; the full `tests/test_todos.py` file remains bundle-level validation after both stories land.
+- [x] `src/app/routes/todos.py` remains untouched by this story.
+- [x] No JSON endpoint, Pydantic route wiring, or auth/session behavior is introduced.
+- [x] BUG-003 regression coverage lives in a dedicated test file, not a shared BUG-002 file or broad route-test rewrite.
+- [x] S02 validation uses dedicated BUG-003 coverage plus targeted quick-add route checks; the full `tests/test_todos.py` file remains bundle-level validation after both stories land.
 
 ## Scope & Boundaries
 
@@ -146,19 +146,19 @@ file   | tests/test_todos.py#TestTodos.test_create_todo | Existing broad test be
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo persistence defaults missing Priority to `low`
+- [x] **TI01** Todo persistence defaults missing Priority to `low`
   - Make `Todo.priority` in `src/app/database.py#Todo` default to the canonical Priority value `low`, following the existing SQLAlchemy column default style used by Todo fields such as `is_completed` and `position`.
   - **Verify**: `uv run pytest tests/test_bug_003_quick_add_priority.py::test_quick_add_without_priority_persists_low_and_renders_low_priority -q` proves a quick-add POST without `priority` persists `priority == "low"` and returns `data-todo-priority="low"`.
 
-- [ ] **TI02** BUG-003 has isolated regression coverage for quick-add Priority and unchanged failure behavior
+- [x] **TI02** BUG-003 has isolated regression coverage for quick-add Priority and unchanged failure behavior
   - Add `tests/test_bug_003_quick_add_priority.py` using `authenticated_client`, `test_list`, and `db_session`; cover valid quick-add persistence/rendering and blank-title rejection without editing shared BUG-002 tests or `tests/test_todos.py`.
   - **Verify**: `uv run pytest tests/test_bug_003_quick_add_priority.py -q` passes and includes assertions for `priority == "low"`, `data-todo-priority="low"`, next-position preservation, incomplete default, and `Title is required` on blank title.
 
-- [ ] **TI03** S02 remains disjoint from the todo edit/update route surface
+- [x] **TI03** S02 remains disjoint from the todo edit/update route surface
   - Keep `src/app/routes/todos.py` as a read-only reference for this story; all implementation writes must stay outside that route file.
   - **Verify**: `git diff -- src/app/routes/todos.py` prints no diff after implementation.
 
-- [ ] **TI04** Existing todo behavior remains green with the BUG-003 default in place
+- [x] **TI04** Existing todo behavior remains green with the BUG-003 default in place
   - Run only the existing quick-add route checks after the dedicated BUG-003 test passes so S02 stays independent from the BUG-002 edit-route surface.
   - **Verify**: `uv run pytest tests/test_bug_003_quick_add_priority.py tests/test_todos.py::TestTodos::test_create_todo tests/test_todos.py::TestTodos::test_create_todo_empty_title -q` passes.
 
@@ -173,9 +173,11 @@ file   | tests/test_todos.py#TestTodos.test_create_todo | Existing broad test be
 
 ## Final Validation Checklist
 
-- [ ] `uv run pytest tests/test_bug_003_quick_add_priority.py tests/test_todos.py::TestTodos::test_create_todo tests/test_todos.py::TestTodos::test_create_todo_empty_title -q` passes.
-- [ ] No S02 change edits `src/app/routes/todos.py`, broadens quick-add behavior beyond the missing `low` Priority default, or masks persisted `NULL` Priority only at render time.
+- [x] `uv run pytest tests/test_bug_003_quick_add_priority.py tests/test_todos.py::TestTodos::test_create_todo tests/test_todos.py::TestTodos::test_create_todo_empty_title -q` passes.
+- [x] No S02 change edits `src/app/routes/todos.py`, broadens quick-add behavior beyond the missing `low` Priority default, or masks persisted `NULL` Priority only at render time.
 
 ## Implementation Observations
 
-_No observations recorded yet._
+#### NOTICED BUT NOT TOUCHING
+
+- `src/app/routes/todos.py` position assignment still uses `max_pos or -1` semantics. A pre-existing quick-add ordering edge case (`position=0`) can yield duplicate `position=0`; this story intentionally left route logic unchanged to keep S01 ownership boundaries intact.
