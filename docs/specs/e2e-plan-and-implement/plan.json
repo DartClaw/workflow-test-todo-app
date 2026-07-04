@@ -75,7 +75,7 @@
       "dependsOn": [],
       "parallel": true,
       "risk": "medium",
-      "status": "spec-ready",
+      "status": "done",
       "fis": "docs/specs/e2e-plan-and-implement/s01-persist-edit-dialog-due-dates.md",
       "owner": null,
       "scope": "Ensure a due date chosen in the edit dialog survives save-and-reopen by aligning the edit form's date value with the server persistence path, while keeping the fix limited to todo edit behavior and a dedicated BUG-002 regression file. Excludes priority-default behavior, due-date styling, and broader todo-creation changes.",

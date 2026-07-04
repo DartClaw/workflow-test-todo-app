@@ -89,15 +89,17 @@ async def create_todo(
             status_code=404,
         )
 
+    title_value = title.strip()
+
     # Validate title
-    if not title.strip():
+    if not title_value:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
             context={"error": "Title is required"},
         )
 
-    if len(title) > 200:
+    if len(title_value) > 200:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
@@ -197,15 +199,18 @@ async def update_todo(
             status_code=403,
         )
 
+    title_value = title.strip()
+    due_date_value = due_date.strip() if due_date else ""
+
     # Validate title
-    if not title.strip():
+    if not title_value:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
             context={"error": "Title is required"},
         )
 
-    if len(title) > 200:
+    if len(title_value) > 200:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
@@ -217,15 +222,17 @@ async def update_todo(
         priority = "low"
 
     # Update fields
-    todo.title = title.strip()
+    todo.title = title_value
     todo.note = note.strip() if note else None
 
     # Parse due date
-    if due_date and due_date.strip():
+    if due_date_value:
         try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
+            todo.due_date = datetime.strptime(due_date_value, "%Y-%m-%d")
         except ValueError:
-            pass  # Keep existing
+            # Keep existing value for unknown input formats.
+            # The edit dialog sends YYYY-MM-DD; legacy values are intentionally untouched.
+            pass
     else:
         todo.due_date = None
 
