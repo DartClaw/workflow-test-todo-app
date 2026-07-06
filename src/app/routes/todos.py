@@ -15,6 +15,7 @@ from app.utils import format_date, format_date_input, is_due_today, is_overdue
 
 router = APIRouter(prefix="/api/todos", tags=["todos"])
 templates = Jinja2Templates(directory="src/app/templates")
+PRIORITY_LEVELS = {"low", "medium", "high"}
 
 # Add utility functions to template globals
 templates.env.globals["is_overdue"] = is_overdue
@@ -31,6 +32,11 @@ def _parse_due_date(due_date: str) -> datetime | None:
         except ValueError:
             continue
     return None
+
+
+def _normalize_priority(priority: str) -> str:
+    """Return a supported priority value."""
+    return priority if priority in PRIORITY_LEVELS else "low"
 
 
 def _verify_list_access(db: Session, list_id: str, user_id: str) -> TodoList | None:
@@ -86,6 +92,7 @@ async def create_todo(
     user_id: Annotated[str, Depends(get_current_user_id)],
     list_id: Annotated[str, Form()],
     title: Annotated[str, Form()],
+    priority: Annotated[str, Form()] = "low",
     db: Session = Depends(get_db),
 ):
     """Create a new todo (quick add with title only)."""
@@ -99,20 +106,24 @@ async def create_todo(
             status_code=404,
         )
 
+    normalized_title = title.strip()
+
     # Validate title
-    if not title.strip():
+    if not normalized_title:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
             context={"error": "Title is required"},
         )
 
-    if len(title) > 200:
+    if len(normalized_title) > 200:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
             context={"error": "Title must be 200 characters or less"},
         )
+
+    priority = _normalize_priority(priority)
 
     # Calculate next position
     max_pos = (
@@ -125,8 +136,9 @@ async def create_todo(
     # Create todo
     todo = Todo(
         list_id=list_id,
-        title=title.strip(),
+        title=normalized_title,
         position=new_pos,
+        priority=priority,
     )
     db.add(todo)
     db.commit()
@@ -223,9 +235,7 @@ async def update_todo(
             context={"error": "Title must be 200 characters or less"},
         )
 
-    # Validate priority
-    if priority not in ("low", "medium", "high"):
-        priority = "low"
+    priority = _normalize_priority(priority)
 
     # Update fields
     todo.title = normalized_title
