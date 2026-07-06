@@ -1,6 +1,7 @@
 """Integration tests for full user journeys."""
 
 import pytest
+from datetime import datetime, timezone
 
 from app.database import Todo, TodoList, User
 
@@ -177,6 +178,43 @@ class TestUserJourneys:
 
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">0</span>'.encode()
+            in response.content
+        )
+
+    def test_todo_delete_updates_count_oob(self, authenticated_client, test_list, db_session):
+        """Test that deleting a todo updates the list count via OOB swap."""
+        incomplete_todo = Todo(
+            list_id=test_list.id,
+            title="Count Incomplete",
+            position=0,
+        )
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Count Completed",
+            is_completed=True,
+            position=1,
+            completed_at=datetime.now(timezone.utc),
+        )
+        db_session.add_all([incomplete_todo, completed_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{incomplete_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">0</span>'.encode()
+            in response.content
+        )
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">0</span>'.encode()
+            in response.content
+        )
 
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""

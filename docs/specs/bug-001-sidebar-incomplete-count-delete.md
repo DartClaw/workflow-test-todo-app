@@ -37,17 +37,17 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Incomplete todo deletion decrements the sidebar badge without a reload**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Incomplete todo deletion decrements the sidebar badge without a reload**
   - **Given** a `TodoList` with two incomplete `Todo` items and the sidebar badge rendered as `id="list-{list_id}-count"` with value `2`
   - **When** the user deletes one of those incomplete todos through `DELETE /api/todos/{todo_id}`
   - **Then** the response returns `200`, includes `hx-swap-oob="true"`, and returns `<span id="list-{list_id}-count">1</span>` so the sidebar badge updates in the same HTMX interaction
 
-- [ ] **S02 [OC01,OC02] [TI01,TI02] Completed todo deletion preserves the incomplete-count contract**
+- [x] **S02 [OC01,OC02] [TI01,TI02] Completed todo deletion preserves the incomplete-count contract**
   - **Given** a `TodoList` with one incomplete `Todo`, one completed `Todo`, and the sidebar badge value `1`
   - **When** the user deletes the completed todo
   - **Then** the response still includes `hx-swap-oob="true"` and returns `<span id="list-{list_id}-count">1</span>`, proving successful delete responses keep a uniform OOB swap contract even when the numeric count does not change
 
-- [ ] **S03 [OC03] [TI03] Missing or unauthorized deletes do not widen the success contract**
+- [x] **S03 [OC03] [TI03] Missing or unauthorized deletes do not widen the success contract**
   - **Given** a delete request for a missing todo or a todo outside the current user's ownership
   - **When** `DELETE /api/todos/{todo_id}` is submitted
   - **Then** the route keeps returning `404` or `403` respectively, no todo owned by the requester is removed, and no success-only OOB count fragment is emitted
@@ -55,9 +55,9 @@
 
 ## Structural Criteria
 
-- [ ] The sidebar badge target remains the existing `list-{list_id}-count` contract shared with `partials/todo_list_item.html`.
-- [ ] Delete count updates use the same incomplete-count rule as the rest of the todo routes, excluding completed todos from the badge total.
-- [ ] Existing toggle-count regression coverage remains valid while delete-path regression coverage is added.
+- [x] The sidebar badge target remains the existing `list-{list_id}-count` contract shared with `partials/todo_list_item.html`.
+- [x] Delete count updates use the same incomplete-count rule as the rest of the todo routes, excluding completed todos from the badge total.
+- [x] Existing toggle-count regression coverage remains valid while delete-path regression coverage is added.
 
 
 ## Scope & Boundaries
@@ -111,15 +111,15 @@ file   | tests/conftest.py#authenticated_client          | Authenticated in-memo
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful todo deletes return the existing sidebar OOB update contract
+- [x] **TI01** Successful todo deletes return the existing sidebar OOB update contract
   - Follow `src/app/routes/todos.py#toggle_todo` for success-payload shape and use `src/app/templates/partials/todo_deleted_oob.html:1-2` from `src/app/routes/todos.py#delete_todo`; keep the current `403` and `404` branches unchanged
   - **Verify**: `DELETE /api/todos/{todo_id}` for one of two incomplete todos returns `200`, includes `hx-swap-oob="true"`, and returns `<span id="list-{list_id}-count">1</span>`
 
-- [ ] **TI02** Delete responses preserve the sidebar's incomplete-count semantics across todo states
+- [x] **TI02** Delete responses preserve the sidebar's incomplete-count semantics across todo states
   - Reuse `src/app/routes/todos.py#_get_list_todo_count` so the value returned to `list-{list_id}-count` excludes completed todos and reflects committed database state after deletion
   - **Verify**: deleting a completed todo from a list with one incomplete todo returns `hx-swap-oob="true"` and `<span id="list-{list_id}-count">1</span>` while the deleted row no longer exists in the database
 
-- [ ] **TI03** Regression tests prove delete fixes without weakening existing count-update behavior
+- [x] **TI03** Regression tests prove delete fixes without weakening existing count-update behavior
   - Extend `tests/test_todos.py` and `tests/test_integration.py` using `tests/conftest.py#authenticated_client`; cover incomplete-delete decrement, completed-delete no-change, and `403`/`404` delete responses that do not emit a success OOB fragment
   - **Verify**: automated tests assert successful deletes include `hx-swap-oob="true"` with the `list-{list_id}-count` target, failed deletes omit that fragment, and the existing toggle-count OOB assertions still pass
 

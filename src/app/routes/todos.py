@@ -295,15 +295,23 @@ async def delete_todo(
     if not todo:
         return Response(status_code=404)
 
+    list_id = todo.list_id
+
     # Verify access
-    list_obj = _verify_list_access(db, todo.list_id, user_id)
+    list_obj = _verify_list_access(db, list_id, user_id)
     if not list_obj:
         return Response(status_code=403)
 
     db.delete(todo)
     db.commit()
 
-    return Response(status_code=200)
+    count = _get_list_todo_count(db, list_id)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/todo_deleted_oob.html",
+        context={"list_id": list_id, "count": count},
+    )
 
 
 @router.post("/{todo_id}/reorder")
