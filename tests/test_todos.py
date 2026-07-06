@@ -1,9 +1,5 @@
 """Tests for todo item routes."""
 
-from datetime import date, datetime, timezone
-
-import pytest
-
 from app.database import Todo
 
 
@@ -60,6 +56,30 @@ class TestTodos:
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
+
+    def test_edit_todo_dialog_prefills_due_date_after_save(
+        self, authenticated_client, test_list, test_todo, db_session
+    ):
+        """Test due date is rendered for dialog prefill after edit."""
+        due_date = "2025-12-31"
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": test_todo.title,
+                "note": test_todo.note,
+                "due_date": due_date,
+                "priority": "medium",
+            },
+        )
+        assert response.status_code == 200
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is not None
+        assert test_todo.due_date.strftime("%Y-%m-%d") == due_date
+
+        page = authenticated_client.get(f"/app/lists/{test_list.id}")
+        assert page.status_code == 200
+        assert f'data-todo-due-date="{due_date}"'.encode() in page.content
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
