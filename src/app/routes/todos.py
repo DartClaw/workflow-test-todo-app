@@ -24,6 +24,16 @@ templates.env.globals["format_date"] = format_date
 templates.env.globals["format_date_input"] = format_date_input
 
 
+def _parse_due_date(due_date: str) -> datetime | None:
+    """Parse a supported due-date value."""
+    for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M"):
+        try:
+            return datetime.strptime(due_date, fmt)
+        except ValueError:
+            continue
+    return None
+
+
 def _normalize_priority(priority: str) -> str:
     """Return a supported priority value."""
     return priority if priority in PRIORITY_LEVELS else "low"
@@ -210,14 +220,15 @@ async def update_todo(
         )
 
     # Validate title
-    if not title.strip():
+    normalized_title = title.strip()
+    if not normalized_title:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
             context={"error": "Title is required"},
         )
 
-    if len(title) > 200:
+    if len(normalized_title) > 200:
         return templates.TemplateResponse(
             request=request,
             name="partials/error.html",
@@ -227,15 +238,15 @@ async def update_todo(
     priority = _normalize_priority(priority)
 
     # Update fields
-    todo.title = title.strip()
+    todo.title = normalized_title
     todo.note = note.strip() if note else None
 
     # Parse due date
-    if due_date and due_date.strip():
-        try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass  # Keep existing
+    normalized_due_date = due_date.strip() if due_date else None
+    if normalized_due_date:
+        parsed_due_date = _parse_due_date(normalized_due_date)
+        if parsed_due_date is not None:
+            todo.due_date = parsed_due_date
     else:
         todo.due_date = None
 
