@@ -50,6 +50,7 @@
           hx-swap="beforeend"
           hx-on::after-request="if(event.detail.successful) this.reset()">
         <input type="hidden" name="list_id" value="{{ current_list.id }}">
+        <input type="hidden" name="priority" value="low">
         <sl-input
             name="title"
             placeholder="Add a new todo..."
