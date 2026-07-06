@@ -36,22 +36,22 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC03] [TI01] Deleting an incomplete Todo refreshes the sidebar count immediately**
+- [x] **S01 [OC01,OC03] [TI01] Deleting an incomplete Todo refreshes the sidebar count immediately**
   - **Given** an authenticated User viewing a TodoList whose sidebar badge `#list-{list_id}-count` shows `2` for two incomplete Todos
   - **When** the user confirms delete for one of those incomplete Todos and `DELETE /api/todos/{todo_id}` succeeds
   - **Then** `#todo-{todo_id}` is removed and the response updates `#list-{list_id}-count` to `1` via `hx-swap-oob` without a full page reload
 
-- [ ] **S02 [OC02,OC03] [TI01,TI02] Deleting a completed Todo keeps the incomplete-count unchanged**
+- [x] **S02 [OC02,OC03] [TI01,TI02] Deleting a completed Todo keeps the incomplete-count unchanged**
   - **Given** a TodoList with one incomplete Todo, one completed Todo, and sidebar badge `#list-{list_id}-count` showing `1`
   - **When** the completed Todo is deleted
   - **Then** `#todo-{todo_id}` is removed and the OOB update keeps `#list-{list_id}-count` at `1`
 
-- [ ] **S03 [OC03] [TI02] Toggle-driven count updates still work after the delete fix**
+- [x] **S03 [OC03] [TI02] Toggle-driven count updates still work after the delete fix**
   - **Given** an incomplete Todo in the active TodoList and sidebar badge `#list-{list_id}-count` showing `1`
   - **When** the user toggles that Todo complete through `PATCH /api/todos/{todo_id}/toggle`
   - **Then** the Todo row re-renders and the response still updates `#list-{list_id}-count` to `0` via the existing OOB pattern
 
-- [ ] **S04 [OC03] [TI01] Rejected deletes do not emit a fake success-state count update**
+- [x] **S04 [OC03] [TI01] Rejected deletes do not emit a fake success-state count update**
   - **Given** a User submits `DELETE /api/todos/{todo_id}` for a missing Todo or a Todo owned by another User
   - **When** the request is rejected
   - **Then** the response stays `404` or `403` and does not emit a success-state `#list-{list_id}-count` OOB fragment
@@ -59,9 +59,9 @@
 
 ## Structural Criteria
 
-- [ ] Successful delete responses target the existing sidebar badge `id="list-{list_id}-count"` rather than introducing a second count selector.
-- [ ] Delete-side count recomputation reflects persisted `Todo.is_completed == False` state after the delete commit, not a client-side guess.
-- [ ] Automated coverage includes explicit assertions for delete-path `hx-swap-oob` output and for the pre-existing toggle count update path.
+- [x] Successful delete responses target the existing sidebar badge `id="list-{list_id}-count"` rather than introducing a second count selector.
+- [x] Delete-side count recomputation reflects persisted `Todo.is_completed == False` state after the delete commit, not a client-side guess.
+- [x] Automated coverage includes explicit assertions for delete-path `hx-swap-oob` output and for the pre-existing toggle count update path.
 
 
 ## Scope & Boundaries
@@ -114,15 +114,15 @@ file   | tests/test_integration.py#test_todo_completion_updates_count | Existing
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful Todo delete responses carry the updated sidebar incomplete-count for the owning TodoList
+- [x] **TI01** Successful Todo delete responses carry the updated sidebar incomplete-count for the owning TodoList
   - Follow `src/app/routes/todos.py#toggle_todo`, reuse `src/app/routes/todos.py#_get_list_todo_count`, and return `src/app/templates/partials/todo_deleted_oob.html` on `200` only after `db.commit()`
   - **Verify**: `Test: deleting an incomplete Todo removes it from the DB and returns 200 content containing "hx-swap-oob" and 'id="list-{list_id}-count"' with the decremented count`
 
-- [ ] **TI02** Delete-side OOB markup and sidebar badge targeting stay aligned on incomplete-only semantics
+- [x] **TI02** Delete-side OOB markup and sidebar badge targeting stay aligned on incomplete-only semantics
   - Keep `src/app/templates/partials/todo_deleted_oob.html` and `src/app/templates/partials/todo_list_item.html` on the same `list-{{ ... }}-count` contract; the returned count must still represent only `Todo.is_completed == False`
   - **Verify**: `Test: deleting a completed Todo returns an OOB fragment that leaves the visible count unchanged, and toggling an incomplete Todo complete still drives 'id="list-{list_id}-count"' to 0`
 
-- [ ] **TI03** Automated coverage proves delete count refresh and rejected deletes stay free of misleading OOB success markup
+- [x] **TI03** Automated coverage proves delete count refresh and rejected deletes stay free of misleading OOB success markup
   - Extend `tests/test_todos.py#test_delete_todo` and `tests/test_integration.py#test_todo_completion_updates_count`; add explicit assertions for delete success OOB output plus rejected `403` and `404` delete responses
   - **Verify**: `uv run pytest tests/test_todos.py tests/test_integration.py -k "delete or count or toggle"` passes with assertions covering success OOB output and rejected-delete no-OOB cases
 

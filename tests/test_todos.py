@@ -1,6 +1,8 @@
 """Tests for todo item routes."""
 
+import re
 from datetime import date, datetime, timezone
+from uuid import uuid4
 
 import pytest
 
@@ -86,10 +88,39 @@ class TestTodos:
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert re.search(
+            rf'id="list-{test_todo.list_id}-count".*?>0</span>',
+            response.text,
+        )
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_completed_todo_keeps_sidebar_count(
+        self,
+        authenticated_client,
+        test_todo,
+        db_session,
+    ):
+        """Test deleting a completed todo does not decrement the incomplete count."""
+        completed_todo = Todo(
+            list_id=test_todo.list_id,
+            title="Completed",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add(completed_todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+        assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert re.search(
+            rf'id="list-{test_todo.list_id}-count".*?>1</span>',
+            response.text,
+        )
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
@@ -232,3 +263,28 @@ class TestTodoAccess:
             data={"title": "Hacked!"},
         )
         assert response.status_code == 403
+
+    def test_cannot_delete_other_users_todo(self, client, test_todo, db_session):
+        """Test users cannot delete other users' todos."""
+        from app.core.deps import create_session
+        from app.database import User
+
+        # Create another user
+        other_user = User(email="other-delete@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+
+        # Authenticate as other user
+        session_id = create_session(other_user.id)
+        client.cookies.set("session_id", session_id)
+
+        # Try to delete the todo
+        response = client.delete(f"/api/todos/{test_todo.id}")
+        assert response.status_code == 403
+        assert b"hx-swap-oob" not in response.content
+
+    def test_delete_missing_todo(self, authenticated_client):
+        """Test deleting a missing todo does not emit OOB count output."""
+        response = authenticated_client.delete(f"/api/todos/{uuid4()}")
+        assert response.status_code == 404
+        assert b"hx-swap-oob" not in response.content

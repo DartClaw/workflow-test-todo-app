@@ -1,5 +1,7 @@
 """Integration tests for full user journeys."""
 
+import re
+
 import pytest
 
 from app.database import Todo, TodoList, User
@@ -177,6 +179,10 @@ class TestUserJourneys:
 
         # Response should include OOB swap for count
         assert b"hx-swap-oob" in response.content
+        assert re.search(
+            rf'id="list-{test_list.id}-count".*?>0</span>',
+            response.text,
+        )
 
     def test_todo_search_filters_correctly(self, authenticated_client, test_list, db_session):
         """Test that search filters todos correctly."""
