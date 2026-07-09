@@ -84,8 +84,26 @@ class TestTodos:
     def test_delete_todo(self, authenticated_client, test_todo, db_session):
         """Test deleting a todo."""
         todo_id = test_todo.id
+
+        # Add another todo to verify incomplete count updates via OOB
+        db_session.add(
+            Todo(
+                list_id=test_todo.list_id,
+                title="Another Todo",
+                position=1,
+            )
+        )
+        db_session.commit()
+
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+
+        assert b"hx-swap-oob" in response.content
+        assert (
+            f'id="list-{test_todo.list_id}-count" hx-swap-oob="true">1</span>'
+            .encode()
+            in response.content
+        )
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
