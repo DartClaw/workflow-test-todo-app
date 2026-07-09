@@ -1,6 +1,6 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-07-09
 
 ## Current Phase
 
@@ -16,6 +16,8 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S01** (2026-07-09): Implemented BUG-002 fix so edited due dates persist after save and re-open with the current value.
+- **S02** (2026-07-09): Implemented BUG-003 fix so quick-add todos default to `low` priority and render visibly in list rows.
 
 ## Blockers
 

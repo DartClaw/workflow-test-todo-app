@@ -19,6 +19,7 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"New Todo" in response.content
+        assert b"Low" in response.content
 
         # Verify in database
         created = db_session.query(Todo).filter(Todo.title == "New Todo").first()

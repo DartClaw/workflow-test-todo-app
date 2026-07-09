@@ -133,6 +133,7 @@ async def create_todo(
         list_id=list_id,
         title=title.strip(),
         position=new_pos,
+        priority="low",
     )
     db.add(todo)
     db.commit()
