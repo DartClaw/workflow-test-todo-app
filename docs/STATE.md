@@ -1,6 +1,6 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-07-16
 
 ## Current Phase
 
@@ -16,6 +16,7 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **BUG-003 quick-add default priority** (2026-07-16): Quick-add todos now default to low priority and the quick-add form indicates the default priority.
 
 ## Blockers
 
