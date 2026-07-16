@@ -15,12 +15,23 @@ from app.utils import format_date, format_date_input, is_due_today, is_overdue
 
 router = APIRouter(prefix="/api/todos", tags=["todos"])
 templates = Jinja2Templates(directory="src/app/templates")
+_DUE_DATE_FORMATS = ("%Y-%m-%d", "%Y-%m-%dT%H:%M")
 
 # Add utility functions to template globals
 templates.env.globals["is_overdue"] = is_overdue
 templates.env.globals["is_due_today"] = is_due_today
 templates.env.globals["format_date"] = format_date
 templates.env.globals["format_date_input"] = format_date_input
+
+
+def _parse_due_date(raw_due_date: str) -> datetime | None:
+    """Parse todo due-date input in supported formats."""
+    for fmt in _DUE_DATE_FORMATS:
+        try:
+            return datetime.strptime(raw_due_date, fmt)
+        except ValueError:
+            continue
+    return None
 
 
 def _verify_list_access(db: Session, list_id: str, user_id: str) -> TodoList | None:
@@ -223,10 +234,10 @@ async def update_todo(
 
     # Parse due date
     if due_date and due_date.strip():
-        try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass  # Keep existing
+        due_date_value = due_date.strip()
+        parsed_due_date = _parse_due_date(due_date_value)
+        if parsed_due_date is not None:
+            todo.due_date = parsed_due_date
     else:
         todo.due_date = None
 
