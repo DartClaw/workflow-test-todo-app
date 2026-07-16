@@ -17,13 +17,11 @@
         <div class="list-header-actions">
             <sl-icon-button name="pencil"
                             label="Edit list"
-                            class="edit-list-header-btn"
-                            onclick="openEditListDialog('{{ current_list.id }}', '{{ current_list.name | e }}', '{{ (current_list.description or '') | e }}', '{{ current_list.color }}')">
+                            class="edit-list-header-btn">
             </sl-icon-button>
             <sl-icon-button name="trash"
                             label="Delete list"
-                            class="delete-list-header-btn danger-icon"
-                            onclick="confirmDeleteList('{{ current_list.id }}', '{{ current_list.name | e }}')">
+                            class="delete-list-header-btn danger-icon">
             </sl-icon-button>
         </div>
     </div>

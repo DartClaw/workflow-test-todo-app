@@ -36,13 +36,11 @@
     <div class="todo-actions">
         <sl-icon-button name="pencil"
                         label="Edit todo"
-                        class="edit-todo-btn"
-                        onclick="openEditTodoDialog('{{ todo.id }}', '{{ todo.title | e }}', '{{ (todo.note or '') | e }}', '{{ format_date_input(todo.due_date) }}', '{{ todo.priority }}')">
+                        class="edit-todo-btn">
         </sl-icon-button>
         <sl-icon-button name="trash"
                         label="Delete todo"
-                        class="delete-todo-btn danger-icon"
-                        onclick="confirmDeleteTodo('{{ todo.id }}', '{{ todo.title | e }}')">
+                        class="delete-todo-btn danger-icon">
         </sl-icon-button>
     </div>
 </div>

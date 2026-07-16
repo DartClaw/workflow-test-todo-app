@@ -1,6 +1,8 @@
 """Tests for todo item routes."""
 
+import re
 from datetime import date, datetime, timezone
+from html import unescape
 
 import pytest
 
@@ -28,6 +30,36 @@ class TestTodos:
         assert created.list_id == test_list.id
         assert created.priority == "low"
         assert created.is_completed is False
+
+    def test_todo_rendering_uses_data_attributes_for_edit_actions(self, authenticated_client, test_list, db_session):
+        """Test todo and list action handlers use data attributes instead of inline args."""
+        todo = Todo(
+            list_id=test_list.id,
+            title="x' ); alert(1);//",
+            note='Note "with" <tags> risk',
+            position=0,
+        )
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.get(f"/api/lists/{test_list.id}")
+        assert response.status_code == 200
+        body = response.text
+
+        assert 'onclick="openEditTodoDialog(' not in body
+        assert 'onclick="confirmDeleteTodo(' not in body
+        assert 'onclick="event.stopPropagation(); openEditListDialog(' not in body
+        assert 'onclick="event.stopPropagation(); confirmDeleteList(' not in body
+        assert 'onclick="openEditListDialog(' not in body
+        assert 'onclick="confirmDeleteList(' not in body
+
+        title_attr = re.search(r'data-todo-title="([^"]*)"', body)
+        assert title_attr is not None
+        assert unescape(title_attr.group(1)) == "x' ); alert(1);//"
+
+        note_attr = re.search(r'data-todo-note="([^"]*)"', body)
+        assert note_attr is not None
+        assert unescape(note_attr.group(1)) == 'Note "with" <tags> risk'
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
