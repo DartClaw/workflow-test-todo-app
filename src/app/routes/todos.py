@@ -223,10 +223,15 @@ async def update_todo(
 
     # Parse due date
     if due_date and due_date.strip():
-        try:
-            todo.due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass  # Keep existing
+        parsed = None
+        for fmt in ("%Y-%m-%dT%H:%M", "%Y-%m-%d"):
+            try:
+                parsed = datetime.strptime(due_date.strip(), fmt)
+                break
+            except ValueError:
+                continue
+        if parsed is not None:
+            todo.due_date = parsed
     else:
         todo.due_date = None
 

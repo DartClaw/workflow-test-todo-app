@@ -16,6 +16,7 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **BUG-002 fix** (2026-07-16): Persisted due dates from the edit dialog; updated todo update handler to parse `YYYY-MM-DD` values.
 
 ## Blockers
 
