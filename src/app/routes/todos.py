@@ -37,6 +37,35 @@ def _get_list_todo_count(db: Session, list_id: str) -> int:
     ).scalar()
 
 
+def _todo_item_fragment(
+    request: Request,
+    todo: Todo,
+    list_obj: TodoList,
+    db: Session,
+):
+    """Render a todo item with sidebar count OOB swap."""
+    count = _get_list_todo_count(db, todo.list_id)
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/todo_item_with_oob.html",
+        context={"todo": todo, "list": list_obj, "count": count},
+    )
+
+
+def _todo_count_fragment(
+    request: Request,
+    list_id: str,
+    db: Session,
+):
+    """Render sidebar incomplete-count OOB swap."""
+    count = _get_list_todo_count(db, list_id)
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/todo_deleted_oob.html",
+        context={"list_id": list_id, "count": count},
+    )
+
+
 @router.get("/search", response_class=HTMLResponse)
 async def search_todos(
     request: Request,
@@ -122,14 +151,7 @@ async def create_todo(
     db.commit()
     db.refresh(todo)
 
-    # Get updated count for OOB swap
-    count = _get_list_todo_count(db, list_id)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/todo_item_with_oob.html",
-        context={"todo": todo, "list": list_obj, "count": count},
-    )
+    return _todo_item_fragment(request=request, todo=todo, list_obj=list_obj, db=db)
 
 
 @router.get("/{todo_id}", response_class=HTMLResponse)
@@ -273,14 +295,7 @@ async def toggle_todo(
     db.commit()
     db.refresh(todo)
 
-    # Get updated count for OOB swap
-    count = _get_list_todo_count(db, todo.list_id)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/todo_item_with_oob.html",
-        context={"todo": todo, "list": list_obj, "count": count},
-    )
+    return _todo_item_fragment(request=request, todo=todo, list_obj=list_obj, db=db)
 
 
 @router.delete("/{todo_id}")
@@ -303,12 +318,8 @@ async def delete_todo(
     db.delete(todo)
     db.commit()
 
-    count = _get_list_todo_count(db, todo.list_id)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/todo_deleted_oob.html",
-        context={"list_id": todo.list_id, "count": count},
+    return _todo_count_fragment(
+        request=request, list_id=todo.list_id, db=db
     )
 
 
