@@ -61,6 +61,16 @@ class TestTodos:
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
 
+    def test_edit_todo_prefills_due_date_markup(self, authenticated_client, test_list, db_session):
+        """Test that list UI includes the persisted due date for dialog prefill."""
+        todo = Todo(list_id=test_list.id, title="Prefill Todo", due_date=datetime(2026, 1, 5), position=1)
+        db_session.add(todo)
+        db_session.commit()
+
+        response = authenticated_client.get(f"/app/lists/{test_list.id}")
+        assert response.status_code == 200
+        assert b'data-todo-due-date="2026-01-05"' in response.content
+
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
         assert test_todo.is_completed is False
