@@ -65,6 +65,24 @@ class TestTodos:
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
 
+    def test_update_todo_invalid_due_date_rejected(self, authenticated_client, test_todo, db_session):
+        """Test that invalid due dates return an error and do not clear existing value."""
+        test_todo.due_date = datetime(2026, 1, 5)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Updated Title",
+                "due_date": "2026-31-40",
+            },
+        )
+        assert response.status_code == 200
+        assert b"Invalid due date format" in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date == datetime(2026, 1, 5)
+
     def test_edit_todo_prefills_due_date_markup(self, authenticated_client, test_list, db_session):
         """Test that list UI includes the persisted due date for dialog prefill."""
         todo = Todo(list_id=test_list.id, title="Prefill Todo", due_date=datetime(2026, 1, 5), position=1)
