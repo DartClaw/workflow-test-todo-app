@@ -29,6 +29,10 @@ class TestTodos:
         assert created.priority == "low"
         assert created.is_completed is False
 
+        # The quick-added row should render the default priority badge
+        assert b"<sl-badge" in response.content
+        assert b'<sl-badge variant="success" pill>' in response.content
+
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
         response = authenticated_client.post(
