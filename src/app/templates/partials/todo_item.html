@@ -1,10 +1,11 @@
+{% set priority = todo.priority or 'low' %}
 <div class="todo-item {% if todo.is_completed %}completed{% endif %} {% if is_overdue(todo) %}overdue{% endif %} {% if is_due_today(todo) %}due-today{% endif %} priority-{{ todo.priority }}"
      id="todo-{{ todo.id }}"
      data-todo-id="{{ todo.id }}"
      data-todo-title="{{ todo.title | e }}"
      data-todo-note="{{ (todo.note or '') | e }}"
      data-todo-due-date="{{ format_date_input(todo.due_date) }}"
-     data-todo-priority="{{ todo.priority }}">
+     data-todo-priority="{{ priority }}">
     <sl-icon name="grip-vertical" class="todo-drag-handle"></sl-icon>
     <div class="todo-checkbox">
         <sl-checkbox
@@ -27,7 +28,6 @@
                 {{ format_date(todo.due_date) }}
             </span>
             {% endif %}
-            {% set priority = todo.priority or 'low' %}
             <sl-badge variant="{{ 'danger' if priority == 'high' else 'warning' if priority == 'medium' else 'success' }}" pill>
                 {{ priority | capitalize }}
             </sl-badge>
@@ -38,7 +38,7 @@
         <sl-icon-button name="pencil"
                         label="Edit todo"
                         class="edit-todo-btn"
-                        onclick="openEditTodoDialog('{{ todo.id }}', '{{ todo.title | e }}', '{{ (todo.note or '') | e }}', '{{ format_date_input(todo.due_date) }}', '{{ todo.priority }}')">
+                        onclick="openEditTodoDialog('{{ todo.id }}', '{{ todo.title | e }}', '{{ (todo.note or '') | e }}', '{{ format_date_input(todo.due_date) }}', '{{ priority }}')">
         </sl-icon-button>
         <sl-icon-button name="trash"
                         label="Delete todo"
