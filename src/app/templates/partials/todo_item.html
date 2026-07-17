@@ -27,8 +27,9 @@
                 {{ format_date(todo.due_date) }}
             </span>
             {% endif %}
-            <sl-badge variant="{{ 'danger' if todo.priority == 'high' else 'warning' if todo.priority == 'medium' else 'success' }}" pill>
-                {{ todo.priority | capitalize }}
+            {% set priority = todo.priority or 'low' %}
+            <sl-badge variant="{{ 'danger' if priority == 'high' else 'warning' if priority == 'medium' else 'success' }}" pill>
+                {{ priority | capitalize }}
             </sl-badge>
         </div>
     </div>
