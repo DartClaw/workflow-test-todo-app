@@ -45,3 +45,6 @@ generated_images/
 
 # Node
 node_modules/
+
+# Local state (per-developer, never committed)
+docs/STATE.local.md
