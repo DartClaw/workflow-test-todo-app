@@ -86,6 +86,9 @@ class TestTodos:
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert b"hx-swap-oob" in response.content
+        assert f'"list-{test_todo.list_id}-count"'.encode() in response.content
+        assert b">0</span>" in response.content
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
