@@ -114,7 +114,7 @@ function openEditTodoDialog(id, title, note, dueDate, priority) {
 
     document.getElementById('edit-todo-title').value = title;
     document.getElementById('edit-todo-note').value = note;
-    document.getElementById('edit-todo-due-date').value = dueDate;
+    document.getElementById('edit-todo-due-date').value = dueDate || '';
     document.getElementById('edit-todo-priority').value = priority;
 
     form.setAttribute('hx-put', `/api/todos/${id}`);
