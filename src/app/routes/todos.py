@@ -15,6 +15,8 @@ from app.utils import format_date, format_date_input, is_due_today, is_overdue
 
 router = APIRouter(prefix="/api/todos", tags=["todos"])
 templates = Jinja2Templates(directory="src/app/templates")
+DEFAULT_TODO_PRIORITY = "low"
+VALID_TODO_PRIORITIES = (DEFAULT_TODO_PRIORITY, "medium", "high")
 
 # Add utility functions to template globals
 templates.env.globals["is_overdue"] = is_overdue
@@ -116,6 +118,7 @@ async def create_todo(
     todo = Todo(
         list_id=list_id,
         title=title.strip(),
+        priority=DEFAULT_TODO_PRIORITY,
         position=new_pos,
     )
     db.add(todo)
@@ -174,7 +177,7 @@ async def update_todo(
     title: Annotated[str, Form()],
     note: Annotated[str | None, Form()] = None,
     due_date: Annotated[str | None, Form()] = None,
-    priority: Annotated[str, Form()] = "low",
+    priority: Annotated[str, Form()] = DEFAULT_TODO_PRIORITY,
     db: Session = Depends(get_db),
 ):
     """Update a todo item."""
@@ -213,8 +216,8 @@ async def update_todo(
         )
 
     # Validate priority
-    if priority not in ("low", "medium", "high"):
-        priority = "low"
+    if priority not in VALID_TODO_PRIORITIES:
+        priority = DEFAULT_TODO_PRIORITY
 
     # Update fields
     todo.title = title.strip()
