@@ -11,6 +11,13 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user_id
 from app.database import Todo, TodoList, get_db
+from app.constants import (
+    DEFAULT_TODO_PRIORITY,
+    TODO_PRIORITY_HIGH,
+    TODO_PRIORITY_LOW,
+    TODO_PRIORITY_MEDIUM,
+    VALID_TODO_PRIORITIES,
+)
 from app.utils import format_date, format_date_input, is_due_today, is_overdue
 
 router = APIRouter(prefix="/api/todos", tags=["todos"])
@@ -23,6 +30,9 @@ templates.env.globals["is_overdue"] = is_overdue
 templates.env.globals["is_due_today"] = is_due_today
 templates.env.globals["format_date"] = format_date
 templates.env.globals["format_date_input"] = format_date_input
+templates.env.globals["TODO_PRIORITY_LOW"] = TODO_PRIORITY_LOW
+templates.env.globals["TODO_PRIORITY_MEDIUM"] = TODO_PRIORITY_MEDIUM
+templates.env.globals["TODO_PRIORITY_HIGH"] = TODO_PRIORITY_HIGH
 
 
 def _verify_list_access(db: Session, list_id: str, user_id: str) -> TodoList | None:
@@ -219,11 +229,6 @@ async def update_todo(
     if priority not in VALID_TODO_PRIORITIES:
         priority = DEFAULT_TODO_PRIORITY
 
-    # Update fields
-    todo.title = title.strip()
-    todo.note = note.strip() if note else None
-
-    # Parse due date
     parsed_due_date = None
     if due_date and due_date.strip():
         cleaned_due_date = due_date.strip()
@@ -234,9 +239,18 @@ async def update_todo(
             except ValueError:
                 continue
 
-        if parsed_due_date is not None:
-            todo.due_date = parsed_due_date
-    else:
+        if parsed_due_date is None:
+            return templates.TemplateResponse(
+                request=request,
+                name="partials/error.html",
+                context={"error": "Invalid due date format"},
+            )
+
+    # Update fields
+    todo.title = title.strip()
+    todo.note = note.strip() if note else None
+    todo.due_date = parsed_due_date
+    if due_date is None or not due_date.strip():
         todo.due_date = None
 
     todo.priority = priority

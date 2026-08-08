@@ -1,4 +1,4 @@
-{% set todo_priority = todo.priority or "low" %}
+{% set todo_priority = todo.priority or TODO_PRIORITY_LOW %}
 
 <div class="todo-item {% if todo.is_completed %}completed{% endif %} {% if is_overdue(todo) %}overdue{% endif %} {% if is_due_today(todo) %}due-today{% endif %} priority-{{ todo_priority }}"
      id="todo-{{ todo.id }}"
@@ -29,7 +29,7 @@
                 {{ format_date(todo.due_date) }}
             </span>
             {% endif %}
-            <sl-badge variant="{{ 'danger' if todo_priority == 'high' else 'warning' if todo_priority == 'medium' else 'success' }}" pill>
+            <sl-badge variant="{{ 'danger' if todo_priority == TODO_PRIORITY_HIGH else 'warning' if todo_priority == TODO_PRIORITY_MEDIUM else 'success' }}" pill>
                 {{ todo_priority | capitalize }}
             </sl-badge>
         </div>
@@ -39,12 +39,12 @@
         <sl-icon-button name="pencil"
                         label="Edit todo"
                         class="edit-todo-btn"
-                        onclick="openEditTodoDialog('{{ todo.id }}', '{{ todo.title | e }}', '{{ (todo.note or '') | e }}', '{{ format_date_input(todo.due_date) }}', '{{ todo_priority }}')">
+                        onclick="openEditTodoDialog({{ todo.id | tojson }}, {{ todo.title | tojson }}, {{ (todo.note or '') | tojson }}, {{ format_date_input(todo.due_date) | tojson }}, {{ todo_priority | tojson }})">
         </sl-icon-button>
         <sl-icon-button name="trash"
                         label="Delete todo"
                         class="delete-todo-btn danger-icon"
-                        onclick="confirmDeleteTodo('{{ todo.id }}', '{{ todo.title | e }}')">
+                        onclick="confirmDeleteTodo({{ todo.id | tojson }}, {{ todo.title | tojson }})">
         </sl-icon-button>
     </div>
 </div>

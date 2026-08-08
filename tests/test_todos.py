@@ -1,5 +1,6 @@
 """Tests for todo item routes."""
 
+from app.constants import DEFAULT_TODO_PRIORITY
 from app.database import Todo
 
 
@@ -17,14 +18,14 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"New Todo" in response.content
-        assert b"data-todo-priority=\"low\"" in response.content
-        assert b"Low" in response.content
+        assert f'data-todo-priority="{DEFAULT_TODO_PRIORITY}"'.encode() in response.content
+        assert DEFAULT_TODO_PRIORITY.capitalize().encode() in response.content
 
         # Verify in database
         created = db_session.query(Todo).filter(Todo.title == "New Todo").first()
         assert created is not None
         assert created.list_id == test_list.id
-        assert created.priority == "low"
+        assert created.priority == DEFAULT_TODO_PRIORITY
         assert created.is_completed is False
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
@@ -58,6 +59,23 @@ class TestTodos:
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
+
+    def test_update_todo_invalid_due_date(self, authenticated_client, test_todo, db_session):
+        """Test update rejects invalid due date payloads."""
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Updated Title",
+                "due_date": "2025-12-31T12:00:00.000Z",
+            },
+        )
+
+        assert response.status_code == 200
+        assert b"Invalid due date format" in response.content
+
+        db_session.refresh(test_todo)
+        assert test_todo.title == "Test Todo"
+        assert test_todo.due_date is None
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
