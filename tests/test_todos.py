@@ -91,6 +91,25 @@ class TestTodos:
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
 
+    def test_delete_todo_updates_incomplete_count_via_oob_swap(
+        self, authenticated_client, test_todo, db_session
+    ):
+        """Acceptance scenario: deleting a todo decreases the sidebar count via OOB swap."""
+        second_todo = Todo(
+            list_id=test_todo.list_id,
+            title="Second Todo",
+            position=1,
+        )
+        db_session.add(second_todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        assert f'id="list-{test_todo.list_id}-count"'.encode() in response.content
+        assert b'hx-swap-oob="true"' in response.content
+        assert b">1<" in response.content
+
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
         # Create three todos
