@@ -1,6 +1,6 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-08-10
 
 ## Current Phase
 
@@ -15,6 +15,7 @@ Status: On Track
 
 ## Recently Completed
 
+- **S02 – Fix BUG-003 default priority** (2026-08-10): Quick-add todos now persist low priority and render the Low badge.
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
 
 ## Blockers
