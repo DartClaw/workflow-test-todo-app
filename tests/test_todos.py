@@ -59,8 +59,20 @@ class TestTodos:
         db_session.refresh(test_todo)
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
-        assert test_todo.due_date.year == 2025
+        assert test_todo.due_date == datetime(2025, 12, 31)
         assert test_todo.priority == "high"
+
+    def test_edit_dialog_prefills_existing_due_date(
+        self, authenticated_client, test_todo, db_session
+    ):
+        """The rendered todo exposes its current date for the edit dialog."""
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+
+        response = authenticated_client.get("/app")
+
+        assert response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in response.content
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
