@@ -1,6 +1,6 @@
 # Project State
 
-Last Updated: 2026-04-22
+Last Updated: 2026-08-13
 
 ## Current Phase
 
@@ -16,6 +16,7 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S01 BUG-002** (2026-08-13): Edit-dialog due dates now persist and are exposed for prefill on reopen.
 
 ## Blockers
 
