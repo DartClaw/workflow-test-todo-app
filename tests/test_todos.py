@@ -1,6 +1,8 @@
 """Tests for todo item routes."""
 
 from datetime import date, datetime, timezone
+from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -73,6 +75,48 @@ class TestTodos:
 
         assert response.status_code == 200
         assert b'data-todo-due-date="2025-12-31"' in response.content
+
+    def test_edit_dialog_assigns_due_date_to_input(self):
+        """The edit-dialog client handler copies the existing date into the input."""
+        app_js = Path(__file__).parents[1] / "src/app/static/js/app.js"
+        node_script = """
+const fs = require("fs");
+const vm = require("vm");
+
+const elements = {
+  "edit-todo-dialog": { show() {} },
+  "edit-todo-form": { setAttribute() {} },
+  "edit-todo-title": { value: "" },
+  "edit-todo-note": { value: "" },
+  "edit-todo-due-date": { value: "" },
+  "edit-todo-priority": { value: "" },
+};
+const document = {
+  body: { addEventListener() {} },
+  addEventListener() {},
+  getElementById(id) { return elements[id]; },
+};
+const context = {
+  document,
+  htmx: { process() {} },
+  localStorage: { getItem() { return null; }, setItem() {} },
+  window: { matchMedia() { return { matches: false }; } },
+};
+
+vm.runInNewContext(fs.readFileSync(process.argv[1], "utf8"), context);
+context.openEditTodoDialog("todo-1", "Title", "", "2025-12-31", "low");
+if (elements["edit-todo-due-date"].value !== "2025-12-31") {
+  process.exit(1);
+}
+"""
+        result = subprocess.run(
+            ["node", "-e", node_script, str(app_js)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        assert result.returncode == 0, result.stderr
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
