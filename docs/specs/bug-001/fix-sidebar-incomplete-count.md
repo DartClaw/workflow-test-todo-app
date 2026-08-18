@@ -11,3 +11,12 @@
 ## Implementation Plan
 
 - Update the delete_todo handler to return the same out-of-band count fragment that toggle_todo returns.
+
+## Implementation Observations
+
+### Run: 2026-08-18
+
+#### NOTICED BUT NOT TOUCHING
+
+- `tests/test_todos.py::TestTodos::test_create_todo` fails because the existing create handler leaves `priority` as `None`.
+- `tests/test_todos.py::TestTodos::test_update_todo` fails because the existing update handler does not parse the test's date-only `due_date` value.

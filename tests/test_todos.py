@@ -82,14 +82,69 @@ class TestTodos:
         assert test_todo.completed_at is None
 
     def test_delete_todo(self, authenticated_client, test_todo, db_session):
-        """Test deleting a todo."""
+        """Test deleting a todo and updating the sidebar count via OOB swap."""
+        remaining = Todo(
+            list_id=test_todo.list_id,
+            title="Remaining Todo",
+            position=1,
+        )
+        another_remaining = Todo(
+            list_id=test_todo.list_id,
+            title="Another Remaining Todo",
+            position=2,
+        )
+        completed = Todo(
+            list_id=test_todo.list_id,
+            title="Completed Todo",
+            position=3,
+            is_completed=True,
+            completed_at=datetime.now(timezone.utc),
+        )
+        db_session.add_all([remaining, another_remaining, completed])
+        db_session.commit()
+
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert f'id="list-{test_todo.list_id}-count"' in response.text
+        assert 'hx-swap-oob="true"' in response.text
+        assert ">2<" in response.text
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_last_incomplete_todo_returns_zero_count(
+        self, authenticated_client, test_todo, db_session
+    ):
+        """Test deleting the last incomplete todo returns a zero count."""
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        assert f'id="list-{test_todo.list_id}-count"' in response.text
+        assert 'hx-swap-oob="true"' in response.text
+        assert ">0<" in response.text
+
+    def test_delete_completed_todo_keeps_incomplete_count(
+        self, authenticated_client, test_todo, db_session
+    ):
+        """Test deleting a completed todo leaves the incomplete count unchanged."""
+        completed = Todo(
+            list_id=test_todo.list_id,
+            title="Completed Todo",
+            position=1,
+            is_completed=True,
+            completed_at=datetime.now(timezone.utc),
+        )
+        db_session.add(completed)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed.id}")
+
+        assert response.status_code == 200
+        assert f'id="list-{test_todo.list_id}-count"' in response.text
+        assert 'hx-swap-oob="true"' in response.text
+        assert ">1<" in response.text
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
