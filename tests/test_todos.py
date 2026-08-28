@@ -4,7 +4,7 @@ from datetime import date, datetime, timezone
 
 import pytest
 
-from app.database import Todo
+from app.database import Todo, TodoList, User
 
 
 class TestTodos:
@@ -82,14 +82,64 @@ class TestTodos:
         assert test_todo.completed_at is None
 
     def test_delete_todo(self, authenticated_client, test_todo, db_session):
-        """Test deleting a todo."""
+        """Test deleting an incomplete todo updates the sidebar count via OOB swap."""
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert f'id="list-{test_todo.list_id}-count"' in response.text
+        assert ">0<" in response.text
+        assert "hx-swap-oob" in response.text
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_completed_todo_preserves_incomplete_count(
+        self, authenticated_client, test_list, test_todo, db_session
+    ):
+        """S02: deleting a completed todo returns the unchanged incomplete count."""
+        test_todo.is_completed = True
+        db_session.commit()
+        incomplete = Todo(list_id=test_list.id, title="Still open", position=1)
+        db_session.add(incomplete)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        assert f'id="list-{test_list.id}-count"' in response.text
+        assert ">1<" in response.text
+        assert "hx-swap-oob" in response.text
+        assert db_session.get(Todo, test_todo.id) is None
+
+    def test_delete_missing_todo_has_no_sidebar_count(
+        self, authenticated_client, test_list
+    ):
+        """S03: a missing todo keeps its existing status and has no OOB count."""
+        response = authenticated_client.delete("/api/todos/missing-todo")
+
+        assert response.status_code == 404
+        assert "hx-swap-oob" not in response.text
+
+    def test_delete_unauthorized_todo_has_no_sidebar_count(
+        self, authenticated_client, db_session
+    ):
+        """S03: an unauthorized todo keeps its existing status and has no OOB count."""
+        other_user = User(email="other@example.com", password="otherpass")
+        db_session.add(other_user)
+        db_session.flush()
+        other_list = TodoList(user_id=other_user.id, name="Other", position=0)
+        db_session.add(other_list)
+        db_session.flush()
+        other_todo = Todo(list_id=other_list.id, title="Private", position=0)
+        db_session.add(other_todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{other_todo.id}")
+
+        assert response.status_code == 403
+        assert "hx-swap-oob" not in response.text
+        assert db_session.get(Todo, other_todo.id) is not None
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
