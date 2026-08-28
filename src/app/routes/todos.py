@@ -283,7 +283,7 @@ async def toggle_todo(
     )
 
 
-@router.delete("/{todo_id}")
+@router.delete("/{todo_id}", response_class=HTMLResponse)
 async def delete_todo(
     request: Request,
     todo_id: str,
@@ -303,7 +303,13 @@ async def delete_todo(
     db.delete(todo)
     db.commit()
 
-    return Response(status_code=200)
+    count = _get_list_todo_count(db, todo.list_id)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/todo_deleted_oob.html",
+        context={"list_id": list_obj.id, "count": count},
+    )
 
 
 @router.post("/{todo_id}/reorder")

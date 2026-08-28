@@ -91,6 +91,18 @@ class TestTodos:
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
 
+    def test_delete_incomplete_todo_updates_count_via_oob_swap(
+        self, authenticated_client, test_todo, test_list
+    ):
+        """BUG-001: deleting an incomplete todo refreshes the sidebar count."""
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        assert (
+            f'<span id="list-{test_list.id}-count" hx-swap-oob="true">0</span>'.encode()
+            in response.content
+        )
+
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
         # Create three todos
