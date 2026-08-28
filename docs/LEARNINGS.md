@@ -10,6 +10,8 @@
 
 - _(none yet)_
 
+- Delete interactions that remove a Todo must return an HTML partial containing the sidebar count's `hx-swap-oob` marker, just like completion toggles, so HTMX updates both the row and count.
+
 ## SQLAlchemy + SQLite
 
 <!-- Pooling, threading, ordering, cascade quirks encountered while working with the DB layer. -->
