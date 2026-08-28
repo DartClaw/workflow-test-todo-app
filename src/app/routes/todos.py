@@ -300,16 +300,15 @@ async def delete_todo(
     if not list_obj:
         return Response(status_code=403)
 
-    list_id = todo.list_id
     db.delete(todo)
     db.commit()
 
-    count = _get_list_todo_count(db, list_id)
+    count = _get_list_todo_count(db, list_obj.id)
 
     return templates.TemplateResponse(
         request=request,
         name="partials/todo_deleted_oob.html",
-        context={"list_id": list_id, "count": count},
+        context={"list_id": list_obj.id, "count": count},
     )
 
 
