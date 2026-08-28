@@ -28,6 +28,7 @@ class TestTodos:
         assert created.list_id == test_list.id
         assert created.priority == "low"
         assert created.is_completed is False
+        assert b"Low" in response.content
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
         """Test creating todo with empty title fails."""
