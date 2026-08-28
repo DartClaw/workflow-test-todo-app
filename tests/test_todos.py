@@ -82,10 +82,13 @@ class TestTodos:
         assert test_todo.completed_at is None
 
     def test_delete_todo(self, authenticated_client, test_todo, db_session):
-        """Test deleting a todo."""
+        """Test deleting a todo updates the sidebar count via OOB swap."""
         todo_id = test_todo.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert b'hx-swap-oob="true"' in response.content
+        assert f'id="list-{test_todo.list_id}-count"'.encode() in response.content
+        assert b">0</span>" in response.content
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
