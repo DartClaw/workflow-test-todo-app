@@ -59,6 +59,8 @@ class TestTodos:
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
+        assert b'data-todo-due-date="2025-12-31"' in response.content
+        assert b"openEditTodoDialog" in response.content
         assert test_todo.priority == "high"
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
