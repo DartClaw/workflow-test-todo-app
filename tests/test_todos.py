@@ -43,7 +43,7 @@ class TestTodos:
         assert b"required" in response.content
 
     def test_update_todo(self, authenticated_client, test_todo, db_session):
-        """Test updating a todo."""
+        """Editing a todo persists the due date after the list re-renders. [BUG-002]"""
         response = authenticated_client.put(
             f"/api/todos/{test_todo.id}",
             data={
@@ -61,6 +61,15 @@ class TestTodos:
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
+
+    def test_edit_todo_renders_existing_due_date(self, authenticated_client, test_todo):
+        """Reopening edit exposes the existing due date to the dialog. [BUG-002]"""
+        test_todo.due_date = datetime(2025, 12, 31)
+
+        response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        assert 'data-todo-due-date="2025-12-31"' in response.text
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
