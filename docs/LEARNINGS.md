@@ -14,7 +14,7 @@
 
 <!-- Pooling, threading, ordering, cascade quirks encountered while working with the DB layer. -->
 
-- _(none yet)_
+- HTML date inputs submit `YYYY-MM-DD`; parse that format before storing in the Todo `DateTime` column, which intentionally holds naive values.
 
 ## Authentication (intentionally simplified)
 
