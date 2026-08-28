@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- **Todo deletion OOB** – Successful Todo deletion must render the server-count `todo_deleted_oob.html` Partial after commit so HTMX removes the row and updates the sidebar count together.
 
 ## SQLAlchemy + SQLite
 

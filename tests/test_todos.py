@@ -1,6 +1,7 @@
 """Tests for todo item routes."""
 
 from datetime import date, datetime, timezone
+from uuid import uuid4
 
 import pytest
 
@@ -82,14 +83,79 @@ class TestTodos:
         assert test_todo.completed_at is None
 
     def test_delete_todo(self, authenticated_client, test_todo, db_session):
-        """Test deleting a todo."""
+        """S01: deleting an incomplete todo updates the sidebar count via OOB swap."""
         todo_id = test_todo.id
+        second_todo = Todo(
+            list_id=test_todo.list_id,
+            title="Second Todo",
+            position=1,
+        )
+        db_session.add(second_todo)
+        db_session.commit()
+
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/html")
+        assert (
+            f'id="list-{test_todo.list_id}-count" hx-swap-oob="true">1'
+            in response.text
+        )
 
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_completed_todo_preserves_incomplete_count(
+        self, authenticated_client, test_list, db_session
+    ):
+        """S02: deleting a completed todo preserves the incomplete count via OOB swap."""
+        incomplete_todo = Todo(
+            list_id=test_list.id,
+            title="Incomplete Todo",
+            position=0,
+        )
+        completed_todo = Todo(
+            list_id=test_list.id,
+            title="Completed Todo",
+            position=1,
+            is_completed=True,
+        )
+        db_session.add_all([incomplete_todo, completed_todo])
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{completed_todo.id}")
+
+        assert response.status_code == 200
+        assert (
+            f'id="list-{test_list.id}-count" hx-swap-oob="true">1'
+            in response.text
+        )
+        assert db_session.query(Todo).filter(Todo.id == completed_todo.id).first() is None
+
+    def test_failed_delete_does_not_return_count_oob(
+        self, authenticated_client, test_todo, client, db_session
+    ):
+        """S03: rejected deletion preserves its error status without a count OOB swap."""
+        missing_response = authenticated_client.delete(f"/api/todos/{uuid4()}")
+        assert missing_response.status_code == 404
+        assert b"hx-swap-oob" not in missing_response.content
+
+        from app.database import TodoList, User
+
+        other_user = User(email="delete-other@example.com", password="password")
+        db_session.add(other_user)
+        db_session.commit()
+        other_list = TodoList(user_id=other_user.id, name="Other List", position=0)
+        db_session.add(other_list)
+        db_session.commit()
+        other_todo = Todo(list_id=other_list.id, title="Other Todo", position=0)
+        db_session.add(other_todo)
+        db_session.commit()
+
+        forbidden_response = client.delete(f"/api/todos/{other_todo.id}")
+        assert forbidden_response.status_code == 403
+        assert b"hx-swap-oob" not in forbidden_response.content
+        assert db_session.query(Todo).filter(Todo.id == other_todo.id).first() is not None
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""

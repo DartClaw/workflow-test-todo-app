@@ -20,26 +20,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01,OC02] [TI01,TI02] Deleting one of two incomplete Todos removes its row and changes the sidebar incomplete count from 2 to 1 through an OOB Swap**
+- [x] **S01 [OC01,OC02] [TI01,TI02] Deleting one of two incomplete Todos removes its row and changes the sidebar incomplete count from 2 to 1 through an OOB Swap**
   - **Given** an authenticated User is viewing a TodoList containing two incomplete Todos and its sidebar count is `2`
   - **When** the User deletes either incomplete Todo
   - **Then** the deleted Todo row disappears and the response replaces that TodoList's sidebar count with `1` through an `hx-swap-oob` element, without a full-page reload
   - **Proof**: `tests/test_todos.py#TestTodos.test_delete_todo` – green – parity/regression for successful deletion persistence; the sidebar response behavior is not covered at spec time
 
-- [ ] **S02 [OC02] [TI01,TI02] Deleting a completed Todo preserves the sidebar incomplete count through an OOB Swap**
+- [x] **S02 [OC02] [TI01,TI02] Deleting a completed Todo preserves the sidebar incomplete count through an OOB Swap**
   - **Given** an authenticated User is viewing a TodoList containing one incomplete Todo and one completed Todo and its sidebar count is `1`
   - **When** the User deletes the completed Todo
   - **Then** the deleted Todo row disappears and the response replaces that TodoList's sidebar count with `1` through an `hx-swap-oob` element, without a full-page reload
 
-- [ ] **S03 [OC02] [TI01,TI02] A failed Todo deletion does not emit a misleading sidebar count replacement**
+- [x] **S03 [OC02] [TI01,TI02] A failed Todo deletion does not emit a misleading sidebar count replacement**
   - **Given** an authenticated User requests deletion of a Todo that does not exist or belongs to another User
   - **When** the delete request is rejected
   - **Then** the existing `404` or `403` response is preserved, no Todo is deleted, and no sidebar count OOB Swap is returned
 
 ## Structural Criteria
 
-- [ ] The Todo deletion endpoint continues to return an HTML-fragment response for successful HTMX requests; it does not introduce a JSON count contract or client-owned count calculation.
-- [ ] Existing Todo creation and completion-toggle OOB count behavior remains unchanged.
+- [x] The Todo deletion endpoint continues to return an HTML-fragment response for successful HTMX requests; it does not introduce a JSON count contract or client-owned count calculation.
+- [x] Existing Todo creation and completion-toggle OOB count behavior remains unchanged.
 
 ## Scope & Boundaries
 
@@ -82,14 +82,19 @@ file   | tests/test_integration.py#TestUserJourneys.test_todo_completion_updates
 
 ### Implementation Tasks
 
-- [ ] **TI01** Todo deletion response behavior has executable regression coverage
+- [x] **TI01** Todo deletion response behavior has executable regression coverage
   - Extend the existing authenticated route fixtures and deletion patterns in `tests/test_todos.py#TestTodos.test_delete_todo`; use `tests/test_integration.py#TestUserJourneys.test_todo_completion_updates_count` only as the OOB assertion pattern.
   - **Verify**: Focused tests prove S01-S03, including the affected TodoList ID, exact remaining incomplete value, successful persistence, and unchanged `403`/`404` behavior.
 
-- [ ] **TI02** Successful Todo deletion reconciles the affected sidebar incomplete count from server state
+- [x] **TI02** Successful Todo deletion reconciles the affected sidebar incomplete count from server state
   - Follow `src/app/routes/todos.py#toggle_todo` and reuse `src/app/templates/partials/todo_deleted_oob.html`; preserve `src/app/routes/todos.py#delete_todo` ownership and missing-Todo outcomes.
   - **Verify**: Successful responses are HTML containing the affected TodoList's `hx-swap-oob` count with the post-delete value, creation/toggle OOB regression tests remain green, and failed deletions contain no OOB count replacement.
 
 ## Implementation Observations
 
-_No observations recorded yet._
+### Run: 2026-08-28T07:17:21Z – observations
+
+#### NOTICED BUT NOT TOUCHING
+
+- `tests/test_todos.py::TestTodos::test_create_todo` currently fails because creation leaves priority unset (BUG-003).
+- `tests/test_todos.py::TestTodos::test_update_todo` currently fails because due-date persistence is broken (BUG-002).
