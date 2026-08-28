@@ -61,7 +61,21 @@ class TestTodos:
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
+        assert response.content.count(b'data-todo-due-date="2025-12-31"') == 1
         assert test_todo.priority == "high"
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": "Updated Title",
+                "note": "Updated note",
+                "due_date": "",
+                "priority": "high",
+            },
+        )
+        assert response.status_code == 200
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""

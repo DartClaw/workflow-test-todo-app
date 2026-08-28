@@ -16,6 +16,7 @@ Status: On Track
 ## Recently Completed
 
 - **Initial setup** (2026-04-22): AndThen workflow structure initialized (CLAUDE.md sections, docs scaffolding, starter guidelines)
+- **S01 BUG-002 remediation** (2026-08-28): Due-date updates now accept the edit dialog's date-only format, persist the value, render it for reopening, and clear it when emptied; all tests pass.
 
 ## Blockers
 
