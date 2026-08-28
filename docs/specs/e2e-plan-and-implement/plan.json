@@ -1,1 +1,1 @@
-{"stories":[{"id":"S01","title":"Fix BUG-002 due-date persistence","fis":"fis/s01-bug-002.md","dependsOn":[],"status":"spec-ready"},{"id":"S02","title":"Fix BUG-003 default priority","fis":"fis/s02-bug-003.md","dependsOn":[],"status":"spec-ready"}]}
+{"stories":[{"id":"S01","title":"Fix BUG-002 due-date persistence","fis":"fis/s01-bug-002.md","dependsOn":[],"status":"spec-ready"},{"id":"S02","title":"Fix BUG-003 default priority","fis":"fis/s02-bug-003.md","dependsOn":[],"status":"done"}]}
