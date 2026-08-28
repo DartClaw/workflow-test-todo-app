@@ -1,5 +1,6 @@
 """Tests for todo item routes."""
 
+import re
 from datetime import date, datetime, timezone
 
 import pytest
@@ -95,7 +96,32 @@ class TestTodos:
         # Verify OOB sidebar count fragment is present and correct (BUG-001)
         assert 'hx-swap-oob="true"' in response.text
         assert f'id="list-{list_id}-count"' in response.text
-        assert ">0<" in response.text
+        assert re.search(r'id="list-' + list_id + r'-count"[^>]*>\s*0\s*<', response.text)
+
+    def test_delete_completed_todo_count_unchanged(
+        self, authenticated_client, test_todo, test_list, db_session
+    ):
+        """Deleting a completed todo must not reduce the incomplete count (BUG-001)."""
+        from app.database import Todo as TodoModel
+
+        # Add a completed todo alongside the existing incomplete test_todo
+        completed = TodoModel(list_id=test_list.id, title="Done", position=1, is_completed=True)
+        db_session.add(completed)
+        db_session.commit()
+        db_session.refresh(completed)
+
+        response = authenticated_client.delete(f"/api/todos/{completed.id}")
+        assert response.status_code == 200
+
+        # OOB fragment must be present
+        assert 'hx-swap-oob="true"' in response.text
+        assert f'id="list-{test_list.id}-count"' in response.text
+
+        # Incomplete count must still be 1 (test_todo is untouched)
+        assert re.search(
+            r'id="list-' + test_list.id + r'-count"[^>]*>\s*1\s*<',
+            response.text,
+        )
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
