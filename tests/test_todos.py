@@ -81,15 +81,21 @@ class TestTodos:
         assert test_todo.is_completed is False
         assert test_todo.completed_at is None
 
-    def test_delete_todo(self, authenticated_client, test_todo, db_session):
+    def test_delete_todo(self, authenticated_client, test_todo, test_list, db_session):
         """Test deleting a todo."""
         todo_id = test_todo.id
+        list_id = test_list.id
         response = authenticated_client.delete(f"/api/todos/{todo_id}")
         assert response.status_code == 200
 
-        # Verify deleted
+        # Verify deleted from DB
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+        # Verify OOB sidebar count fragment is present and correct (BUG-001)
+        assert 'hx-swap-oob="true"' in response.text
+        assert f'id="list-{list_id}-count"' in response.text
+        assert ">0<" in response.text
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""
