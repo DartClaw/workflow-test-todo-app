@@ -42,7 +42,7 @@ class TestTodos:
         assert b"required" in response.content
 
     def test_update_todo(self, authenticated_client, test_todo, db_session):
-        """Test updating a todo."""
+        """Test updating a todo, including the edit dialog's date format."""
         response = authenticated_client.put(
             f"/api/todos/{test_todo.id}",
             data={
@@ -53,6 +53,7 @@ class TestTodos:
             },
         )
         assert response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in response.content
 
         # Verify in database
         db_session.refresh(test_todo)
