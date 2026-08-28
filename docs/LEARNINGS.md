@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- Quick-add todo responses use `todo_item_with_oob.html`, which includes the todo-item partial; list rendering changes should inspect that include chain before adding duplicate markup.
 
 ## SQLAlchemy + SQLite
 
