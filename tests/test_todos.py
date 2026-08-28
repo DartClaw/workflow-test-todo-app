@@ -4,7 +4,7 @@ from datetime import date, datetime, timezone
 
 import pytest
 
-from app.database import Todo
+from app.database import Todo, TodoList, User
 
 
 class TestTodos:
@@ -90,6 +90,62 @@ class TestTodos:
         # Verify deleted
         deleted = db_session.query(Todo).filter(Todo.id == todo_id).first()
         assert deleted is None
+
+    def test_delete_incomplete_todo_updates_list_count(
+        self, authenticated_client, test_list, test_todo, db_session
+    ):
+        """S01: deleting an incomplete todo returns its authoritative count OOB swap."""
+        second_todo = Todo(list_id=test_list.id, title="Second Todo", position=1)
+        db_session.add(second_todo)
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/html")
+        content = response.content.decode()
+        assert f'id="list-{test_list.id}-count"' in content
+        assert 'hx-swap-oob="true"' in content
+        assert ">1<" in content
+        assert db_session.query(Todo).filter(Todo.id == test_todo.id).first() is None
+
+    def test_delete_completed_todo_preserves_list_count(
+        self, authenticated_client, test_list, test_todo, db_session
+    ):
+        """S02: deleting a completed todo returns the unchanged incomplete count."""
+        test_todo.is_completed = True
+        db_session.commit()
+
+        response = authenticated_client.delete(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert f'id="list-{test_list.id}-count"' in content
+        assert 'hx-swap-oob="true"' in content
+        assert ">0<" in content
+
+    def test_delete_missing_or_inaccessible_todo_has_no_count_swap(
+        self, authenticated_client, test_user, db_session
+    ):
+        """S03: rejected deletes preserve status and do not return an OOB swap."""
+        missing_response = authenticated_client.delete("/api/todos/missing-todo")
+        assert missing_response.status_code == 404
+        assert b"hx-swap-oob" not in missing_response.content
+
+        other_user = User(email="other@example.com", password="otherpass")
+        db_session.add(other_user)
+        db_session.commit()
+        other_list = TodoList(user_id=other_user.id, name="Other List", position=0)
+        db_session.add(other_list)
+        db_session.commit()
+        other_todo = Todo(list_id=other_list.id, title="Private Todo", position=0)
+        db_session.add(other_todo)
+        db_session.commit()
+
+        forbidden_response = authenticated_client.delete(f"/api/todos/{other_todo.id}")
+        assert forbidden_response.status_code == 403
+        assert b"hx-swap-oob" not in forbidden_response.content
+        assert db_session.query(Todo).filter(Todo.id == other_todo.id).first() is not None
 
     def test_reorder_todo_move_up(self, authenticated_client, test_list, db_session):
         """Test reordering a todo to an earlier position."""

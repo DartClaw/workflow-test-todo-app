@@ -21,26 +21,26 @@
 
 ## Acceptance Scenarios
 
-- [ ] **S01 [OC01] [TI01,TI02] Deleting an incomplete Todo decrements its TodoList sidebar count without a page reload**
+- [x] **S01 [OC01] [TI01,TI02] Deleting an incomplete Todo decrements its TodoList sidebar count without a page reload**
   - **Given** a TodoList has two incomplete Todos and its sidebar count shows `2`
   - **When** the user deletes one of those incomplete Todos
   - **Then** the Todo row disappears and an OOB Swap changes that TodoList's sidebar count to `1` in the same response
 
-- [ ] **S02 [OC01] [TI01,TI02] Deleting a completed Todo preserves the current incomplete count without a page reload**
+- [x] **S02 [OC01] [TI01,TI02] Deleting a completed Todo preserves the current incomplete count without a page reload**
   - **Given** a TodoList has one incomplete Todo, one completed Todo, and its sidebar count shows `1`
   - **When** the user deletes the completed Todo
   - **Then** the Todo row disappears and an OOB Swap leaves that TodoList's sidebar count at `1` in the same response
 
-- [ ] **S03 [OC02] [TI01,TI02] A missing or inaccessible Todo is not deleted and produces no sidebar count swap**
+- [x] **S03 [OC02] [TI01,TI02] A missing or inaccessible Todo is not deleted and produces no sidebar count swap**
   - **Given** the authenticated User requests deletion of a Todo that does not exist or belongs to another User
   - **When** the deletion request is handled
   - **Then** the existing `404` or `403` response is preserved, no Todo is deleted, and no OOB Swap is returned
 
 ## Structural Criteria
 
-- [ ] The deletion response remains an HTML response compatible with the existing HTMX target swap.
-- [ ] Incomplete counts continue to come from persisted Todo state rather than client-maintained arithmetic.
-- [ ] Existing Todo deletion and toggle-count behavior remains green.
+- [x] The deletion response remains an HTML response compatible with the existing HTMX target swap.
+- [x] Incomplete counts continue to come from persisted Todo state rather than client-maintained arithmetic.
+- [x] Existing Todo deletion and toggle-count behavior remains green.
 
 ## Scope & Boundaries
 
@@ -85,11 +85,11 @@ file   | tests/test_integration.py#TestUserJourneys.test_todo_completion_updates
 
 ### Implementation Tasks
 
-- [ ] **TI01** Successful Todo deletion synchronizes the affected TodoList's authoritative incomplete count in the same HTMX response
+- [x] **TI01** Successful Todo deletion synchronizes the affected TodoList's authoritative incomplete count in the same HTMX response
   - Follow `src/app/routes/todos.py#toggle_todo` and reuse `src/app/templates/partials/todo_deleted_oob.html`; preserve `src/app/routes/todos.py#delete_todo` ownership checks and failure responses.
   - **Verify**: S01 and S02 pass; S03 preserves `404` and `403` behavior without an OOB Swap; the response is HTML and the persisted Todo is deleted only on success.
 
-- [ ] **TI02** Automated coverage distinguishes incomplete-Todo deletion, completed-Todo deletion, and rejected deletion
+- [x] **TI02** Automated coverage distinguishes incomplete-Todo deletion, completed-Todo deletion, and rejected deletion
   - Extend the existing pytest fixtures and route/integration patterns; assertions must verify the affected count element's ID, `hx-swap-oob`, and rendered count rather than merely checking for generic response markup.
   - **Verify**: Tests fail against the pre-fix empty successful deletion response, pass after TI01, and the existing deletion and toggle-count tests remain green.
 
@@ -97,4 +97,14 @@ file   | tests/test_integration.py#TestUserJourneys.test_todo_completion_updates
 
 > _Managed by exec-spec post-implementation – append-only. Tag semantics: see the AndThen FIS Mutability Contract. Spec authors leave this section empty._
 
-_No observations recorded yet._
+### Run: 2026-08-28
+
+#### NOTICED BUT NOT TOUCHING
+
+- `tests/test_todos.py:29` – pre-existing `test_create_todo` failure: created Todo priority is `None`, not `low`.
+- `tests/test_todos.py:61` – pre-existing `test_update_todo` failure: `due_date` remains `None` for the submitted `2025-12-31` value.
+
+#### Verification
+
+- Focused BUG-001 scenarios and existing delete/toggle coverage: 8 passed.
+- Full suite: 59 passed, 2 pre-existing failures listed above.
