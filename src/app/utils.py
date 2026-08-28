@@ -8,19 +8,19 @@ if TYPE_CHECKING:
 
 
 def is_overdue(todo: "Todo") -> bool:
-    """Return True if due_date < today AND not completed."""
+    """Return True if due_date is before today AND not completed."""
     if todo.is_completed or not todo.due_date:
         return False
-    now = datetime.now()
-    return todo.due_date < now
+    today = datetime.now().date()
+    return todo.due_date.date() < today
 
 
 def is_due_today(todo: "Todo") -> bool:
-    """Return True if due_date == today."""
-    if not todo.due_date:
+    """Return True if due_date falls on today AND not completed."""
+    if todo.is_completed or not todo.due_date:
         return False
-    now = datetime.now()
-    return todo.due_date == now
+    today = datetime.now().date()
+    return todo.due_date.date() == today
 
 
 def format_date(dt: datetime | date | None) -> str:
