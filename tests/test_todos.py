@@ -21,6 +21,8 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"New Todo" in response.content
+        # Acceptance scenario: quick-add renders the assigned default priority.
+        assert b"Low" in response.content
 
         # Verify in database
         created = db_session.query(Todo).filter(Todo.title == "New Todo").first()
