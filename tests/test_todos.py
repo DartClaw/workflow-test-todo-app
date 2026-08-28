@@ -58,8 +58,27 @@ class TestTodos:
         db_session.refresh(test_todo)
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
-        assert test_todo.due_date.year == 2025
+        assert test_todo.due_date == datetime(2025, 12, 31)
         assert test_todo.priority == "high"
+
+    def test_clear_due_date(self, authenticated_client, test_todo, db_session):
+        """Test clearing a due date sets it to None."""
+        # First set a due date
+        authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={"title": test_todo.title, "due_date": "2025-12-31"},
+        )
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is not None
+
+        # Now clear it
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={"title": test_todo.title, "due_date": ""},
+        )
+        assert response.status_code == 200
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
