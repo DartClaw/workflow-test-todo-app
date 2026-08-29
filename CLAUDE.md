@@ -1,6 +1,18 @@
-# Rules, Guidelines and Project Overview for Coding Agents — DartClaw Workspace
+# Rules, Guidelines and Project Overview for Coding Agents — workflow-test-todo-app
 
 This file provides guidance to coding agents when working with code in this repository.
+
+## Smoke-Run Boundary
+
+This checkout is the complete project root for workflow smoke runs. Everything a workflow
+needs is here; nothing outside it is in scope.
+
+- Do not inspect parent or sibling repositories. The DartClaw checkout that hosts this
+  fixture is not part of the project under work, and reading it makes a smoke run's output
+  depend on the machine it ran on.
+- Keep changes inside this directory.
+- language: python
+- framework: fastapi
 
 ## Commands
 
