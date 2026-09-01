@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "2",
+  "prd": "prd.md",
+  "overview": {
+    "summary": "Two independent thin documentation slices produce the two required note artifacts, each with the exact minimal content shape defined by the PRD.",
+    "phases": [
+      {
+        "id": "P1",
+        "name": "Required note artifacts",
+        "waves": [
+          "W1"
+        ]
+      }
+    ]
+  },
+  "sharedDecisions": [],
+  "bindingConstraints": [],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Primary note artifact",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "pending",
+      "fis": null,
+      "owner": null,
+      "scope": "Deliver the first required note artifact with exactly one heading and one bullet. The slice includes only that artifact and its prescribed content shape; it excludes the second note artifact and all planning or specification artifacts.",
+      "sourceRefs": [
+        "prd.md#workflow-live-ui-scenario-20260901-155554"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "sequencing": null
+    },
+    {
+      "id": "S02",
+      "name": "Secondary note artifact",
+      "phase": "P1",
+      "wave": "W1",
+      "dependsOn": [],
+      "parallel": true,
+      "risk": "low",
+      "status": "pending",
+      "fis": null,
+      "owner": null,
+      "scope": "Deliver the second required note artifact with exactly one heading and one bullet. The slice includes only that artifact and its prescribed content shape; it excludes the first note artifact and all planning or specification artifacts.",
+      "sourceRefs": [
+        "prd.md#workflow-live-ui-scenario-20260901-155554"
+      ],
+      "provenance": null,
+      "assetRefs": [],
+      "sequencing": null
+    }
+  ]
+}
