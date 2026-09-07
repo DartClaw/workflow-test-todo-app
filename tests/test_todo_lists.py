@@ -39,11 +39,12 @@ class TestTodoLists:
         assert response.status_code == 200
         assert b"required" in response.content
 
-    def test_get_list(self, authenticated_client, test_list):
+    def test_get_list(self, authenticated_client, test_list, test_todo):
         """Test getting a specific list."""
         response = authenticated_client.get(f"/api/lists/{test_list.id}")
         assert response.status_code == 200
         assert test_list.name.encode() in response.content
+        assert b"Medium" in response.content
 
     def test_get_list_not_found(self, authenticated_client):
         """Test getting a non-existent list."""
