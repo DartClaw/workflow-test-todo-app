@@ -58,8 +58,9 @@ class TestTodos:
         db_session.refresh(test_todo)
         assert test_todo.title == "Updated Title"
         assert test_todo.note == "Updated note"
-        assert test_todo.due_date.year == 2025
+        assert test_todo.due_date == datetime(2025, 12, 31)
         assert test_todo.priority == "high"
+        assert b'data-todo-due-date="2025-12-31"' in response.content
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
