@@ -54,6 +54,7 @@ class TestTodos:
             },
         )
         assert response.status_code == 200
+        assert b'data-todo-due-date="2025-12-31"' in response.content
 
         # Verify in database
         db_session.refresh(test_todo)
