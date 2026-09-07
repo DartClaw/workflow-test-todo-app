@@ -21,6 +21,8 @@ class TestTodos:
         )
         assert response.status_code == 200
         assert b"New Todo" in response.content
+        assert b"priority-low" in response.content
+        assert b"Low" in response.content
 
         # Verify in database
         created = db_session.query(Todo).filter(Todo.title == "New Todo").first()
@@ -60,6 +62,33 @@ class TestTodos:
         assert test_todo.note == "Updated note"
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
+
+        assert b'data-todo-due-date="2025-12-31"' in response.content
+
+    def test_update_todo_clears_due_date(self, authenticated_client, test_todo, db_session):
+        """Test clearing a todo due date through the edit form."""
+        test_todo.due_date = datetime(2025, 12, 31)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={"title": "Updated Title", "due_date": "", "priority": "low"},
+        )
+        assert response.status_code == 200
+
+        db_session.refresh(test_todo)
+        assert test_todo.due_date is None
+
+    def test_todo_actions_do_not_inline_user_content(
+        self, authenticated_client, test_todo
+    ):
+        """Test todo actions rely on data attributes instead of inline JavaScript."""
+        test_todo.title = "quoted' title"
+        response = authenticated_client.get(f"/api/todos/{test_todo.id}")
+
+        assert response.status_code == 200
+        assert b"onclick=" not in response.content
+        assert b'data-todo-title="quoted&#39; title"' in response.content
 
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
