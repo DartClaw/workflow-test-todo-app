@@ -10,6 +10,8 @@
 
 - _(none yet)_
 
+- HTML `input type="date"` submits `YYYY-MM-DD`; update handlers must parse that format before persisting due dates.
+
 ## SQLAlchemy + SQLite
 
 <!-- Pooling, threading, ordering, cascade quirks encountered while working with the DB layer. -->

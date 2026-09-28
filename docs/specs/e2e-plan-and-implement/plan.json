@@ -11,9 +11,13 @@
       "id": "S01",
       "name": "Fix BUG-002 due-date persistence",
       "dependsOn": [],
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s01-fix-bug-002-due-date-persistence.md",
       "completedTaskIds": [],
+      "verified": {
+        "at": "2026-09-28T22:17Z",
+        "summary": "uv run pytest tests/test_todos.py::TestTodos::test_update_todo tests/test_todos.py::TestTodos::test_update_todo_persists_date_input -> exit=0, 2 passed in 0.03s"
+      },
       "owner": null,
       "scope": "Persist edited due dates and pre-fill them when editing.",
       "sourceRefs": [
