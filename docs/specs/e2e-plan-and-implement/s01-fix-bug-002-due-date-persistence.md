@@ -16,3 +16,8 @@
 
 - In src/app/routes/todos.py, read the due-date form field in the update handler and store it on the todo.
 - In src/app/templates/app.html, bind the edit dialog's due-date input to the todo's current value.
+
+## Implementation Observations
+
+- The existing `todo_item.html` data attribute and `app.js` `openEditTodoDialog` call already bind the current due date into the `app.html` edit dialog input; the regression test covers this rendered wiring without changing those files.
+- The FIS does not define task IDs or runnable Proof/Verify targets. Execution derives focused regression tests from the two acceptance scenarios; the missing proof metadata remains an authoring gap for re-spec.

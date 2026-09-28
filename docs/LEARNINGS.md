@@ -8,6 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
+- HTML `input[type=date]` submits `YYYY-MM-DD`; update handlers must parse that exact value when persisting date fields.
 - Quick-add routes must set model defaults explicitly when constructing ORM objects; the shared todo item partial renders the resulting priority badge automatically.
 
 ## SQLAlchemy + SQLite
