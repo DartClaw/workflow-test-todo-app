@@ -10,6 +10,8 @@
 
 - _(none yet)_
 
+- HTML date inputs submit `YYYY-MM-DD`; update handlers must parse that format before persisting the app's naive datetime value.
+
 ## SQLAlchemy + SQLite
 
 <!-- Pooling, threading, ordering, cascade quirks encountered while working with the DB layer. -->
