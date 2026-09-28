@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- HTML `input[type=date]` submits `YYYY-MM-DD`; update handlers must parse that exact value when persisting date fields.
 
 ## SQLAlchemy + SQLite
 
