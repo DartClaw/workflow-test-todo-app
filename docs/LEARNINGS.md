@@ -30,7 +30,7 @@
 
 | Error | Type | Conclusion |
 |-------|------|------------|
-| _(none yet)_ | | |
+| Full suite exposes unrelated known defects during focused bugfix work | Baseline | Keep the focused regression proof green and report unrelated BUG-002/BUG-003 failures without expanding scope. |
 
 ## Process & Tooling
 
