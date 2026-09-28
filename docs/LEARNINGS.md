@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- Quick-add routes must set model defaults explicitly when constructing ORM objects; the shared todo item partial renders the resulting priority badge automatically.
 
 ## SQLAlchemy + SQLite
 
