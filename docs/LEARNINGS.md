@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- Quick-add todo responses include `partials/todo_item.html` through the OOB wrapper, so priority display is shared with the list rendering; set persisted defaults at creation rather than duplicating badge markup in the list container.
 
 - HTML `input type="date"` submits `YYYY-MM-DD`; update handlers must parse that format before persisting due dates.
 

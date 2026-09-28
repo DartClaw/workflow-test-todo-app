@@ -27,6 +27,7 @@ class TestTodos:
         assert created is not None
         assert created.list_id == test_list.id
         assert created.priority == "low"
+        assert b"Low" in response.content
         assert created.is_completed is False
 
     def test_create_todo_empty_title(self, authenticated_client, test_list):
