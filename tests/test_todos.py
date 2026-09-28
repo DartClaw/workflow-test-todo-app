@@ -61,6 +61,23 @@ class TestTodos:
         assert test_todo.due_date.year == 2025
         assert test_todo.priority == "high"
 
+    def test_update_todo_persists_date_input(self, authenticated_client, test_todo, db_session):
+        """Test the edit dialog's date input is persisted and rendered for reopening."""
+        response = authenticated_client.put(
+            f"/api/todos/{test_todo.id}",
+            data={
+                "title": test_todo.title,
+                "note": test_todo.note,
+                "due_date": "2026-01-15",
+                "priority": test_todo.priority,
+            },
+        )
+
+        assert response.status_code == 200
+        db_session.refresh(test_todo)
+        assert test_todo.due_date == datetime(2026, 1, 15)
+        assert f'data-todo-due-date="2026-01-15"'.encode() in response.content
+
     def test_toggle_todo_complete(self, authenticated_client, test_todo, db_session):
         """Test toggling todo completion."""
         assert test_todo.is_completed is False
