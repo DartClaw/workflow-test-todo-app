@@ -27,9 +27,13 @@
       "id": "S02",
       "name": "Fix BUG-003 default priority",
       "dependsOn": [],
-      "status": "spec-ready",
+      "status": "done",
       "fis": "s02-fix-bug-003-default-priority.md",
       "completedTaskIds": [],
+      "verified": {
+        "at": "2026-09-28T23:02Z",
+        "summary": "uv run pytest tests/test_todos.py::TestTodos::test_create_todo -q -> exit=0, 1 passed"
+      },
       "owner": null,
       "scope": "Assign and display the default priority for quick-add todos.",
       "sourceRefs": [
