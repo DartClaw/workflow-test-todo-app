@@ -16,3 +16,8 @@
 
 - In src/app/routes/todos.py, set the default priority when a quick-add todo is created.
 - In src/app/templates/partials/todo_list_content.html, render the todo priority so the default is visible.
+
+## Implementation Observations
+
+- Quick-add returns `partials/todo_item_with_oob.html`, which includes `partials/todo_item.html`; that shared partial already renders the priority badge and is also used by `todo_list_content.html`. The implementation therefore sets the missing persisted default and adds a regression assertion for the rendered `Low` label without duplicating template markup.
+- The full suite has one unrelated pre-existing failure in `TestTodos.test_update_todo`: due-date persistence is the scope of S01/BUG-002. S02's focused proof passes; the baseline failure is external context and non-blocking for this story.
