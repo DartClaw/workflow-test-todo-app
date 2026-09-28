@@ -8,7 +8,9 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- Quick-add todo responses use the shared `todo_item.html` partial, so priority rendering belongs
+  there once and is inherited by the OOB response; adding markup to `todo_list_content.html` would
+  duplicate the badge.
 
 ## SQLAlchemy + SQLite
 
