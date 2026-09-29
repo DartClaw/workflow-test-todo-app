@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "2",
+  "prd": "docs/specs/e2e-plan-and-implement/prd.md",
+  "overview": {
+    "summary": "Implement two independent todo fixes in parallel."
+  },
+  "sharedDecisions": [],
+  "bindingConstraints": [],
+  "stories": [
+    {
+      "id": "S01",
+      "name": "Fix BUG-002 due-date persistence",
+      "dependsOn": [],
+      "status": "spec-ready",
+      "fis": "s01-fix-bug-002-due-date-persistence.md",
+      "completedTaskIds": [],
+      "owner": null,
+      "scope": "Persist edited due dates and pre-fill them when editing.",
+      "sourceRefs": [
+        "docs/specs/e2e-plan-and-implement/prd.md"
+      ],
+      "provenance": "docs/specs/e2e-plan-and-implement/plan.json",
+      "assetRefs": [],
+      "sequencing": null
+    },
+    {
+      "id": "S02",
+      "name": "Fix BUG-003 default priority",
+      "dependsOn": [],
+      "status": "spec-ready",
+      "fis": "s02-fix-bug-003-default-priority.md",
+      "completedTaskIds": [],
+      "owner": null,
+      "scope": "Assign and display the default priority for quick-add todos.",
+      "sourceRefs": [
+        "docs/specs/e2e-plan-and-implement/prd.md"
+      ],
+      "provenance": "docs/specs/e2e-plan-and-implement/plan.json",
+      "assetRefs": [],
+      "sequencing": null
+    }
+  ]
+}
