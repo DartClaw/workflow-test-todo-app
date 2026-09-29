@@ -8,6 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
+- Todo list content delegates item rendering through `todos_list.html` to `todo_item.html`; verify the existing item partial before changing list-level templates for todo display behavior.
 - HTML `input[type=date]` submits `YYYY-MM-DD`; keep route parsing aligned with `format_date_input()` rather than a datetime-local format.
 
 ## SQLAlchemy + SQLite
