@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- Todo list content delegates item rendering through `todos_list.html` to `todo_item.html`; verify the existing item partial before changing list-level templates for todo display behavior.
 
 ## SQLAlchemy + SQLite
 
