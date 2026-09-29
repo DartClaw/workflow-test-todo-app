@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- HTML `input[type=date]` submits `YYYY-MM-DD`; keep route parsing aligned with `format_date_input()` rather than a datetime-local format.
 
 ## SQLAlchemy + SQLite
 

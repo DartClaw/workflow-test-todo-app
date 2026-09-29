@@ -16,3 +16,7 @@
 
 - In src/app/routes/todos.py, read the due-date form field in the update handler and store it on the todo.
 - In src/app/templates/app.html, bind the edit dialog's due-date input to the todo's current value.
+
+## Implementation Observations
+
+- The update handler already read the submitted field, but parsed it as a datetime (`%Y-%m-%dT%H:%M`) while the HTML date input submits a date (`%Y-%m-%d`). The fix aligns parsing with the existing input and template formatting; the dialog prefill was already wired through `todo_item.html` data attributes and `app.js`.
