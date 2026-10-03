@@ -27,9 +27,9 @@
       "id": "S02",
       "name": "Fix BUG-003 default priority",
       "dependsOn": [],
-      "status": "pending",
+      "status": "done",
       "fis": "s02-fix-bug-003-default-priority.md",
-      "completedTaskIds": [],
+      "completedTaskIds": ["quick-add-default-priority"],
       "owner": null,
       "scope": "Assign and display the default priority for quick-add todos.",
       "sourceRefs": [
@@ -37,7 +37,11 @@
       ],
       "provenance": "docs/specs/e2e-plan-and-implement/plan.json",
       "assetRefs": [],
-      "sequencing": null
+      "sequencing": null,
+      "verified": {
+        "at": "2026-10-03T08:44Z",
+        "summary": "uv run pytest tests/test_todos.py::TestTodos::test_create_todo -q -> exit=0, 1 passed"
+      }
     }
   ]
 }
