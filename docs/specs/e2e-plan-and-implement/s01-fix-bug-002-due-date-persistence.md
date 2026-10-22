@@ -16,3 +16,8 @@
 
 - In src/app/routes/todos.py, read the due-date form field in the update handler and store it on the todo.
 - In src/app/templates/app.html, bind the edit dialog's due-date input to the todo's current value.
+
+## Implementation Observations
+
+- The edit dialog already receives the current due date through the todo partial's `data-todo-due-date` attribute and `openEditTodoDialog` in `src/app/static/js/app.js`; no additional `app.html` change was necessary. `ASSUMPTION: preserve this existing binding – change it only if the dialog stops receiving the current value.`
+- The full suite has one unrelated baseline failure in `TestTodos.test_create_todo`, covered by S02 (quick-add priority), while the S01 regression tests pass.

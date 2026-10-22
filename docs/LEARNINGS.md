@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- HTML `type="date"` inputs submit `YYYY-MM-DD`; update handlers must parse that format before persisting due dates.
 
 ## SQLAlchemy + SQLite
 
