@@ -76,6 +76,7 @@ async def create_todo(
     user_id: Annotated[str, Depends(get_current_user_id)],
     list_id: Annotated[str, Form()],
     title: Annotated[str, Form()],
+    priority: Annotated[str, Form()] = "low",
     db: Session = Depends(get_db),
 ):
     """Create a new todo (quick add with title only)."""
@@ -104,6 +105,9 @@ async def create_todo(
             context={"error": "Title must be 200 characters or less"},
         )
 
+    if priority not in ("low", "medium", "high"):
+        priority = "low"
+
     # Calculate next position
     max_pos = (
         db.query(func.max(Todo.position))
@@ -116,6 +120,7 @@ async def create_todo(
     todo = Todo(
         list_id=list_id,
         title=title.strip(),
+        priority=priority,
         position=new_pos,
     )
     db.add(todo)
