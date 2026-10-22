@@ -8,7 +8,7 @@
 
 <!-- Gotchas and idioms specific to returning HTML fragments from FastAPI routes. -->
 
-- _(none yet)_
+- A route driven by `htmx.ajax(..., swap: 'delete')` still needs an HTML body: `swap: 'delete'` only decides what happens to the *primary* target, but HTMX still scans the response for `hx-swap-oob` fragments and applies them regardless of the main swap mode. An empty `Response(status_code=200)` silently drops any OOB updates (e.g. a sidebar count) that should fire alongside the deletion (BUG-001).
 
 ## SQLAlchemy + SQLite
 
